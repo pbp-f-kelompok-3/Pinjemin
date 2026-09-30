@@ -129,3 +129,6 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 | **Peminjam** | Mahasiswa UI yang sudah login. Dapat memesan barang sewa atau pinjam gratis, melihat titik temu, memantau riwayat pesanan, dan menghubungi pemilik lewat WhatsApp. |
 | **Pemilik Barang** | Pengguna yang menyewakan atau meminjamkan barang. Dapat menambah, mengedit, dan menghapus barang miliknya, serta melihat pesanan masuk. |
 | **Admin** | Memantau seluruh aktivitas platform, mengelola kategori barang, dan menghapus postingan barang yang melanggar aturan. |
+
+## LINK FIGMA 
+https://www.figma.com/design/cIcomyuXpNiIPvk3Wa4gwo/Design-System?node-id=0-1&p=f&t=STwAfPD95yE7Ky2X-0
