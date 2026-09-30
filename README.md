@@ -1,6 +1,7 @@
 # Pinjemin
 
-Pinjemin adalah platform web bagi sesama mahasiswa Universitas Indonesia untuk dapat saling meminjamkan barang secara gratis maupun menyewakannya dengan harga terjangkau. Platform ini hadir untuk mengurangi penumpukan barang yang jarang dipakai, menekan pembelian berlebih, dan mendukung gaya hidup ramah lingkungan melalui sistem autentikasi *SSO UI* yang aman.
+Pinjemin adalah platform web bagi sesama mahasiswa Universitas Indonesia untuk saling meminjamkan barang secara gratis maupun menyewakannya dengan harga terjangkau. Platform ini hadir untuk mengurangi penumpukan barang yang jarang dipakai, menekan pembelian berlebih, dan mendukung gaya hidup ramah lingkungan melalui sistem autentikasi *SSO UI* yang aman.
+
 ---
 
 ## Tema Proyek
@@ -19,98 +20,104 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 * **Pengurus organisasi atau panitia acara:** Mahasiswa yang memerlukan perlengkapan kegiatan kampus seperti proyektor, megafon, kabel rol, atau tenda.
 
 ### Permasalahan yang Diselesaikan
-Aplikasi ini menyelesaikan beberapa persoalan nyata:
 * **Penumpukan barang yang jarang dipakai:** Banyak barang seperti jas sidang, setrika, alat perkakas, atau koper hanya dipakai sesekali lalu dibiarkan menumpuk di kosan.
-* **Pengeluaran boros untuk barang musiman:** Mahasiswa sering terpaksa membeli barang mahal padahal cuma dipakai satu atau dua kali.
-* **Kekhawatiran saat meminjamkan barang:** Meminjamkan barang ke orang lain sering menimbulkan rasa ragu karena risiko barang rusak atau tidak dikembalikan. Sistem login SSO UI dan riwayat pemesanan membuat transaksi lebih aman dan jelas pertanggungjawabannya.
-* **Kesulitan mencari barang di sekitar:** Mahasiswa sering tidak tahu bahwa tetangga kos atau teman di sekitar mereka sebenarnya memiliki barang yang sedang dicari. Fitur peta mempermudah pencarian barang terdekat.
+* **Pengeluaran boros untuk barang musiman:** Mahasiswa sering terpaksa membeli barang mahal padahal hanya dipakai satu atau dua kali.
+* **Kekhawatiran saat meminjamkan barang:** Meminjamkan barang ke orang lain menimbulkan keraguan karena risiko barang rusak atau tidak dikembalikan. Login SSO UI dan riwayat pemesanan membuat transaksi lebih aman dan pertanggungjawabannya lebih jelas.
+* **Kesulitan mencari barang di sekitar:** Mahasiswa sering tidak tahu bahwa tetangga kos atau teman di sekitar mereka memiliki barang yang sedang dicari. Fitur peta mempermudah pencarian barang terdekat.
 
 ### Keterkaitan dengan Sustainable Living
-Pinjemin mendukung gaya hidup berkelanjutan dengan cara:
-* **Mendorong budaya berbagi:** Membiasakan mahasiswa untuk memanfaatkan barang yang sudah ada bersama-sama daripada selalu membeli baru.
-* **Memperpanjang masa pakai barang:** Barang yang dirawat dan dipakai bergantian tidak cepat terbuang menjadi sampah rongsokan.
+* **Mendorong budaya berbagi:** Membiasakan mahasiswa memanfaatkan barang yang sudah ada bersama-sama, bukan selalu membeli baru.
+* **Memperpanjang masa pakai barang:** Barang yang dirawat dan dipakai bergantian tidak cepat menjadi sampah.
 * **Mengurangi sampah konsumsi:** Berkurangnya pembelian barang baru membantu menekan sampah kemasan plastik dan emisi dari pengiriman barang.
 
 ---
 
 ## Anggota Kelompok dan Pembagian Tugas
 
-| NPM | Nama | Modul yang Dikerjakan |
+| NPM | Nama | Modul |
 | :---: | :--- | :--- |
-| **2506632910** | Alphard Qodaruddin | Checkout, Transaksi, dan Pembayaran |
-| **2506587876** | Chelsea Stania Passikha | Halaman Utama, Kategori, dan Detail Barang |
-| **2506615993** | I Nyoman Yadnya Suta Karmana | Peta, Titik Lokasi, dan Komunikasi |
-| **2506607272** | Fauzan Taqiy Santosa | Manajemen Barang dan Dashboard |
-| **2506620210** | Roisul Umam | Autentikasi, Profil, dan Pusat Bantuan |
+| **2506632910** | Alphard Qodaruddin | Manajemen Transaksi |
+| **2506587876** | Chelsea Stania Passikha | Manajemen Kategori |
+| **2506615993** | I Nyoman Yadnya Suta Karmana | Manajemen Lokasi |
+| **2506607272** | Fauzan Taqiy Santosa | Manajemen Barang |
+| **2506620210** | Roisul Umam | Manajemen Pengguna |
 
 ---
 
-## Rincian Modul & CRUD Aplikasi
+## Rincian Modul dan CRUD
 
-### 1. Autentikasi, Profil, dan Pusat Bantuan
+### 1. Manajemen Pengguna
 
 **Penanggung jawab:** Roisul Umam
-**Ruang lingkup:** Login SSO UI, pengelolaan profil, peralihan mode Peminjam dan Pemilik Barang, serta konten bantuan.
+**Entitas:** Profil Pengguna
+**Cakupan fitur:** Login dan logout melalui SSO UI mock API, pengelolaan profil, peralihan mode Peminjam dan Pemilik Barang, serta Pusat Bantuan berisi tutorial dan Kebijakan Privasi.
 
-| Entitas | Create | Read | Update | Delete |
-| :--- | :--- | :--- | :--- | :--- |
-| Profil Pengguna | Saat pertama kali login melalui SSO UI, nama dan NPM diambil dari akun SSO UI dan disimpan sebagai profil. Pengguna kemudian melengkapi nomor WhatsApp yang dibutuhkan untuk fitur komunikasi | Menampilkan data profil pengguna yang sedang login | Mengubah nomor WhatsApp dan beralih antara mode Peminjam dan Pemilik Barang. Nama dan NPM tidak dapat diubah karena bersumber dari SSO UI | - |
-| Sesi Login | Pengguna login dengan akun SSO UI (mock API), lalu sistem membuat sesi login | Memeriksa status login untuk menentukan apakah pengguna berstatus Tamu atau sudah terautentikasi | - | Logout mengakhiri sesi login |
-| Tutorial, Pusat Bantuan, dan Kebijakan Privasi | - (konten statis) | Menampilkan panduan cara meminjam dan menyewakan barang, Pusat Bantuan, serta Kebijakan Privasi | - | - |
+| Operasi | Penjelasan | Pelaku |
+| :--- | :--- | :--- |
+| **Create** | Saat pertama kali login melalui SSO UI, nama dan NPM diambil dari akun SSO UI dan disimpan sebagai profil. Pengguna melengkapi nomor WhatsApp untuk fitur komunikasi | Pengguna |
+| **Read** | Menampilkan data profil berupa nama, NPM, nomor WhatsApp, dan mode aktif | Pengguna |
+| **Update** | Mengubah nomor WhatsApp dan beralih antara mode Peminjam dan Pemilik Barang. Nama dan NPM tidak dapat diubah karena bersumber dari SSO UI | Pengguna |
+| **Delete** | Menonaktifkan akun. Data pesanan tetap tersimpan sebagai riwayat | Pengguna |
 
-### 2. Halaman Utama, Kategori, dan Detail Barang
+### 2. Manajemen Kategori
 
 **Penanggung jawab:** Chelsea Stania Passikha
-**Ruang lingkup:** Tampilan halaman depan, pengelolaan kategori, pencarian dan filter, serta halaman detail barang.
+**Entitas:** Kategori
+**Cakupan fitur:** Halaman utama yang memuat banner edukasi, pilihan kategori, dan barang yang sering dipinjam, pencarian, filter harga atau lokasi, serta halaman detail barang.
 
-| Entitas | Create | Read | Update | Delete |
-| :--- | :--- | :--- | :--- | :--- |
-| Kategori | Admin menambah kategori barang baru | Menampilkan pilihan kategori pada halaman utama dan pada formulir barang | Admin mengubah nama kategori | Admin menghapus kategori |
-| Halaman Utama | - (banner edukasi berupa konten statis) | Menampilkan banner edukasi, pilihan kategori, dan daftar barang yang sering dipinjam (diurutkan dari jumlah pesanan terbanyak) | - | - |
-| Pencarian dan Filter | - | Mencari barang berdasarkan kata kunci pada kolom pencarian, lalu menyaring hasil berdasarkan rentang harga atau lokasi | - | - |
-| Detail Barang | - (data barang dibuat pada modul Manajemen Barang) | Menampilkan foto, deskripsi, tarif sewa per hari atau label pinjam gratis, lokasi barang, dan kontak pemilik. Kontak pemilik hanya tampil bagi pengguna yang sudah login | - | - |
+| Operasi | Penjelasan | Pelaku |
+| :--- | :--- | :--- |
+| **Create** | Menambah kategori barang baru | Admin |
+| **Read** | Menampilkan pilihan kategori pada halaman utama, filter pencarian, dan formulir barang | Semua pengguna |
+| **Update** | Mengubah nama kategori | Admin |
+| **Delete** | Menghapus kategori yang tidak lagi digunakan | Admin |
 
-### 3. Peta, Titik Lokasi, dan Komunikasi
+### 3. Manajemen Lokasi
 
 **Penanggung jawab:** I Nyoman Yadnya Suta Karmana
-**Ruang lingkup:** Peta berbasis OpenStreetMap, penyimpanan koordinat barang, pencarian barang terdekat, penentuan titik penjemputan, dan pengalihan ke WhatsApp.
+**Entitas:** Titik Lokasi dengan jenis Lokasi Barang dan Titik Penjemputan
+**Cakupan fitur:** Peta berbasis OpenStreetMap, deteksi lokasi pengguna, pencarian barang terdekat, dan tombol pengalihan ke WhatsApp pemilik barang setelah pesanan dibuat.
 
-| Entitas | Create | Read | Update | Delete |
-| :--- | :--- | :--- | :--- | :--- |
-| Koordinat Barang | Pemilik menandai lokasi barang pada peta di formulir tambah barang, lalu koordinat (latitude dan longitude) disimpan bersama data barang | Menampilkan pin barang pada peta dan mencari barang terdekat dari lokasi pengguna | Pemilik menggeser pin atau mengubah lokasi ketika barang berpindah tempat | Koordinat dihapus bersamaan dengan barang yang bersangkutan |
-| Titik Penjemputan | Pemilik menentukan titik penjemputan pada peta ketika pesanan dibuat. Secara bawaan, titik ini sama dengan koordinat barang | Peminjam dan Pemilik melihat titik penjemputan pada detail pesanan | Pemilik mengubah titik penjemputan selama pesanan belum selesai | Titik penjemputan dinonaktifkan apabila pesanan dibatalkan |
-| Lokasi Pengguna | Mendeteksi lokasi pengguna melalui izin lokasi peramban saat fitur peta digunakan | Menampilkan posisi pengguna dan menghitung jarak ke barang | - (lokasi dideteksi ulang setiap sesi dan tidak disimpan permanen) | - |
-| Tombol WhatsApp | - (tombol dibentuk otomatis setelah pesanan dibuat) | Mengalihkan Peminjam langsung ke WhatsApp pemilik menggunakan nomor pada profil pemilik | - | - |
+| Operasi | Penjelasan | Pelaku |
+| :--- | :--- | :--- |
+| **Create** | Menyimpan koordinat lokasi barang saat pemilik menandai posisi pada peta di formulir tambah barang, dan menentukan titik penjemputan ketika pesanan dibuat | Pemilik Barang |
+| **Read** | Menampilkan pin barang pada peta, mencari barang terdekat dari lokasi pengguna, dan menampilkan titik penjemputan pada detail pesanan | Semua pengguna, kecuali titik penjemputan yang hanya untuk Peminjam dan Pemilik pada pesanan terkait |
+| **Update** | Menggeser pin atau mengubah alamat lokasi barang, serta mengubah titik penjemputan selama pesanan belum selesai | Pemilik Barang |
+| **Delete** | Menghapus lokasi barang bersamaan dengan barangnya, dan menonaktifkan titik penjemputan apabila pesanan dibatalkan | Pemilik Barang dan sistem |
 
-### 4. Manajemen Barang dan Dashboard
+### 4. Manajemen Barang
 
 **Penanggung jawab:** Fauzan Taqiy Santosa
-**Ruang lingkup:** Formulir pengelolaan barang oleh pemilik, moderasi oleh Admin, dan dashboard pemantauan.
+**Entitas:** Barang
+**Cakupan fitur:** Formulir pengelolaan barang, moderasi postingan oleh Admin, dan dashboard yang menampilkan barang yang sedang dipinjam, pesanan masuk, serta daftar barang yang ditawarkan.
 
-| Entitas | Create | Read | Update | Delete |
-| :--- | :--- | :--- | :--- | :--- |
-| Barang | Pemilik menambah barang melalui formulir yang memuat nama, foto, deskripsi, kategori, jenis (gratis atau sewa), tarif per hari, dan lokasi | Pemilik melihat daftar barang miliknya. Admin melihat seluruh barang di platform | Pemilik memperbarui data barang, termasuk tarif dan ketersediaan | Pemilik menghapus barang miliknya yang tidak sedang dipinjam. Admin menghapus postingan yang melanggar aturan |
-| Dashboard | - | Menampilkan barang milik pemilik yang sedang dipinjam orang lain, pesanan masuk beserta statusnya, dan daftar barang yang sedang ditawarkan | - | - |
+| Operasi | Penjelasan | Pelaku |
+| :--- | :--- | :--- |
+| **Create** | Menambah barang melalui formulir yang memuat nama, foto, deskripsi, kategori, jenis gratis atau sewa, tarif per hari, dan lokasi | Pemilik Barang |
+| **Read** | Menampilkan daftar barang milik sendiri, sedangkan Admin dapat melihat seluruh barang di platform | Pemilik Barang dan Admin |
+| **Update** | Memperbarui data barang, termasuk tarif dan ketersediaan | Pemilik Barang |
+| **Delete** | Menghapus barang yang tidak sedang dipinjam. Admin menghapus postingan yang melanggar aturan | Pemilik Barang dan Admin |
 
-Pengelolaan daftar barang pada dashboard dilakukan melalui operasi CRUD entitas Barang di atas.
-
-### 5. Checkout, Transaksi, dan Pembayaran
+### 5. Manajemen Transaksi
 
 **Penanggung jawab:** Alphard Qodaruddin
-**Ruang lingkup:** Formulir pemesanan, perhitungan biaya, riwayat pesanan, dan simulasi pembayaran.
+**Entitas:** Pesanan beserta data Pembayaran
+**Cakupan fitur:** Formulir checkout, perhitungan total biaya, riwayat pesanan, dan pembayaran melalui payment gateway mock API.
 
-| Entitas | Create | Read | Update | Delete |
-| :--- | :--- | :--- | :--- | :--- |
-| Pesanan | Peminjam mengisi formulir checkout berupa tanggal peminjaman dan durasi sewa. Sistem menghitung total biaya (tarif per hari dikalikan durasi), lalu membuat pesanan berstatus Menunggu Pembayaran. Barang gratis langsung berstatus Dikonfirmasi | Peminjam melihat riwayat pesanannya beserta rincian biaya. Pemilik melihat pesanan masuk melalui Dashboard | Status pesanan berubah mengikuti alur: Menunggu Pembayaran, Dikonfirmasi (setelah pembayaran berhasil), dan Selesai (setelah masa peminjaman berakhir) | Peminjam membatalkan pesanan sebelum masa peminjaman dimulai. Status berubah menjadi Dibatalkan |
-| Pembayaran | Sistem membuat transaksi melalui payment gateway (mock API) untuk barang sewa. Barang pinjaman gratis tidak memiliki tagihan dan langsung berhasil | Menampilkan status (Menunggu, Berhasil, atau Gagal) dan rincian pembayaran | Status diperbarui sesuai respons payment gateway | - |
+| Operasi | Penjelasan | Pelaku |
+| :--- | :--- | :--- |
+| **Create** | Mengisi formulir checkout berupa tanggal peminjaman dan durasi sewa. Sistem menghitung total biaya, yaitu tarif per hari dikalikan durasi, lalu membuat pesanan berstatus Menunggu Pembayaran beserta transaksi pembayarannya. Barang gratis langsung berstatus Dikonfirmasi tanpa tagihan | Peminjam |
+| **Read** | Menampilkan riwayat pesanan, rincian biaya, dan status pembayaran. Pemilik melihat pesanan masuk melalui dashboard | Peminjam dan Pemilik Barang |
+| **Update** | Mengubah tanggal atau durasi selama pesanan berstatus Menunggu Pembayaran. Status berubah mengikuti alur Menunggu Pembayaran, Dikonfirmasi setelah pembayaran berhasil, dan Selesai setelah masa peminjaman berakhir | Peminjam dan sistem |
+| **Delete** | Membatalkan pesanan sebelum masa peminjaman dimulai. Status berubah menjadi Dibatalkan dan pembayaran yang belum selesai ikut dibatalkan | Peminjam |
 
 ---
 
 ## Integrasi API
 
-1. **OpenStreetMap API (Public API):** Digunakan untuk membaca titik koordinat lokasi, mencari barang dalam jarak terdekat, dan menampilkan lokasi penjemputan.
-2. **SSO UI Service (Mock API):** Digunakan untuk simulasi sistem login mahasiswa Universitas Indonesia agar identitas pengguna terverifikasi.
-3. **Payment Gateway (Mock API):** Digunakan untuk simulasi sistem pembayaran transaksi sewa secara langsung.
+1. **OpenStreetMap API:** Public API yang digunakan untuk membaca titik koordinat lokasi, mencari barang dalam jarak terdekat, dan menampilkan lokasi penjemputan.
+2. **SSO UI Service:** Mock API yang digunakan untuk simulasi sistem login mahasiswa Universitas Indonesia agar identitas pengguna terverifikasi.
+3. **Payment Gateway:** Mock API yang digunakan untuk simulasi sistem pembayaran transaksi sewa secara langsung.
 
 ---
 
@@ -118,7 +125,7 @@ Pengelolaan daftar barang pada dashboard dilakukan melalui operasi CRUD entitas 
 
 | Peran | Hak Akses |
 | :--- | :--- |
-| **Tamu** | Pengguna yang belum login. Hanya bisa melihat halaman utama, mencari barang, dan melihat info produk secara terbatas. |
+| **Tamu** | Pengguna yang belum login. Hanya dapat melihat halaman utama, mencari barang, dan melihat informasi produk secara terbatas. |
 | **Peminjam** | Mahasiswa UI yang sudah login. Dapat memesan barang sewa atau pinjam gratis, melihat titik temu, memantau riwayat pesanan, dan menghubungi pemilik lewat WhatsApp. |
-| **Pemilik Barang** | Pengguna yang menyewakan atau meminjamkan barang. Bisa menambah, mengedit, dan menghapus daftar barang miliknya, serta melihat pesanan masuk. |
+| **Pemilik Barang** | Pengguna yang menyewakan atau meminjamkan barang. Dapat menambah, mengedit, dan menghapus barang miliknya, serta melihat pesanan masuk. |
 | **Admin** | Memantau seluruh aktivitas platform, mengelola kategori barang, dan menghapus postingan barang yang melanggar aturan. |
