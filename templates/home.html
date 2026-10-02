@@ -4,5 +4,26 @@
 
 {% block content %}
 <h1>Pinjemin</h1>
-<p>Platform pinjam dan sewa barang untuk mahasiswa Universitas Indonesia.</p>
+<section class="featured-section"> 
+    <div class="featured-box"> 
+        <h2>Featured Products</h2>
+    </div> 
+</section>
+
+<section class="category-section">
+    <h2>Shop by Category</h2>
+    <div class="categories">
+        {% for category in categories %} 
+            <div class="category"> 
+                <div class="category-icon">
+                    {{ category.icon }} 
+                </div> 
+                <span class="category-name">
+                    {{ category.name }} 
+                </span> 
+            </div> 
+        {% endfor %}
+    </div>
+</section>
+
 {% endblock %}

@@ -6,6 +6,11 @@
     </a>
 
     <nav aria-label="Navigasi utama">
+      <form class="search-form" method="GET" action="{% url 'home' %}"> 
+        <input type="search" placeholder="Cari di Pinjemin..."> 
+        <button type="submit">Cari</button> 
+      </form>
+
       <a href="{% url 'home' %}">Beranda</a>
 
       <a href="#">

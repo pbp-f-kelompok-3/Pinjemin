@@ -457,3 +457,92 @@ footer {
     text-align: left;
   }
 }
+
+/* search bar */
+.search-form {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 500px;
+}
+
+.search-form input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid var(--gray);
+  border-radius: 6px 0 0 6px;
+  outline: none;
+  font-size: 14px;
+}
+
+.search-form input:focus {
+  border-color: var(--gray-dark);
+}
+
+.search-form button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  background-color: var(--black);
+  color: var(--white);
+  cursor: pointer;
+}
+
+.search-form button:hover {
+  background-color: var(--gray-dark);
+}
+
+/* bagian featured products */
+.featured-section { 
+  margin-top: 20px; 
+} 
+.featured-box {
+  height: 150px; 
+  background-color: var(--gray); 
+  padding: 16px 22px; 
+  box-sizing: border-box; 
+}
+
+/* categories */
+.category-section {
+margin-top: 20px;
+}
+
+.category-section h2 {
+font-size: 16px;
+font-weight: 400;
+margin-bottom: 20px;
+}
+
+.categories {
+display: flex;
+justify-content: space-around;
+align-items: flex-start;
+gap: 30px;
+padding: 0 20px;
+}
+
+.category {
+display: flex;
+flex-direction: column;
+align-items: center;
+text-align: center;
+min-width: 100px;
+}
+
+.category-icon {
+width: 74px;
+height: 74px;
+border-radius: 50%;
+background-color: var(--gray);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 32px;
+margin-bottom: 10px;
+}
+
+.category-name {
+font-size: 11px;
+color: var(--black);
+}
