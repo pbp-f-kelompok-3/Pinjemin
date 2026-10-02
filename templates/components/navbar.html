@@ -1,8 +1,9 @@
+{% load static %}
 <header>
   <div class="container navbar">
 
     <a class="brand" href="{% url 'home' %}">
-      Pinjemin
+      <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin" class="brand-logo">
     </a>
 
     <nav aria-label="Navigasi utama">

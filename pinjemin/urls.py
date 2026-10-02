@@ -16,11 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 from .views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='home')
+    path('', home, name='home'),
+    path("bantuan/", TemplateView.as_view(template_name="help_center/help.html"), name="help"),
+    path("kebijakan-privasi/", RedirectView.as_view(url="/bantuan/#kebijakan-privasi"), name="privacy"),
+    path("tutorial/meminjam/", RedirectView.as_view(url="/bantuan/#tutorial"), name="tutorial_borrow"),
+    path("tutorial/menyewakan/", RedirectView.as_view(url="/bantuan/#tutorial"), name="tutorial_lend"),
 ]

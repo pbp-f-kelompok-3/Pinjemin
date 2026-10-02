@@ -86,9 +86,15 @@ nav a:hover {
   text-decoration: underline;
 }
 
+.brand-logo {
+  display: block;
+  height: 32px;   /* atur sesuai tinggi navbar */
+  width: auto;
+}
+
 .brand {
-  font-size: 24px;
-  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
 }
 
 

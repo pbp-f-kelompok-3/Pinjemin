@@ -1,0 +1,39 @@
+{% load static %}
+<header class="hc-nav">
+  <div class="hc-nav__inner">
+
+    <a class="hc-nav__logo" href="{% url 'home' %}" aria-label="Pinjemin - Beranda">
+      <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin">
+    </a>
+
+    <div class="hc-nav__right">
+      {% if user.is_authenticated %}
+        <button type="button" class="hc-bell" aria-label="Notifikasi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+          <span class="hc-bell__dot"></span>
+        </button>
+
+        <a class="hc-user" href="{% url 'accounts:profile' %}">
+          {% if user.profile.photo %}
+            <img class="hc-avatar" src="{{ user.profile.photo.url }}" alt="Foto profil">
+          {% else %}
+            <span class="hc-avatar">{{ user.profile.full_name|default:user.username|slice:":1"|upper }}</span>
+          {% endif %}
+          <span>
+            <span class="hc-user__name">{{ user.profile.full_name|default:user.username }}</span>
+            {# TODO: ganti rating dummy ini dengan data rating asli kalau fitur review sudah ada #}
+            <span class="hc-user__rating">
+              <svg viewBox="0 0 24 24" fill="#ffc400" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+              4.9 (18)
+            </span>
+          </span>
+        </a>
+      {% else %}
+        <a class="hc-login-btn" href="{% url 'accounts:login' %}">Masuk</a>
+      {% endif %}
+    </div>
+
+  </div>
+</header>

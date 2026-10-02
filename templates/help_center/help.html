@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pusat Bantuan{% endblock %}
+
+{# Navbar khusus Pusat Bantuan (menggantikan navbar landing page) #}
+{% block navbar %}{% include "components/navbar_help.html" %}{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/help_center.css' %}">
+
+<div class="hc-page">
+
+  <!-- ===== Header halaman ===== -->
+  <section class="hc-head">
+    <div class="hc-meta">
+      <span class="hc-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+        </svg>
+        Penting untuk Dibaca Bersama
+      </span>
+      <span class="hc-updated">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        {# Edit tanggal/revisi di bawah ini kalau ada pembaruan #}
+        Terakhir diperbarui: 12 Oktober 2026 (Revisi V2.3)
+      </span>
+    </div>
+    <h1 class="hc-title">Pusat Bantuan</h1>
+  </section>
+
+  <!-- ===== Isi: sidebar + konten ===== -->
+  <div class="hc-body">
+    <div class="hc-layout">
+
+      <!-- Sidebar -->
+      <aside class="hc-side">
+        <div class="hc-card hc-menu" role="navigation" aria-label="Menu Pusat Bantuan">
+          <h2 class="hc-menu__title">Pusat Bantuan</h2>
+          <ul>
+            <li><a href="#tutorial" data-hc-tab="tutorial"><span class="hc-menu__num">1</span><span class="hc-menu__label">Tutorial</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a></li>
+            <li><a href="#kebijakan-privasi" data-hc-tab="kebijakan-privasi"><span class="hc-menu__num">2</span><span class="hc-menu__label">Kebijakan Privasi</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a></li>
+            <li><a href="#faq" data-hc-tab="faq"><span class="hc-menu__num">3</span><span class="hc-menu__label">FAQ</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a></li>
+          </ul>
+        </div>
+
+        <div class="hc-card hc-dispute">
+          <h2 class="hc-dispute__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 12.5-8 8a2.119 2.119 0 1 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><path d="m9 7 8 8"/><path d="m21 11-8-8"/></svg>
+            Pusat Bantuan &amp; Bantuan Sengketa
+          </h2>
+          <p>Mengalami kendala peminjaman, kerusakan, atau barang belum dikembalikan? Tim Support Pinjemin siap membantu mediasi transaksi kamu.</p>
+          <div class="hc-dispute__care">
+            <span>Customer Care Pinjemin</span>
+            <span class="hc-online">Online</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Konten (3 tab) -->
+      <main class="hc-card hc-main">
+
+        <!-- ===== 01 TUTORIAL ===== -->
+        <section id="panel-tutorial" data-hc-panel="tutorial" aria-labelledby="h-tutorial">
+          <p class="hc-tag"><span class="hc-tag__num">01</span> TUTORIAL</p>
+          <h2 class="hc-h2" id="h-tutorial">Tutorial Memakai Layanan Pinjemin</h2>
+
+          <div class="tut">
+            <p class="tut__eyebrow">SIRKULAR KAMPUS</p>
+            <h3 class="tut__title">4 Langkah Mudah Meminjam Barang</h3>
+
+            <div class="step-grid">
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">01</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M13 10h5M13 14h4"/></svg></span></div>
+                <h4>Login dengan SSO UI</h4>
+                <p>Verifikasi otomatis tanpa perlu upload KTP. Cukup masuk dengan akun mahasiswa aktif (<code>@ui.ac.id</code>) untuk membuka katalog inventaris terpercaya.</p>
+              </article>
+
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">02</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h10M3 12h6M3 18h8"/><circle cx="17" cy="15" r="3"/><path d="m21 19-1.9-1.9"/></svg></span></div>
+                <h4>Cari &amp; Ajukan Pinjaman</h4>
+                <p>Filter berdasarkan fakultas terdekat (Kantin Fasilkom, Kansas, Pocin, Kutek, dll). Tentukan durasi tanggal pinjam dan pilih opsi sewa gratis solidaritas atau harga sewa bersahabat.</p>
+              </article>
+
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">03</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg></span></div>
+                <h4>Sepakati Titik Temu</h4>
+                <p>Pilih titik kumpul resmi yang terawasi (Crystal Knowledge Perpusat, Kantin Dallas FT, Selasar RIK, atau Stasiun UI). Lakukan inspeksi fisik barang bersama pemilik.</p>
+              </article>
+
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">04</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg></span></div>
+                <h4>Scan QR Pengembalian</h4>
+                <p>Saat masa sewa usai, temui pemilik di titik yang sama. Scan QR konfirmasi serah terima kembali, dana jaminan otomatis cair, lalu berikan review bintang reputasi.</p>
+              </article>
+            </div>
+          </div>
+
+          {# ===== Tambahan: tutorial menyewakan (hapus blok ini kalau tidak dipakai) ===== #}
+          <div class="tut">
+            <p class="tut__eyebrow">BERBAGI KE SESAMA</p>
+            <h3 class="tut__title">4 Langkah Mudah Menyewakan Barang</h3>
+
+            <div class="step-grid">
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">01</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></span></div>
+                <h4>Beralih ke Mode Penjual</h4>
+                <p>Klik tombol mode di navbar untuk berpindah dari mode Penyewa ke mode Penjual, lalu lengkapi nomor WhatsApp di profil kamu.</p>
+              </article>
+
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">02</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></span></div>
+                <h4>Unggah Barang</h4>
+                <p>Tambahkan foto, nama, deskripsi, dan kondisi barang. Tentukan apakah barang dipinjamkan gratis atau disewakan dengan harga bersahabat.</p>
+              </article>
+
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">03</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg></span></div>
+                <h4>Setujui &amp; Sepakati Titik Temu</h4>
+                <p>Tinjau permintaan yang masuk, setujui peminjam yang sesuai, lalu tentukan titik kumpul resmi untuk serah terima barang.</p>
+              </article>
+
+              <article class="step-card" tabindex="0">
+                <div class="step-top"><span class="step-num">04</span>
+                  <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span></div>
+                <h4>Konfirmasi Pengembalian</h4>
+                <p>Setelah barang kembali, cek kondisinya bersama peminjam, konfirmasi lewat QR, lalu berikan review untuk membangun reputasi.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== 02 KEBIJAKAN PRIVASI ===== -->
+        <section id="panel-kebijakan-privasi" data-hc-panel="kebijakan-privasi" aria-labelledby="h-privasi" hidden>
+          <p class="hc-tag"><span class="hc-tag__num">02</span> KEBIJAKAN PRIVASI</p>
+          <h2 class="hc-h2" id="h-privasi">Kebijakan Privasi Pengguna</h2>
+          <p class="hc-lead">Selamat datang di Pinjemin, platform berbagi dan menyewakan barang khusus mahasiswa Universitas Indonesia. Demi terciptanya ekosistem collaborative consumption yang aman, adil, dan ramah lingkungan, seluruh pengguna diwajibkan untuk memahami dan mematuhi kebijakan berikut.</p>
+
+          {# Isi poin selain "Ketentuan Barang & Kategori" adalah draft, sesuaikan dengan kebijakan tim #}
+          <div class="acc" id="policy-acc">
+            <details name="policy">
+              <summary>Verifikasi Akun &amp; Identitas Pengguna
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+              <div class="acc__body">
+                <p>Akun Pinjemin hanya dapat dibuat dan diakses melalui SSO UI. Nama, NPM, dan status kemahasiswaan diambil otomatis dari SSO, sedangkan Pinjemin tidak pernah menyimpan kata sandi SSO kamu.</p>
+                <ul>
+                  <li>Satu mahasiswa hanya diperbolehkan memiliki satu akun.</li>
+                  <li>Dilarang membagikan akun atau meminjamkan akses login kepada orang lain.</li>
+                  <li>Informasi kontak hanya ditampilkan kepada pihak yang terlibat dalam transaksi yang disetujui.</li>
+                </ul>
+              </div>
+            </details>
+
+            <details name="policy">
+              <summary>Ketentuan Barang &amp; Kategori
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+              <div class="acc__body">
+                <p><strong><em>Barang yang Diizinkan</em></strong>: Barang-barang kebutuhan kuliah, kegiatan organisasi/kampus, perlengkapan kos, alat elektronik, koper, hingga pakaian formal/jas sidang.</p>
+                <p><strong><em>Barang Terlarang (Dilarang Ditawarkan)</em></strong>:</p>
+                <ul>
+                  <li>Narkotika, obat-obatan terlarang, dan minuman beralkohol.</li>
+                  <li>Senjata tajam, senjata api, atau bahan peledak.</li>
+                  <li>Dokumen pribadi resmi (KTP, SIM, KTM asli) atau barang berharga bernilai tinggi yang berisiko ekstrem.</li>
+                  <li>Barang ilegal, bajakan, atau melanggar hukum dan norma kampus.</li>
+                </ul>
+              </div>
+            </details>
+
+            <details name="policy">
+              <summary>Tata Cara Transaksi &amp; Penjemputan
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+              <div class="acc__body">
+                <ul>
+                  <li>Seluruh transaksi dilakukan melalui platform Pinjemin agar tercatat dan terlindungi.</li>
+                  <li>Serah terima dilakukan di titik temu resmi kampus yang terawasi.</li>
+                  <li>Lakukan pengecekan kondisi barang bersama sebelum dan sesudah masa pinjam.</li>
+                  <li>Pengembalian dikonfirmasi melalui pemindaian QR oleh kedua belah pihak.</li>
+                </ul>
+              </div>
+            </details>
+
+            <details name="policy">
+              <summary>Tanggung Jawab Kerusakan &amp; Keterlambatan
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+              <div class="acc__body">
+                <ul>
+                  <li>Peminjam bertanggung jawab atas barang selama masa pinjam, termasuk kerusakan atau kehilangan di luar pemakaian wajar.</li>
+                  <li>Keterlambatan pengembalian wajib dikomunikasikan kepada pemilik barang sebelum batas waktu berakhir.</li>
+                  <li>Kerusakan yang sudah ada sebelum masa pinjam wajib dicatat saat inspeksi bersama.</li>
+                </ul>
+              </div>
+            </details>
+
+            <details name="policy">
+              <summary>Sanksi &amp; Mediasi Sengketa
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+              <div class="acc__body">
+                <ul>
+                  <li>Pelanggaran dapat dikenai peringatan, pembatasan fitur, hingga penangguhan akun.</li>
+                  <li>Jika terjadi sengketa, kedua pihak dapat menghubungi Tim Support Pinjemin untuk mediasi.</li>
+                  <li>Keputusan mediasi didasarkan pada riwayat transaksi, bukti foto, dan hasil inspeksi bersama.</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- ===== 03 FAQ ===== -->
+        <section id="panel-faq" data-hc-panel="faq" aria-labelledby="h-faq" hidden>
+          <p class="hc-tag"><span class="hc-tag__num">03</span> FREQUENTLY ASKED QUESTIONS</p>
+          <h2 class="hc-h2" id="h-faq">FAQ Pusat Bantuan</h2>
+          <p class="hc-sub">Pertanyaan yang sering diajukan.</p>
+
+          <div class="faq-grid">
+            <details class="faq">
+              <summary>Apakah semua mahasiswa UI bisa langsung bertransaksi di Pinjemin?
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p>Ya, cukup login menggunakan akun SSO UI dan melengkapi nomor WhatsApp aktif.</p>
+            </details>
+
+            <details class="faq">
+              <summary>Bagaimana jika barang yang saya pinjam mengalami kerusakan?
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p>Laporkan segera ke Pemilik Barang dan diskusikan opsi perbaikan. Jika tidak menemukan jalan keluar, kamu dapat menghubungi Tim Mediasi &amp; Bantuan Pinjemin.</p>
+            </details>
+
+            <details class="faq">
+              <summary>Bisakah saya membatalkan pesanan sewa yang sudah dibayar?
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p>Pembatalan dapat dilakukan sebelum masa peminjaman dimulai melalui menu Riwayat Pesanan.</p>
+            </details>
+
+            <details class="faq">
+              <summary>Apakah ada asuransi resmi dari pihak Pinjemin UI?
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p>Saat ini transaksi dilindungi oleh sistem Deposit Escrow dan Kode Etik Kemahasiswaan UI. Untuk barang kategori super premium (&gt; Rp 10 juta), pengguna dapat mengaktifkan fitur opsi asuransi mikro mitra kampus dengan premi Rp 5.000/hari saat checkout.</p>
+            </details>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var panels = {};
+    document.querySelectorAll("[data-hc-panel]").forEach(function (el) {
+      panels[el.dataset.hcPanel] = el;
+    });
+    var links = document.querySelectorAll("[data-hc-tab]");
+
+    function show(name) {
+      if (!panels[name]) name = "tutorial";
+      Object.keys(panels).forEach(function (k) { panels[k].hidden = (k !== name); });
+      links.forEach(function (a) {
+        var on = a.dataset.hcTab === name;
+        a.classList.toggle("is-active", on);
+        if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+      });
+    }
+
+    links.forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        history.replaceState(null, "", "#" + a.dataset.hcTab);
+        show(a.dataset.hcTab);
+      });
+    });
+    window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });
+    show(location.hash.slice(1));
+
+  })();
+</script>
+{% endblock %}
