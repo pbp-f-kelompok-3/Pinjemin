@@ -1,5 +1,33 @@
 # Pinjemin
 
+## Menjalankan secara lokal (Windows PowerShell)
+
+Jalankan dari folder `D:\TugasKelompokPBP` yang berisi `env` dan `Pinjemin`:
+
+```powershell
+.\env\Scripts\python.exe -m pip install -r .\Pinjemin\requirements.txt
+.\env\Scripts\python.exe .\Pinjemin\manage.py migrate
+.\env\Scripts\python.exe .\Pinjemin\manage.py runserver
+```
+
+Buka http://127.0.0.1:8000/. Jika `env` belum tersedia, buat dengan `py -m venv env`. Menggunakan executable Python di dalam `env` memastikan dependensi yang benar terpakai tanpa perlu mengaktifkan environment. Gunicorn digunakan untuk deployment; pengembangan lokal Windows memakai `runserver`.
+
+### Template bersama
+
+`templates/base.html` menyediakan navbar, footer, notifikasi, dan blok `title`, `navigation`, `account_navigation`, `content`, `extra_css`, serta `extra_js`. Halaman baru dapat memakai:
+
+```html
+{% extends 'base.html' %}
+{% block title %}Judul halaman — Pinjemin{% endblock %}
+{% block content %}
+<section>
+  <h1>Judul halaman</h1>
+</section>
+{% endblock %}
+```
+
+Style dasar ada di `static/css/base.css`, dengan warna utama `#FFDE01`. Halaman `/` menggunakan `templates/home.html` sebagai contoh sederhana. Desain halaman dan fitur tiap modul dapat dikembangkan oleh anggota tim.
+
 Pinjemin adalah platform web bagi sesama mahasiswa Universitas Indonesia untuk saling meminjamkan barang secara gratis maupun menyewakannya dengan harga terjangkau. Platform ini hadir untuk mengurangi penumpukan barang yang jarang dipakai, menekan pembelian berlebih, dan mendukung gaya hidup ramah lingkungan melalui sistem autentikasi *SSO UI* yang aman.
 
 ---

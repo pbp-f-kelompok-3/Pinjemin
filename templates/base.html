@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Pinjemin{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <header>
+    <div class="container navbar">
+      <a class="brand" href="{% url 'home' %}">Pinjemin</a>
+      <nav aria-label="Navigasi utama">
+        {% block navigation %}
+        <a href="{% url 'home' %}">Beranda</a>
+        {% endblock %}
+        {% block account_navigation %}{% endblock %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <p class="message">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+
+    {# Isi halaman masing-masing modul diletakkan di blok ini. #}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="container">&copy; {% now 'Y' %} Pinjemin</div>
+  </footer>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
