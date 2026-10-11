@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Selamat Datang | Pinjemin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/onboarding.css' %}">
+</head>
+<body class="ob-body">
+
+  <div class="ob-bg" aria-hidden="true">
+    <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="blob b4"></i>
+  </div>
+
+  <main class="ob">
+    <img class="ob-logo" src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin">
+
+    <!-- ===== Stepper ===== -->
+    <div class="stepper-wrap">
+      <div class="stepper" aria-label="Langkah onboarding">
+        <div class="stepper__line" aria-hidden="true"><i id="stepperProgress"></i></div>
+        <div class="step" data-step="1"><span class="step__dot">1</span></div>
+        <div class="step" data-step="2"><span class="step__dot">2</span></div>
+        <div class="step" data-step="3"><span class="step__dot">3</span></div>
+        <div class="stepper__tab" id="stepperTab" aria-hidden="true"><span id="stepperTabNum">1</span></div>
+      </div>
+    </div>
+
+    <!-- ===== Kartu ===== -->
+    <form class="ob-card" id="onboardingForm" method="post" enctype="multipart/form-data" novalidate
+          data-start-step="{{ start_step }}">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <p class="field-error">{{ form.non_field_errors.0 }}</p>
+      {% endif %}
+
+      <!-- ---------- Langkah 1: Selamat datang ---------- -->
+      <section class="panel" data-panel="1">
+        <h1 class="ob-title">Selamat Datang di Pinjemin!</h1>
+        <p class="ob-text">
+          Halo, {{ first_name }}! Akun SSO UI kamu sudah terverifikasi. Di Pinjemin, sesama mahasiswa UI
+          bisa saling meminjamkan barang secara gratis atau menyewakannya dengan harga terjangkau,
+          jadi barang yang jarang dipakai tidak menumpuk dan kamu tidak perlu beli yang baru.
+          Yuk, lengkapi profilmu dulu, hanya butuh satu menit.
+        </p>
+        <div class="ob-actions">
+          <button type="button" class="btn-yellow" data-next>
+            Lanjut
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------- Langkah 2: Lengkapi profil ---------- -->
+      <section class="panel" data-panel="2" hidden>
+        <h2 class="ob-title">Lengkapi Profil Kamu!</h2>
+
+        <div class="p2">
+          <div class="p2__photo">
+            <div class="photo-preview" id="photoPreview">
+              {% if profile.photo %}
+                <img src="{{ profile.photo.url }}" alt="Foto profil">
+              {% else %}
+                <span>{{ profile.full_name|default:user.username|slice:":1"|upper }}</span>
+              {% endif %}
+            </div>
+            <div class="photo-pick">
+              {{ form.photo }}
+              <label for="id_photo" class="btn-outline">Pilih foto (opsional)</label>
+            </div>
+            <p class="hint">Maks. 10 MB, format JPG, JPEG, atau PNG.</p>
+            <p class="field-error" id="err-photo" {% if not form.photo.errors %}hidden{% endif %}>{{ form.photo.errors.0 }}</p>
+          </div>
+
+          <div class="p2__fields">
+            <h3 class="group-title">
+              Biodata Diri
+              <span class="lock-tag">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                Data dari SSO UI
+              </span>
+            </h3>
+            <dl class="bio">
+              <dt>Nama</dt><dd>{{ profile.full_name|default:user.username }}</dd>
+              <dt>NPM</dt><dd>{{ profile.npm|default:"-" }}</dd>
+              {# Fakultas & Jurusan: tambahkan di sini kalau tabel pemetaan kd_org sudah ada #}
+            </dl>
+
+            <h3 class="group-title">Data Pinjemin</h3>
+
+            <div class="field">
+              <label for="id_phone">No. WhatsApp <b class="req">*</b></label>
+              {{ form.phone }}
+              <p class="hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                Hanya dibagikan setelah transaksi disetujui.
+              </p>
+              <p class="field-error" id="err-phone" {% if not form.phone.errors %}hidden{% endif %}>{{ form.phone.errors.0 }}</p>
+            </div>
+
+            <div class="field">
+              <label for="id_location">Titik Temu Favorit</label>
+              {{ form.location }}
+              <p class="hint">Pisahkan dengan koma kalau lebih dari satu.</p>
+              <p class="field-error" id="err-location" {% if not form.location.errors %}hidden{% endif %}>{{ form.location.errors.0 }}</p>
+            </div>
+
+            <div class="field">
+              <label for="id_bio">Bio Singkat</label>
+              {{ form.bio }}
+              <div class="counter"><span id="bioCount">0</span>/300</div>
+              <p class="field-error" id="err-bio" {% if not form.bio.errors %}hidden{% endif %}>{{ form.bio.errors.0 }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ob-actions">
+          <button type="button" class="btn-outline btn-back" data-prev>Kembali</button>
+          <button type="button" class="btn-yellow" data-next>
+            Lanjut
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------- Langkah 3: Mulai sebagai apa? ---------- -->
+      <section class="panel" data-panel="3" hidden>
+        <h2 class="ob-title">Mulai Sebagai Apa?</h2>
+
+        <div class="seg" id="seg" role="radiogroup" aria-label="Pilih mode" data-mode="{% if form.mode.value == 'seller' %}seller{% else %}renter{% endif %}">
+          <i class="seg__pill" aria-hidden="true"></i>
+          <label>
+            <input type="radio" name="mode" value="renter" {% if form.mode.value != "seller" %}checked{% endif %}>
+            <span>Minjem</span>
+          </label>
+          <label>
+            <input type="radio" name="mode" value="seller" {% if form.mode.value == "seller" %}checked{% endif %}>
+            <span>Minjemin</span>
+          </label>
+        </div>
+        <p class="seg-note">*mode bisa diganti kapan saja</p>
+
+        <p class="ob-text mode-desc" data-mode-desc="renter">
+          Cari dan pinjam barang dari sesama mahasiswa UI, mulai dari buku modul, kamera, sampai jas sidang.
+          Gratis atau sewa bersahabat.
+        </p>
+        <p class="ob-text mode-desc" data-mode-desc="seller" hidden>
+          Pinjamkan atau sewakan barang yang jarang kamu pakai. Hemat ruang, dapat tambahan uang saku,
+          dan bantu teman kuliahmu.
+        </p>
+
+        <label class="agree">
+          <input type="checkbox" name="accept_privacy" id="acceptPrivacy">
+          <span>
+            Saya menyetujui
+            <a href="{% url 'help_center:help' %}#kebijakan-privasi" target="_blank" rel="noopener">Kebijakan Privasi &amp; Ketentuan Pinjemin</a>
+          </span>
+        </label>
+        <p class="field-error center" id="err-accept_privacy" {% if not form.accept_privacy.errors %}hidden{% endif %}>{{ form.accept_privacy.errors.0 }}</p>
+
+        <div class="ob-actions">
+          <button type="button" class="btn-outline btn-back" data-prev>Kembali</button>
+          <button type="submit" class="btn-yellow" id="submitBtn" disabled>
+            Mulai Pakai Pinjemin
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </section>
+    </form>
+  </main>
+
+  <script>
+    (function () {
+      var form = document.getElementById("onboardingForm");
+      var panels = form.querySelectorAll("[data-panel]");
+      var steps = document.querySelectorAll(".step");
+      var progress = document.getElementById("stepperProgress");
+      var current = parseInt(form.dataset.startStep, 10) || 1;
+
+      var card = form;
+      var tab = document.getElementById("stepperTab");
+      var tabNum = document.getElementById("stepperTabNum");
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var animating = false;
+
+      function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+      function panelOf(n) { return form.querySelector('[data-panel="' + n + '"]'); }
+
+      // Stepper: tab kuning bergeser, garis progres memanjang, angka berganti
+      function syncStepper(n, instant) {
+        steps.forEach(function (s) {
+          var i = Number(s.dataset.step);
+          s.classList.toggle("is-active", i === n);
+          s.classList.toggle("is-done", i < n);
+        });
+        progress.style.width = ((n - 1) / 2 * 100) + "%";
+        tab.style.setProperty("--pos", n - 1);
+        if (instant) { tabNum.textContent = n; return; }
+        tabNum.classList.add("swap");
+        setTimeout(function () { tabNum.textContent = n; tabNum.classList.remove("swap"); }, 200);
+      }
+
+      // Pindah langkah: kartu mengecil ke atas, lalu membesar ke bawah dengan isi baru
+      function go(n, instant) {
+        if (animating) return;
+        var from = current;
+        current = n;
+
+        if (instant || reduceMotion || from === n) {
+          panels.forEach(function (p) { p.hidden = Number(p.dataset.panel) !== n; });
+          syncStepper(n, true);
+          return;
+        }
+
+        animating = true;
+        syncStepper(n, false);
+        if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: "smooth" });
+
+        var leaving = panelOf(from);
+        var entering = panelOf(n);
+        var collapsed = parseFloat(getComputedStyle(card).paddingTop);
+
+        card.style.height = card.offsetHeight + "px";
+        card.style.overflow = "hidden";
+        leaving.classList.add("is-fading");
+
+        wait(180).then(function () {
+          // 1) mengecil ke atas
+          card.style.height = collapsed + "px";
+          card.style.paddingBottom = "0px";
+          return wait(400);
+        }).then(function () {
+          // 2) tukar isi, ukur tinggi baru
+          leaving.hidden = true;
+          leaving.classList.remove("is-fading");
+          entering.hidden = false;
+          entering.classList.add("is-fading");
+
+          card.style.transition = "none";
+          card.style.height = "auto";
+          card.style.paddingBottom = "";
+          var target = card.offsetHeight;
+          card.style.height = collapsed + "px";
+          card.style.paddingBottom = "0px";
+          void card.offsetHeight;
+          card.style.transition = "";
+
+          // 3) membesar ke bawah
+          card.style.height = target + "px";
+          card.style.paddingBottom = "";
+          return wait(60);
+        }).then(function () {
+          entering.classList.remove("is-fading");
+          return wait(420);
+        }).then(function () {
+          card.style.height = "";
+          card.style.overflow = "";
+          card.style.paddingBottom = "";
+          animating = false;
+        });
+      }
+
+      function showError(name, msg) {
+        var el = document.getElementById("err-" + name);
+        if (!el) return;
+        el.textContent = msg || "";
+        el.hidden = !msg;
+      }
+
+      // ---- Validasi langkah 2 ----
+      function validateStep2() {
+        var ok = true;
+        var phone = document.getElementById("id_phone");
+        var raw = phone.value.replace(/[\s-]/g, "");
+        if (!raw) {
+          showError("phone", "Nomor WhatsApp wajib diisi."); ok = false;
+        } else if (!/^\+?\d{9,15}$/.test(raw)) {
+          showError("phone", "Nomor WhatsApp tidak valid. Contoh: 08123456789."); ok = false;
+        } else {
+          showError("phone", "");
+        }
+        if (!ok) phone.focus();
+        return ok;
+      }
+
+      // ---- Tombol Lanjut / Kembali ----
+      form.querySelectorAll("[data-next]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (current === 2 && !validateStep2()) return;
+          if (current < 3) go(current + 1);
+        });
+      });
+      form.querySelectorAll("[data-prev]").forEach(function (b) {
+        b.addEventListener("click", function () { if (current > 1) go(current - 1); });
+      });
+
+      // Enter di langkah 1-2 = Lanjut (bukan kirim form)
+      form.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && current < 3 && e.target.tagName !== "TEXTAREA") {
+          e.preventDefault();
+          form.querySelector('[data-panel="' + current + '"] [data-next]').click();
+        }
+      });
+
+      // ---- Foto: pratinjau + validasi ----
+      var fileInput = document.getElementById("id_photo");
+      var preview = document.getElementById("photoPreview");
+      fileInput.addEventListener("change", function () {
+        showError("photo", "");
+        var f = fileInput.files[0];
+        if (!f) return;
+        if (f.size > 10 * 1024 * 1024) {
+          showError("photo", "Ukuran foto maksimal 10 MB."); fileInput.value = ""; return;
+        }
+        if (!/\.(jpe?g|png)$/i.test(f.name)) {
+          showError("photo", "Format foto harus JPG, JPEG, atau PNG."); fileInput.value = ""; return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          preview.innerHTML = "";
+          var img = document.createElement("img");
+          img.src = ev.target.result;
+          img.alt = "Pratinjau foto";
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(f);
+      });
+
+      // ---- Bio: penghitung karakter ----
+      var bio = document.getElementById("id_bio");
+      var bioCount = document.getElementById("bioCount");
+      function updateCount() { bioCount.textContent = bio.value.length; }
+      bio.addEventListener("input", updateCount);
+      updateCount();
+
+      // ---- Mode: pill bergeser + deskripsi berganti ----
+      var seg = document.getElementById("seg");
+      var modeRadios = form.querySelectorAll('input[name="mode"]');
+      function updateMode(animate) {
+        var val = form.querySelector('input[name="mode"]:checked').value;
+        seg.dataset.mode = val;
+        form.querySelectorAll("[data-mode-desc]").forEach(function (p) {
+          var show = p.dataset.modeDesc === val;
+          p.hidden = !show;
+          if (show && animate) {
+            p.classList.remove("fade-in");
+            void p.offsetWidth;
+            p.classList.add("fade-in");
+          }
+        });
+      }
+      modeRadios.forEach(function (r) { r.addEventListener("change", function () { updateMode(true); }); });
+      updateMode(false);
+
+      // ---- Checkbox persetujuan: aktif/nonaktifkan tombol ----
+      var agree = document.getElementById("acceptPrivacy");
+      var submitBtn = document.getElementById("submitBtn");
+      function updateSubmit() {
+        submitBtn.disabled = !agree.checked;
+        if (agree.checked) showError("accept_privacy", "");
+      }
+      agree.addEventListener("change", updateSubmit);
+      updateSubmit();
+
+      form.addEventListener("submit", function () {
+        submitBtn.disabled = true;
+        submitBtn.firstChild.textContent = "Menyimpan... ";
+      });
+
+      go(current, true);
+    })();
+  </script>
+</body>
+</html>

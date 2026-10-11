@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Masuk | Pinjemin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body class="login-body">
+  <div class="login-page">
+
+    <!-- ===== Kiri: hero ===== -->
+    <section class="hero">
+      <h1 class="logo">
+        <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin" class="logo-img">
+      </h1>
+
+      <span class="badge-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>
+        </svg>
+        Platform Peminjaman Khusus Mahasiswa UI
+      </span>
+
+      <h2 class="hero-title">Pinjam Mudah, Hemat Uang, Selamatkan Lingkungan Kampus UI.</h2>
+
+      <p class="hero-desc">
+        Solusi sirkular cerdas civitas akademika Universitas Indonesia. Berbagi perlengkapan
+        laboratorium, kamera, alat praktikum teknik, hingga buku referensi tanpa biaya berlebih.
+      </p>
+    </section>
+
+    <!-- ===== Kanan: kartu login ===== -->
+    <main class="login-wrap">
+      <div class="login-card">
+        <h2 class="login-title">Masuk ke Pinjemin</h2>
+        <p class="login-subtitle">
+          Gunakan akun Single Sign-On (SSO) resmi Universitas Indonesia kamu
+          (<strong>@ui.ac.id</strong>).
+        </p>
+
+        {% for message in messages %}
+          <div class="alert-error" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        <a href="{% url 'accounts:sso_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn-login">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>
+          </svg>
+          Login Akun SSO
+        </a>
+
+        <div class="info-box">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2 4 5v6c0 5 3.4 9.5 8 11 4.6-1.5 8-6 8-11V5l-8-3zm-1.5 14-3.5-3.5 1.4-1.4 2.1 2.1 5-5 1.4 1.4-6.4 6.4z"/>
+          </svg>
+          <p>
+            Data pribadi, NPM, dan status kemahasiswaan kamu dilindungi secara otomatis melalui
+            protokol integrasi <strong>SIMAK &amp; SSO DSTI UI</strong>. Pinjemin tidak menyimpan
+            kata sandi SSO Anda. <a href="{% url 'help_center:help' %}#kebijakan-privasi">Kebijakan Privasi</a>
+          </p>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</body>
+</html>

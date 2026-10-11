@@ -3,6 +3,9 @@ env/
 venv/
 .env*
 
+media/
+staticfiles/
+
 # Django Database & Cache
 db.sqlite3
 __pycache__/

@@ -1,0 +1,10 @@
+<form method="post" action="{% url 'accounts:toggle_mode' %}" class="d-flex align-items-center gap-2">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <span class="small text-muted">Mode:</span>
+  <button type="submit" class="btn btn-sm {% if is_seller_mode %}btn-success{% else %}btn-primary{% endif %}"
+          title="Klik untuk ganti mode">
+    {% if is_seller_mode %}Minjemin{% else %}Minjem{% endif %}
+    <span class="ms-1">&#8646;</span>
+  </button>
+</form>
