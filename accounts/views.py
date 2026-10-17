@@ -4,7 +4,7 @@ import requests
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -126,26 +126,41 @@ def onboarding(request):
 
 @login_required
 def profile_detail(request):
-    return render(request, "accounts/profile.html", {"profile": request.user.profile})
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    return render(request, "accounts/profile.html", {"profile": profile})
 
 
 @login_required
 def profile_edit(request):
-    form = ProfileForm(request.POST or None, request.FILES or None, instance=request.user.profile)
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    form = ProfileForm(request.POST or None, request.FILES or None, instance=profile)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Profil berhasil diperbarui.")
         return redirect("accounts:profile")
-    return render(request, "accounts/profile_edit.html", {"form": form})
+    return render(request, "accounts/profile_edit.html", {"form": form, "profile": profile})
+
+
+@login_required
+def profile_public(request, pk):
+    profile = get_object_or_404(Profile, pk=pk, is_onboarded=True)
+    return render(request, "accounts/profile_public.html", {
+        "profile": profile,
+        "is_owner": profile.user_id == request.user.id,
+    })
 
 
 @login_required
 @require_POST
 def toggle_mode(request):
     profile = request.user.profile
-    profile.mode = (
-        Profile.Mode.SELLER if profile.mode == Profile.Mode.RENTER else Profile.Mode.RENTER
-    )
+    requested = request.POST.get("mode")
+    if requested in Profile.Mode.values:
+        profile.mode = requested
+    else:
+        profile.mode = (
+            Profile.Mode.SELLER if profile.mode == Profile.Mode.RENTER else Profile.Mode.RENTER
+        )
     profile.save(update_fields=["mode"])
 
     next_url = request.POST.get("next", "")

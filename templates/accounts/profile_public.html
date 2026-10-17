@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ profile.full_name|default:"Profil" }}{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="pf-page">
+  <div class="pf-public">
+
+    {% if is_owner %}
+      <div class="pf-banner">
+        <span>Ini tampilan profilmu di mata pengguna lain. NPM lengkap dan nomor WhatsApp tidak ditampilkan.</span>
+        <a class="pf-btn pf-btn--outline pf-btn--sm" href="{% url 'accounts:profile' %}">Kembali ke Profil Saya</a>
+      </div>
+    {% endif %}
+
+    <section class="pf-card pf-identity pf-identity--public" aria-labelledby="pf-name">
+      <div class="pf-identity__photo">
+        {% if profile.photo %}
+          <img src="{{ profile.photo.url }}" alt="Foto profil {{ profile.full_name }}">
+        {% else %}
+          <span class="pf-avatar-fallback">{{ profile.full_name|default:profile.user.username|slice:":1"|upper }}</span>
+        {% endif %}
+        <span class="pf-verified-dot" title="Terverifikasi UI">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+        </span>
+      </div>
+
+      <div class="pf-identity__body">
+        <h1 class="pf-name" id="pf-name">{{ profile.full_name|default:profile.user.username }}</h1>
+        <p class="pf-muted">
+          {% if profile.angkatan %}Angkatan {{ profile.angkatan }} &middot; {% endif %}NPM {{ profile.npm|slice:":4" }}****
+        </p>
+        <span class="pf-badge pf-badge--green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+          Terverifikasi UI
+        </span>
+
+        <dl class="pf-info">
+          <dt>Bergabung sejak</dt>
+          <dd>{{ profile.created_at|date:"j F Y" }}</dd>
+          <dt>Titik temu favorit</dt>
+          <dd>{{ profile.location|default:"-" }}</dd>
+          <dt>Bio</dt>
+          <dd>{{ profile.bio|default:"-" }}</dd>
+        </dl>
+
+        {# TODO (modul transaksi): tombol "Ajukan Pinjam" dan "Laporkan Pengguna" ditaruh di sini #}
+      </div>
+    </section>
+
+    <div class="pf-public__grid">
+      <section class="pf-card" aria-labelledby="pf-rep-title">
+        <h2 class="pf-card__title" id="pf-rep-title">Reputasi</h2>
+        {# TODO (modul ulasan/transaksi): isi dari data asli #}
+        <div class="pf-rep">
+          <div>
+            <strong>
+              <svg viewBox="0 0 24 24" fill="#ffc400" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+              {{ rating|default:"-" }}
+            </strong>
+            <span>Rating</span>
+          </div>
+          <div><strong>{{ review_count|default:"0" }}</strong><span>Ulasan</span></div>
+          <div><strong>{{ done_count|default:"0" }}</strong><span>Transaksi selesai</span></div>
+        </div>
+      </section>
+
+      <section class="pf-card" aria-labelledby="pf-items-title">
+        <h2 class="pf-card__title" id="pf-items-title">Barang yang Dipinjamkan</h2>
+        {# TODO (modul katalog): daftar barang milik pengguna ini #}
+        <div class="pf-empty pf-empty--compact">
+          <p class="pf-empty__text">Belum ada barang yang ditampilkan.</p>
+        </div>
+      </section>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

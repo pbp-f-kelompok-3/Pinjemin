@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profil{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="pf-page">
+
+  <div class="pf-head">
+    <div>
+      <h1 class="pf-title">Edit Profil</h1>
+      <p class="pf-sub">Perbarui info yang terlihat oleh pengguna lain.</p>
+    </div>
+  </div>
+
+  <div class="pf-layout">
+    {% include "accounts/_sidebar.html" with active="edit" %}
+
+    <div class="pf-main pf-main--single">
+      <form class="pf-card pf-form" id="editForm" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<p class="pf-error">{{ form.non_field_errors.0 }}</p>{% endif %}
+
+        <!-- Foto -->
+        <section class="pf-form__section">
+          <h3 class="pf-form__title">Foto Profil</h3>
+          <div class="pf-photo">
+            <div class="pf-photo__preview" id="photoPreview" data-initial="{{ profile.full_name|default:user.username|slice:':1'|upper }}">
+              {% if profile.photo %}
+                <img src="{{ profile.photo.url }}" alt="Foto profil">
+              {% else %}
+                <span>{{ profile.full_name|default:user.username|slice:":1"|upper }}</span>
+              {% endif %}
+            </div>
+            <div class="pf-photo__actions">
+              <div class="pf-photo__pick">
+                {{ form.photo }}
+                <label for="id_photo" class="pf-btn pf-btn--outline pf-btn--sm">Ganti foto</label>
+              </div>
+              {% if profile.photo %}
+                <label class="pf-check">
+                  {{ form.remove_photo }}
+                  <span>Hapus foto saat ini</span>
+                </label>
+              {% endif %}
+              <p class="pf-hint">Maks. 10 MB, format JPG, JPEG, atau PNG.</p>
+              <p class="pf-error" id="err-photo" {% if not form.photo.errors %}hidden{% endif %}>{{ form.photo.errors.0 }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data SSO (terkunci) -->
+        <section class="pf-form__section">
+          <h3 class="pf-form__title">
+            Data dari SSO UI
+            <span class="pf-badge pf-badge--yellow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              Tidak bisa diubah
+            </span>
+          </h3>
+          <div class="pf-grid2">
+            <div class="pf-field">
+              <label for="sso_nama">Nama</label>
+              <input type="text" id="sso_nama" value="{{ profile.full_name|default:user.username }}" disabled>
+            </div>
+            <div class="pf-field">
+              <label for="sso_npm">NPM</label>
+              <input type="text" id="sso_npm" value="{{ profile.npm|default:'-' }}" disabled>
+            </div>
+          </div>
+          <p class="pf-hint">Diambil otomatis dari SSO UI saat kamu login.</p>
+        </section>
+
+        <!-- Info tambahan -->
+        <section class="pf-form__section">
+          <h3 class="pf-form__title">Info Tambahan</h3>
+
+          <div class="pf-field">
+            <label for="id_phone">No. WhatsApp <b class="pf-req">*</b></label>
+            {{ form.phone }}
+            <p class="pf-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              Hanya dibagikan setelah transaksi disetujui.
+            </p>
+            <p class="pf-error" id="err-phone" {% if not form.phone.errors %}hidden{% endif %}>{{ form.phone.errors.0 }}</p>
+          </div>
+
+          <div class="pf-field">
+            <label for="id_location">Titik Temu Favorit</label>
+            {{ form.location }}
+            <p class="pf-hint">Pisahkan dengan koma kalau lebih dari satu.</p>
+            <p class="pf-error" id="err-location" {% if not form.location.errors %}hidden{% endif %}>{{ form.location.errors.0 }}</p>
+          </div>
+
+          <div class="pf-field">
+            <label for="id_bio">Bio Singkat</label>
+            {{ form.bio }}
+            <div class="pf-counter"><span id="bioCount">0</span>/300</div>
+            <p class="pf-error" id="err-bio" {% if not form.bio.errors %}hidden{% endif %}>{{ form.bio.errors.0 }}</p>
+          </div>
+        </section>
+
+        <!-- Aksi -->
+        <div class="pf-form__actions">
+          <a class="pf-btn pf-btn--outline" href="{% url 'accounts:profile' %}">Batal</a>
+          <button type="submit" class="pf-btn pf-btn--yellow" id="saveBtn">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var form = document.getElementById("editForm");
+    var dirty = false;
+    var saving = false;
+
+    function showError(name, msg) {
+      var el = document.getElementById("err-" + name);
+      if (!el) return;
+      el.textContent = msg || "";
+      el.hidden = !msg;
+    }
+
+    // ---- Foto: pratinjau + validasi ----
+    var fileInput = document.getElementById("id_photo");
+    var preview = document.getElementById("photoPreview");
+    var removeBox = document.getElementById("id_remove_photo");
+
+    function showInitial() {
+      preview.innerHTML = "";
+      var span = document.createElement("span");
+      span.textContent = preview.dataset.initial;
+      preview.appendChild(span);
+    }
+
+    fileInput.addEventListener("change", function () {
+      showError("photo", "");
+      var f = fileInput.files[0];
+      if (!f) return;
+      if (f.size > 10 * 1024 * 1024) { showError("photo", "Ukuran foto maksimal 10 MB."); fileInput.value = ""; return; }
+      if (!/\.(jpe?g|png)$/i.test(f.name)) { showError("photo", "Format foto harus JPG, JPEG, atau PNG."); fileInput.value = ""; return; }
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        preview.innerHTML = "";
+        var img = document.createElement("img");
+        img.src = ev.target.result;
+        img.alt = "Pratinjau foto";
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(f);
+      if (removeBox) removeBox.checked = false;
+      dirty = true;
+    });
+
+    if (removeBox) {
+      removeBox.addEventListener("change", function () {
+        if (removeBox.checked) { fileInput.value = ""; showInitial(); }
+        dirty = true;
+      });
+    }
+
+    // ---- Bio: penghitung karakter ----
+    var bio = document.getElementById("id_bio");
+    var bioCount = document.getElementById("bioCount");
+    function updateCount() { bioCount.textContent = bio.value.length; }
+    bio.addEventListener("input", updateCount);
+    updateCount();
+
+    // ---- Validasi sebelum kirim ----
+    form.addEventListener("submit", function (e) {
+      var phone = document.getElementById("id_phone");
+      var raw = phone.value.replace(/[\s-]/g, "");
+      if (!raw) {
+        e.preventDefault(); showError("phone", "Nomor WhatsApp wajib diisi."); phone.focus(); return;
+      }
+      if (!/^\+?\d{9,15}$/.test(raw)) {
+        e.preventDefault(); showError("phone", "Nomor WhatsApp tidak valid. Contoh: 08123456789."); phone.focus(); return;
+      }
+      showError("phone", "");
+      saving = true;
+      var btn = document.getElementById("saveBtn");
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+    });
+
+    // ---- Peringatan kalau ada perubahan yang belum disimpan ----
+    form.addEventListener("input", function () { dirty = true; });
+    window.addEventListener("beforeunload", function (e) {
+      if (dirty && !saving) { e.preventDefault(); e.returnValue = ""; }
+    });
+  })();
+</script>
+{% endblock %}

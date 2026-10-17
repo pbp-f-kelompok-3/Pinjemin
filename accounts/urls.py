@@ -13,4 +13,5 @@ urlpatterns = [
     path("profil/", views.profile_detail, name="profile"),
     path("profil/edit/", views.profile_edit, name="profile_edit"),
     path("mode/toggle/", views.toggle_mode, name="toggle_mode"),
+    path("pengguna/<int:pk>/", views.profile_public, name="profile_public"),
 ]

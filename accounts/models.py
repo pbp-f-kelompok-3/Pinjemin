@@ -40,3 +40,20 @@ class Profile(models.Model):
     @property
     def is_seller_mode(self):
         return self.mode == self.Mode.SELLER
+
+    @property
+    def angkatan(self):
+        if self.npm[:2].isdigit():
+            return 2000 + int(self.npm[:2])
+        return None
+
+    @property
+    def completeness(self):
+        checks = [
+            ("Foto profil", bool(self.photo)),
+            ("Nomor WhatsApp", bool(self.phone)),
+            ("Titik temu favorit", bool(self.location)),
+            ("Bio singkat", bool(self.bio)),
+        ]
+        done = sum(1 for _, ok in checks if ok)
+        return {"checks": checks, "percent": round(done / len(checks) * 100)}

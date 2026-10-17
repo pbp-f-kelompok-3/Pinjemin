@@ -1,0 +1,47 @@
+{# Menu akun. Pemakaian: {% include "accounts/_sidebar.html" with active="profile" %} #}
+<aside class="pf-side">
+  <div class="pf-card pf-menu" role="navigation" aria-label="Menu akun">
+    <p class="pf-menu__title">Akun Saya</p>
+
+    <ul>
+      <li>
+        <a href="{% url 'accounts:profile' %}" class="{% if active == 'profile' %}is-active{% endif %}"{% if active == 'profile' %} aria-current="page"{% endif %}>
+          <span class="pf-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+          Profil Saya
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'accounts:profile_edit' %}" class="{% if active == 'edit' %}is-active{% endif %}"{% if active == 'edit' %} aria-current="page"{% endif %}>
+          <span class="pf-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+          Edit Profil
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'help_center:help' %}">
+          <span class="pf-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span>
+          Pusat Bantuan
+        </a>
+      </li>
+    </ul>
+
+    <hr class="pf-menu__sep">
+
+    <ul>
+      <li>
+        <a href="{% url 'home' %}">
+          <span class="pf-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span>
+          Kembali ke Beranda
+        </a>
+      </li>
+      <li>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="pf-logout">
+            <span class="pf-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></span>
+            Keluar
+          </button>
+        </form>
+      </li>
+    </ul>
+  </div>
+</aside>

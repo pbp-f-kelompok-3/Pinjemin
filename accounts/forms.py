@@ -23,26 +23,8 @@ class PhotoValidationMixin:
         return photo
 
 
-class BootstrapFormMixin:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            css = "form-check-input" if isinstance(field.widget, forms.CheckboxInput) else "form-control"
-            field.widget.attrs["class"] = css
-
-
-class ProfileForm(PhotoValidationMixin, BootstrapFormMixin, forms.ModelForm):
-    """Form edit profil (halaman /akun/profil/edit/)."""
-
-    class Meta:
-        model = Profile
-        fields = ["photo", "phone", "location", "bio"]
-        labels = {"location": "Titik temu favorit"}
-        widgets = {"bio": forms.Textarea(attrs={"rows": 3})}
-
-
-class OnboardingForm(PhotoValidationMixin, forms.ModelForm):
-    """Form onboarding 3 langkah. Tampilan dirender manual di onboarding.html."""
+class BaseProfileForm(PhotoValidationMixin, forms.ModelForm):
+    """Field yang dipakai bersama oleh onboarding dan edit profil."""
 
     phone = forms.CharField(
         max_length=20,
@@ -53,13 +35,10 @@ class OnboardingForm(PhotoValidationMixin, forms.ModelForm):
             "autocomplete": "tel",
         }),
     )
-    accept_privacy = forms.BooleanField(
-        error_messages={"required": "Kamu harus menyetujui Kebijakan Privasi & Ketentuan Pinjemin."},
-    )
 
     class Meta:
         model = Profile
-        fields = ["photo", "phone", "location", "bio", "mode"]
+        fields = ["photo", "phone", "location", "bio"]
         widgets = {
             "photo": forms.FileInput(attrs={
                 "accept": ".jpg,.jpeg,.png,image/jpeg,image/png",
@@ -78,3 +57,33 @@ class OnboardingForm(PhotoValidationMixin, forms.ModelForm):
         if not re.fullmatch(r"\+?\d{9,15}", raw):
             raise ValidationError("Nomor WhatsApp tidak valid. Contoh: 08123456789.")
         return raw
+
+
+class OnboardingForm(BaseProfileForm):
+
+    accept_privacy = forms.BooleanField(
+        error_messages={"required": "Kamu harus menyetujui Kebijakan Privasi & Ketentuan Pinjemin."},
+    )
+
+    class Meta(BaseProfileForm.Meta):
+        fields = ["photo", "phone", "location", "bio", "mode"]
+
+
+class ProfileEditForm(BaseProfileForm):
+
+    remove_photo = forms.BooleanField(required=False)
+
+    class Meta(BaseProfileForm.Meta):
+        fields = ["photo", "phone", "location", "bio"]
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        uploaded_new = isinstance(self.cleaned_data.get("photo"), UploadedFile)
+        if self.cleaned_data.get("remove_photo") and not uploaded_new and profile.photo:
+            profile.photo.delete(save=False)
+            profile.photo = None
+        if commit:
+            profile.save()
+        return profile
+
+ProfileForm = ProfileEditForm

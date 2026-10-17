@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profil Saya{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="pf-page">
+
+  <div class="pf-head">
+    <div>
+      <h1 class="pf-title">Profil Saya</h1>
+      <p class="pf-sub">Kelola data diri dan mode penggunaan kamu.</p>
+    </div>
+    <a class="pf-btn pf-btn--outline" href="{% url 'accounts:profile_public' profile.pk %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      Lihat tampilan publik
+    </a>
+  </div>
+
+  <div class="pf-layout">
+    {% include "accounts/_sidebar.html" with active="profile" %}
+
+    <div class="pf-main">
+
+      {% for message in messages %}
+        <div class="pf-toast pf-toast--{{ message.tags }}" role="status">{{ message }}</div>
+      {% endfor %}
+
+      <!-- ===== Kartu identitas ===== -->
+      <section class="pf-card pf-identity" aria-labelledby="pf-name">
+        <div class="pf-identity__photo">
+          {% if profile.photo %}
+            <img src="{{ profile.photo.url }}" alt="Foto profil {{ profile.full_name }}">
+          {% else %}
+            <span class="pf-avatar-fallback">{{ profile.full_name|default:user.username|slice:":1"|upper }}</span>
+          {% endif %}
+          <span class="pf-verified-dot" title="Terverifikasi UI">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+          </span>
+        </div>
+
+        <div class="pf-identity__body">
+          <div class="pf-identity__top">
+            <div>
+              <h2 class="pf-name" id="pf-name">{{ profile.full_name|default:user.username }}</h2>
+              <p class="pf-muted">NPM {{ profile.npm|default:"-" }}{% if profile.angkatan %} &middot; Angkatan {{ profile.angkatan }}{% endif %}</p>
+              <span class="pf-badge pf-badge--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+                Terverifikasi UI
+              </span>
+            </div>
+            <a class="pf-btn pf-btn--outline pf-btn--sm" href="{% url 'accounts:profile_edit' %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              Edit Profil
+            </a>
+          </div>
+
+          <dl class="pf-info">
+            <dt>Bergabung sejak</dt>
+            <dd>{{ profile.created_at|date:"j F Y" }}</dd>
+
+            <dt>Titik temu favorit</dt>
+            <dd>{% if profile.location %}{{ profile.location }}{% else %}<a class="pf-fill" href="{% url 'accounts:profile_edit' %}">Belum diisi, lengkapi</a>{% endif %}</dd>
+
+            <dt>WhatsApp</dt>
+            <dd>
+              {% if profile.phone %}{{ profile.phone }}{% else %}<a class="pf-fill" href="{% url 'accounts:profile_edit' %}">Belum diisi, lengkapi</a>{% endif %}
+              <span class="pf-lock">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                Hanya terlihat setelah transaksi disetujui
+              </span>
+            </dd>
+
+            <dt>Bio</dt>
+            <dd>{% if profile.bio %}{{ profile.bio }}{% else %}<a class="pf-fill" href="{% url 'accounts:profile_edit' %}">Belum diisi, lengkapi</a>{% endif %}</dd>
+          </dl>
+        </div>
+      </section>
+
+      <!-- ===== Mode aktif ===== -->
+      <section class="pf-card pf-mode" aria-labelledby="pf-mode-title">
+        <h3 class="pf-card__title" id="pf-mode-title">Mode Aktif</h3>
+
+        <form method="post" action="{% url 'accounts:toggle_mode' %}" id="modeForm">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'accounts:profile' %}">
+          <div class="pf-seg" id="pfSeg" data-mode="{{ profile.mode }}" role="group" aria-label="Pilih mode">
+            <i class="pf-seg__pill" aria-hidden="true"></i>
+            <button type="submit" name="mode" value="renter" aria-pressed="{% if profile.is_seller_mode %}false{% else %}true{% endif %}">Minjem</button>
+            <button type="submit" name="mode" value="seller" aria-pressed="{% if profile.is_seller_mode %}true{% else %}false{% endif %}">Minjemin</button>
+          </div>
+        </form>
+
+        <p class="pf-mode__desc">
+          {% if profile.is_seller_mode %}
+            Kamu sedang di mode <strong>Minjemin</strong>: pinjamkan atau sewakan barang yang jarang kamu pakai.
+          {% else %}
+            Kamu sedang di mode <strong>Minjem</strong>: cari dan pinjam barang dari sesama mahasiswa UI.
+          {% endif %}
+        </p>
+        <p class="pf-hint">Mode bisa diganti kapan saja dan berlaku di seluruh Pinjemin.</p>
+      </section>
+
+      <!-- ===== Aktivitas ===== -->
+      <section class="pf-card pf-activity" aria-labelledby="pf-act-title">
+        <h3 class="pf-card__title" id="pf-act-title">Aktivitas</h3>
+
+        <div class="pf-tabs" role="tablist" aria-label="Aktivitas">
+          <button type="button" role="tab" id="tab-main" aria-controls="panel-main" aria-selected="true" class="is-active">
+            {% if profile.is_seller_mode %}Barang Saya{% else %}Riwayat Pinjam{% endif %}
+          </button>
+          <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false">Ulasan</button>
+        </div>
+
+        {# TODO (modul katalog/transaksi): ganti empty state di dua panel ini dengan data asli #}
+        <div class="pf-panel" role="tabpanel" id="panel-main" aria-labelledby="tab-main">
+          <div class="pf-empty">
+            <span class="pf-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg></span>
+            {% if profile.is_seller_mode %}
+              <p class="pf-empty__title">Belum ada barang</p>
+              <p class="pf-empty__text">Barang yang kamu pinjamkan atau sewakan akan tampil di sini. Yuk mulai berbagi!</p>
+            {% else %}
+              <p class="pf-empty__title">Belum ada riwayat pinjam</p>
+              <p class="pf-empty__text">Barang yang pernah kamu pinjam akan tampil di sini.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="pf-panel" role="tabpanel" id="panel-reviews" aria-labelledby="tab-reviews" hidden>
+          <div class="pf-empty">
+            <span class="pf-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg></span>
+            <p class="pf-empty__title">Belum ada ulasan</p>
+            <p class="pf-empty__text">Ulasan dari pengguna lain setelah transaksi selesai akan muncul di sini.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Kolom kanan bawah: kelengkapan + reputasi ===== -->
+      <div class="pf-stack">
+        <section class="pf-card" aria-labelledby="pf-comp-title">
+          <h3 class="pf-card__title" id="pf-comp-title">Kelengkapan Profil</h3>
+          <div class="pf-progress__head">
+            <strong>{{ profile.completeness.percent }}%</strong>
+            <span class="pf-muted">{% if profile.completeness.percent == 100 %}Profil kamu sudah lengkap{% else %}Lengkapi supaya lebih dipercaya{% endif %}</span>
+          </div>
+          <div class="pf-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ profile.completeness.percent }}">
+            <i style="width: {{ profile.completeness.percent }}%"></i>
+          </div>
+          <ul class="pf-checklist">
+            {% for label, ok in profile.completeness.checks %}
+              <li class="{% if ok %}is-done{% endif %}">
+                <span class="pf-checklist__mark" aria-hidden="true">
+                  {% if ok %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>{% endif %}
+                </span>
+                <span class="pf-checklist__label">{{ label }}</span>
+                {% if not ok %}<a href="{% url 'accounts:profile_edit' %}">Lengkapi</a>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+
+        <section class="pf-card" aria-labelledby="pf-rep-title">
+          <h3 class="pf-card__title" id="pf-rep-title">Reputasi</h3>
+          {# TODO (modul ulasan/transaksi): isi rating, review_count, done_count dari data asli #}
+          <div class="pf-rep">
+            <div>
+              <strong>
+                <svg viewBox="0 0 24 24" fill="#ffc400" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+                {{ rating|default:"-" }}
+              </strong>
+              <span>Rating</span>
+            </div>
+            <div><strong>{{ review_count|default:"0" }}</strong><span>Ulasan</span></div>
+            <div><strong>{{ done_count|default:"0" }}</strong><span>Transaksi selesai</span></div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    // ---- Toggle mode: pill bergeser dulu, baru form dikirim ----
+    var seg = document.getElementById("pfSeg");
+    var form = document.getElementById("modeForm");
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    seg.querySelectorAll("button").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (btn.value === seg.dataset.mode) return;
+        seg.dataset.mode = btn.value;
+        setTimeout(function () { form.requestSubmit(btn); }, reduce ? 0 : 380);
+      });
+    });
+
+    // ---- Tab aktivitas ----
+    var tabs = document.querySelectorAll(".pf-tabs [role=tab]");
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.classList.toggle("is-active", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+          document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+        });
+      });
+    });
+
+    // ---- Notifikasi hilang otomatis ----
+    document.querySelectorAll(".pf-toast").forEach(function (t) {
+      setTimeout(function () { t.classList.add("is-hiding"); setTimeout(function () { t.remove(); }, 400); }, 4000);
+    });
+  })();
+</script>
+{% endblock %}
