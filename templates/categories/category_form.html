@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %} {title} {% endblock %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">Simpan Kategori</button>
+        <a href="{% url 'categories:show_categories' %}">Batal</a>
+    </form>
+{% endblock %}
