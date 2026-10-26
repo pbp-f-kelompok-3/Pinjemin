@@ -58,8 +58,22 @@ a {
    ========================= */
 
 header {
-  background: var(--yellow);
-  padding: 16px 0;
+  position: sticky;
+  top: 12px;                  
+  z-index: 1000;
+
+  width: calc(100% - 32px);     
+  max-width: 1200px;              
+  margin: 12px auto 0;
+
+  padding: 12px 0;
+  border-radius: 16px;
+
+  background: rgba(255, 222, 01, 0.15);
+
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .navbar {
@@ -67,6 +81,7 @@ header {
   justify-content: space-between;
   align-items: center;
   gap: 20px;
+  padding: 0 20px;
 }
 
 nav {
@@ -88,7 +103,7 @@ nav a:hover {
 
 .brand-logo {
   display: block;
-  height: 32px;   /* atur sesuai tinggi navbar */
+  height: 32px;
   width: auto;
 }
 
@@ -469,16 +484,23 @@ footer {
   display: flex;
   align-items: center;
   flex: 1;
-  max-width: 500px;
+  max-width: 600px;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  padding: 3px;
 }
 
 .search-form input {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid var(--gray);
-  border-radius: 6px 0 0 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 8px 8px 16px;
+  border: none;
+  background: transparent;
   outline: none;
   font-size: 14px;
+  color: var(--black);
 }
 
 .search-form input:focus {
@@ -486,16 +508,23 @@ footer {
 }
 
 .search-form button {
-  padding: 10px 18px;
+  padding: 8px 18px;
   border: none;
-  border-radius: 0 6px 6px 0;
+  border-radius: 999px;
   background-color: var(--black);
   color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .search-form button:hover {
   background-color: var(--gray-dark);
+}
+
+.search-form button:active {
+  transform: scale(0.97);
 }
 
 /* bagian featured products */
