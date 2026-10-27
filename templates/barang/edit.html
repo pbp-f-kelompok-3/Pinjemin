@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit {{ barang.nama_barang }} - Pinjemin{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/barang.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="br-page">
+
+  <!-- Header & Breadcrumbs -->
+  <div class="br-header">
+    <div>
+      <nav class="br-breadcrumbs" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Beranda</a>
+        <span>/</span>
+        <a href="{% url 'barang:dashboard' %}">Barang Saya</a>
+        <span>/</span>
+        <span style="font-weight: 700; color: var(--br-black);">Edit Barang</span>
+      </nav>
+      <div class="br-badge-role">
+        <span class="br-pulse-dot"></span>
+        Mode Pemilik Barang (UI Student Hub)
+      </div>
+    </div>
+
+    <div>
+      <a href="{% url 'barang:dashboard' %}" class="br-btn-secondary">
+        &larr; Kembali ke Barang Saya
+      </a>
+    </div>
+  </div>
+
+  <div class="br-title-row" style="margin-bottom: 24px;">
+    <div>
+      <h1 class="br-title">Edit Informasi Barang</h1>
+      <p class="br-subtitle">Perbarui detail, tarif harian, atau ubah status penawaran barang milikmu.</p>
+    </div>
+  </div>
+
+  {% if barang.is_sedang_dipinjam %}
+    <div style="padding: 14px 18px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--br-radius); color: #1E40AF; font-size: 13px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+      <div>
+        <strong>Pemberitahuan Status:</strong> Barang ini saat ini sedang dalam status peminjaman aktif oleh mahasiswa lain. Perubahan tarif baru akan berlaku untuk peminjaman berikutnya.
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Form Layout -->
+  <form method="POST" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div style="padding: 14px 18px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: var(--br-radius); color: #991B1B; font-size: 14px; margin-bottom: 20px;">
+        {% for error in form.non_field_errors %}
+          <p style="margin: 0;">{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="br-form-layout">
+      <!-- Kolom Utama: Formulir Input -->
+      <div class="br-form-card">
+        
+        <!-- Foto Produk Utama & Ganti Foto -->
+        <div class="br-form-group">
+          <label class="br-label">Foto Barang Utama</label>
+          
+          <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
+            {% if barang.foto_utama %}
+              <div style="width: 100px; height: 100px; border-radius: var(--br-radius); overflow: hidden; border: 1px solid var(--br-border); background: #E5E7EB; flex-shrink: 0;">
+                <img id="current-photo" src="{{ barang.foto_utama.url }}" alt="{{ barang.nama_barang }}" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+            {% endif %}
+            
+            <div style="flex: 1;">
+              <div style="font-size: 13px; font-weight: 700; color: var(--br-black); margin-bottom: 4px;">Ganti Foto Produk (Opsional)</div>
+              <div class="br-helper" style="margin-bottom: 8px;">Kosongkan jika ingin tetap menggunakan foto saat ini. Format JPG, PNG, atau WebP (Maksimal 5MB).</div>
+              {{ form.foto_utama }}
+            </div>
+          </div>
+          {% if form.foto_utama.errors %}
+            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.foto_utama.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Status Penawaran (Aktif vs Nonaktif) -->
+        <div class="br-form-group" style="padding: 16px; background: var(--br-bg-muted); border-radius: var(--br-radius); border: 1px solid var(--br-border);">
+          <label for="id_status_penawaran" class="br-label" style="margin-bottom: 4px;">Status Penawaran Barang</label>
+          <div class="br-helper" style="margin-bottom: 10px;">
+            Pilih <strong>Aktif</strong> agar barang muncul di pencarian publik mahasiswa, atau <strong>Nonaktif</strong> jika barang sedang kamu pakai sendiri tanpa menghapus data inventaris.
+          </div>
+          {{ form.status_penawaran }}
+          {% if form.status_penawaran.errors %}
+            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.status_penawaran.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Nama Barang -->
+        <div class="br-form-group">
+          <label for="id_nama_barang" class="br-label">Nama Barang <span style="color: var(--br-red);">*</span></label>
+          {{ form.nama_barang }}
+          <div class="br-helper">Gunakan nama yang jelas dan spesifik (sertakan ukuran, seri, atau warna jika ada).</div>
+          {% if form.nama_barang.errors %}
+            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.nama_barang.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Kategori & Jenis Penawaran Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
+          <!-- Kategori -->
+          <div>
+            <label for="id_kategori" class="br-label">Kategori <span style="color: var(--br-red);">*</span></label>
+            {{ form.kategori }}
+            {% if form.kategori.errors %}
+              <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.kategori.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Jenis Peminjaman -->
+          <div>
+            <label for="id_jenis_penawaran" class="br-label">Jenis Penawaran <span style="color: var(--br-red);">*</span></label>
+            {{ form.jenis_penawaran }}
+            {% if form.jenis_penawaran.errors %}
+              <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.jenis_penawaran.errors.0 }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Banner Info Khusus Pinjam Gratis -->
+        <div id="banner-gratis-info" style="display: none; padding: 12px 16px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: var(--br-radius); color: #065F46; font-size: 13px; margin-bottom: 20px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><strong>Pinjam Tanpa Biaya:</strong> Barang ini akan dipinjamkan secara sukarela untuk sesama mahasiswa UI tanpa tarif sewa (Rp 0).
+        </div>
+
+        <!-- Tarif Sewa Harian -->
+        <div class="br-form-group" id="group-tarif">
+          <label for="id_tarif_per_hari" class="br-label">Tarif Sewa Harian <span style="color: var(--br-red);">*</span></label>
+          <div class="br-input-price-group">
+            <span class="br-price-prefix">Rp</span>
+            {{ form.tarif_per_hari }}
+            <span class="br-price-suffix">/ 24 jam</span>
+          </div>
+          <div class="br-helper" id="tarif-helper">Tentukan tarif harian yang ramah bagi kantong mahasiswa. Otomatis Rp 0 jika memilih Gratis.</div>
+          {% if form.tarif_per_hari.errors %}
+            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.tarif_per_hari.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Deskripsi Barang -->
+        <div class="br-form-group">
+          <label for="id_deskripsi" class="br-label">Deskripsi Lengkap <span style="color: var(--br-red);">*</span></label>
+          {{ form.deskripsi }}
+          <div class="br-helper">Jelaskan kondisi fisik barang (mulus/ada lecet), kelengkapan aksesoris, aturan pemakaian, serta ketentuan pengembalian.</div>
+          {% if form.deskripsi.errors %}
+            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.deskripsi.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Lokasi Penyimpanan -->
+        <div class="br-form-group">
+          <label for="id_lokasi" class="br-label">Lokasi Penyimpanan / Titik Temu UI <span style="color: var(--br-red);">*</span></label>
+          {{ form.lokasi }}
+          <div class="br-helper">Pilih area kampus UI yang paling dekat dengan kost atau tempat tinggalmu.</div>
+          {% if form.lokasi.errors %}
+            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.lokasi.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Tombol Submit -->
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--br-border);">
+          <a href="{% url 'barang:dashboard' %}" class="br-btn-secondary">Batal</a>
+          <button type="submit" class="br-btn-primary">
+            Simpan Perubahan
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Kolom Samping: Info Riwayat & Tips -->
+      <div>
+        <div class="br-info-box">
+          <div class="br-info-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Riwayat Barang
+          </div>
+          <ul class="br-info-list" style="list-style-type: none; padding-left: 0;">
+            <li style="margin-bottom: 8px;"><strong>Waktu Didaftarkan:</strong><br>{{ barang.created_at|date:"d F Y, H:i" }} WIB</li>
+            <li style="margin-bottom: 8px;"><strong>Terakhir Diperbarui:</strong><br>{{ barang.updated_at|date:"d F Y, H:i" }} WIB</li>
+            <li style="margin-bottom: 8px;"><strong>Jumlah Dilihat:</strong><br>{{ barang.dilihat_count }} kali oleh mahasiswa UI</li>
+            <li><strong>Status Peminjaman:</strong><br>
+              {% if barang.is_sedang_dipinjam %}
+                <span class="br-badge br-badge-status-dipinjam">Sedang Dipinjam</span>
+              {% else %}
+                <span class="br-badge br-badge-status-aktif">Tersedia</span>
+              {% endif %}
+            </li>
+          </ul>
+        </div>
+
+        <div style="background: var(--br-card-bg); border: 1px solid var(--br-border); border-radius: var(--br-radius); padding: 18px; font-size: 13px; color: var(--br-text-muted);">
+          <div style="font-weight: 700; color: var(--br-black); margin-bottom: 8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Aturan Penghapusan
+          </div>
+          Barang tidak dapat dihapus jika masih ada transaksi peminjaman yang sedang aktif. Jika barang sedang tidak ingin dipinjamkan, ubah status menjadi <strong>Nonaktifkan Sementara</strong>.
+        </div>
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<script>
+  // Dynamic handling of Jenis Penawaran (Gratis vs Sewa)
+  var jenisSelect = document.getElementById('id_jenis_penawaran');
+  var tarifInput = document.getElementById('id_tarif_per_hari');
+  var groupTarif = document.getElementById('group-tarif');
+  var bannerGratis = document.getElementById('banner-gratis-info');
+
+  function updateTarifState() {
+    if (jenisSelect && tarifInput && groupTarif) {
+      if (jenisSelect.value === 'gratis') {
+        tarifInput.value = '0';
+        tarifInput.removeAttribute('required');
+        groupTarif.style.display = 'none';
+        if (bannerGratis) bannerGratis.style.display = 'block';
+      } else {
+        groupTarif.style.display = 'block';
+        tarifInput.setAttribute('required', 'required');
+        if (bannerGratis) bannerGratis.style.display = 'none';
+        if (tarifInput.value === '0' || !tarifInput.value) {
+          tarifInput.value = '25000';
+        }
+      }
+    }
+  }
+
+  if (jenisSelect) {
+    jenisSelect.addEventListener('change', updateTarifState);
+    updateTarifState();
+  }
+
+  // Cegah mouse wheel mengubah angka tarif saat scroll halaman
+  if (tarifInput) {
+    tarifInput.addEventListener('wheel', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+  }
+
+  window.addEventListener('wheel', function() {
+    if (document.activeElement && document.activeElement.id === 'id_tarif_per_hari') {
+      document.activeElement.blur();
+    }
+  });
+</script>
+{% endblock %}

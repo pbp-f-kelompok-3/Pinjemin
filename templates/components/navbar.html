@@ -26,13 +26,24 @@
         Lokasi
       </a>
 
-      <a href="{% url 'accounts:login' %}">
-        Login / Daftar
-      </a>
-
-      <a href="#">
-        Jual / Sewa
-      </a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'barang:dashboard' %}">
+          Barang Saya
+        </a>
+        <a href="{% url 'accounts:profile' %}">
+          Akun Saya
+        </a>
+        <a href="{% url 'barang:tambah' %}">
+          Jual / Sewa
+        </a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}">
+          Login / Daftar
+        </a>
+        <a href="{% url 'barang:tambah' %}">
+          Jual / Sewa
+        </a>
+      {% endif %}
     </nav>
 
   </div>
