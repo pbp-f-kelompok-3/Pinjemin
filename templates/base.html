@@ -7,7 +7,8 @@
 
   <title>{% block title %}Pinjemin{% endblock %}</title>
 
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}?v=20261028-5">
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20261028-7">
   {% block extra_css %}{% endblock %}
 </head>
 
@@ -27,6 +28,8 @@
 
   {% include "components/footer.html" %}
 
+  <script src="{% static 'js/navbar.js' %}?v=20261028-1" defer></script>
+  <script src="{% static 'js/location.js' %}?v=20261028-3" defer></script>
   {% block extra_js %}{% endblock %}
 
 </body>

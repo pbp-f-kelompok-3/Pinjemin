@@ -45,20 +45,20 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 
 **Penanggung jawab:** Roisul Umam
 **Entitas:** Profil Pengguna
-**Cakupan fitur:** Login dan logout melalui SSO UI mock API, pengelolaan profil, peralihan mode Peminjam dan Pemilik Barang, serta Pusat Bantuan berisi tutorial dan Kebijakan Privasi.
+**Cakupan fitur:** Login dan logout melalui SSO UI mock API, pembuatan profil dari nama dan NPM SSO, serta pengelolaan nomor WhatsApp. Pengguna dapat melihat profil, beralih antara mode Peminjam dan Pemilik Barang, serta menonaktifkan akun tanpa menghapus riwayat pesanan. Tersedia Pusat Bantuan berisi tutorial dan Kebijakan Privasi.
 
 | Operasi | Penjelasan | Pelaku |
 | :--- | :--- | :--- |
 | **Create** | Saat pertama kali login melalui SSO UI, nama dan NPM diambil dari akun SSO UI dan disimpan sebagai profil. Pengguna melengkapi nomor WhatsApp untuk fitur komunikasi | Pengguna |
 | **Read** | Menampilkan data profil berupa nama, NPM, nomor WhatsApp, dan mode aktif | Pengguna |
 | **Update** | Mengubah nomor WhatsApp dan beralih antara mode Peminjam dan Pemilik Barang. Nama dan NPM tidak dapat diubah karena bersumber dari SSO UI | Pengguna |
-| **Delete** | Menonaktifkan akun. Data pesanan tetap tersimpan sebagai riwayat | Pengguna |
+| **Delete** | Menonaktifkan akun (soft delete) jika tidak ada transaksi berjalan. Akun tidak dapat digunakan dan profil disembunyikan, tetapi riwayat pesanan tetap tersimpan. | Pengguna |
 
 ### 2. Manajemen Kategori
 
 **Penanggung jawab:** Chelsea Stania Passikha
 **Entitas:** Kategori
-**Cakupan fitur:** Halaman utama yang memuat banner edukasi, pilihan kategori, dan barang yang sering dipinjam, pencarian, filter harga atau lokasi, serta halaman detail barang.
+**Cakupan fitur:** Pengelolaan kategori untuk mengelompokkan barang dan menyediakan pilihan pada formulir unggah serta filter pencarian. Halaman utama menampilkan banner edukasi, pilihan kategori, dan barang yang sering dipinjam. Pengguna dapat mencari barang, menyaring berdasarkan kategori, harga, atau lokasi, serta melihat informasi lengkap pada halaman detail barang.
 
 | Operasi | Penjelasan | Pelaku |
 | :--- | :--- | :--- |
@@ -69,35 +69,43 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 
 ### 3. Manajemen Lokasi
 
-**Penanggung jawab:** I Nyoman Yadnya Suta Karmana
-**Entitas:** Titik Lokasi dengan jenis Lokasi Barang dan Titik Penjemputan
-**Cakupan fitur:** Peta berbasis OpenStreetMap, deteksi lokasi pengguna, pencarian barang terdekat, dan tombol pengalihan ke WhatsApp pemilik barang setelah pesanan dibuat.
+**Penanggung jawab:** I Nyoman Yadnya Suta Karmana  
+**Entitas:** Lokasi Penjemputan 
+**Cakupan fitur:** Pemilik Barang dapat memilih lokasi yang pernah disimpan, menambahkan lokasi baru, serta mengedit atau menghapusnya dari daftar lokasi tersimpan. Setiap lokasi memuat label, alamat, dan koordinat. Menghapus lokasi dari daftar tidak menghapus lokasi yang sudah tercatat pada barang atau pesanan. Lokasi penjemputan pada barang masih dapat diedit ketika pesanan belum disetujui oleh Pemilik Barang dan terkunci setelah disetujui. Peta berbasis OpenStreetMap membantu Peminjam mencari barang terdekat berdasarkan lokasi real-time dan melihat detail lokasi penjemputan setelah membuat pesanan.
 
 | Operasi | Penjelasan | Pelaku |
 | :--- | :--- | :--- |
-| **Create** | Menyimpan koordinat lokasi barang saat pemilik menandai posisi pada peta di formulir tambah barang, dan menentukan titik penjemputan ketika pesanan dibuat | Pemilik Barang |
-| **Read** | Menampilkan pin barang pada peta, mencari barang terdekat dari lokasi pengguna, dan menampilkan titik penjemputan pada detail pesanan | Semua pengguna, kecuali titik penjemputan yang hanya untuk Peminjam dan Pemilik pada pesanan terkait |
-| **Update** | Menggeser pin atau mengubah alamat lokasi barang, serta mengubah titik penjemputan selama pesanan belum selesai | Pemilik Barang |
-| **Delete** | Menghapus lokasi barang bersamaan dengan barangnya, dan menonaktifkan titik penjemputan apabila pesanan dibatalkan | Pemilik Barang dan sistem |
+| **Create** | Menambahkan lokasi penjemputan untuk disimpan dan dipilih saat mengunggah barang. | Pemilik Barang |
+| **Read** | Melihat daftar lokasi tersimpan. Peminjam melihat detail lokasi penjemputan pada pesanannya. | Pemilik Barang dan Peminjam terkait |
+| **Update** | Mengubah label, alamat, atau koordinat dalam daftar lokasi tersimpan. Perubahan tidak otomatis mengubah lokasi pada barang atau pesanan. Lokasi pada barang dapat diubah secara terpisah selama belum ada pesanan yang disetujui. | Pemilik Barang |
+| **Delete** | Menghapus lokasi dari daftar lokasi tersimpan agar tidak muncul lagi sebagai pilihan saat mengunggah barang. Lokasi yang sudah tercatat pada barang atau pesanan tetap tersimpan. | Pemilik Barang |
+
+**Fitur lokasi untuk Peminjam:**
+
+- Melihat posisi barang pada peta dan jaraknya dari lokasi real-time Peminjam.
+- Mencari barang terdekat berdasarkan posisi Peminjam saat itu.
+- Melihat detail lokasi penjemputan setelah membuat pesanan. Detail tersebut hanya dapat diakses oleh Peminjam dan Pemilik Barang pada pesanan terkait.
+- Menghubungi Pemilik Barang melalui tombol pengalihan ke WhatsApp setelah pesanan dibuat.
+
 
 ### 4. Manajemen Barang
 
 **Penanggung jawab:** Fauzan Taqiy Santosa
 **Entitas:** Barang
-**Cakupan fitur:** Formulir pengelolaan barang, moderasi postingan oleh Admin, dan dashboard yang menampilkan barang yang sedang dipinjam, pesanan masuk, serta daftar barang yang ditawarkan.
+**Cakupan fitur:** Pemilik Barang dapat menambahkan barang beserta foto, deskripsi, kategori, jenis gratis atau sewa, tarif, dan lokasi penjemputan. Dashboard menampilkan daftar barang, barang yang sedang dipinjam, dan pesanan masuk. Data barang masih dapat diedit selama pesanan belum disetujui oleh Pemilik Barang dan terkunci setelah disetujui. Barang hanya dapat dihapus jika belum dipesan.
 
 | Operasi | Penjelasan | Pelaku |
 | :--- | :--- | :--- |
-| **Create** | Menambah barang melalui formulir yang memuat nama, foto, deskripsi, kategori, jenis gratis atau sewa, tarif per hari, dan lokasi | Pemilik Barang |
-| **Read** | Menampilkan daftar barang milik sendiri, sedangkan Admin dapat melihat seluruh barang di platform | Pemilik Barang dan Admin |
-| **Update** | Memperbarui data barang, termasuk tarif dan ketersediaan | Pemilik Barang |
-| **Delete** | Menghapus barang yang tidak sedang dipinjam. Admin menghapus postingan yang melanggar aturan | Pemilik Barang dan Admin |
+| **Create** | Menambahkan barang dengan mengisi nama, foto, deskripsi, kategori, jenis gratis atau sewa, tarif per hari, dan memilih lokasi penjemputan. | Pemilik Barang |
+| **Read** | Melihat daftar dan detail barang milik sendiri. | Pemilik Barang |
+| **Update** | Mengubah data barang selama belum ada pesanan yang disetujui. | Pemilik Barang |
+| **Delete** | Menghapus barang selama belum dipesan. | Pemilik Barang |
 
 ### 5. Manajemen Transaksi
 
 **Penanggung jawab:** Alphard Qodaruddin
 **Entitas:** Pesanan beserta data Pembayaran
-**Cakupan fitur:** Formulir checkout, perhitungan total biaya, riwayat pesanan, dan pembayaran melalui payment gateway mock API.
+**Cakupan fitur:** Pembuatan pesanan melalui checkout dengan memilih tanggal dan durasi peminjaman, perhitungan biaya sewa, serta pembayaran melalui payment gateway mock API. Peminjam dapat melihat riwayat, rincian biaya, dan status pesanan, mengubah jadwal selama Menunggu Pembayaran, serta membatalkan sebelum masa peminjaman dimulai. Pemilik Barang dapat melihat pesanan masuk melalui dashboard.
 
 | Operasi | Penjelasan | Pelaku |
 | :--- | :--- | :--- |
@@ -105,7 +113,6 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 | **Read** | Menampilkan riwayat pesanan, rincian biaya, dan status pembayaran. Pemilik melihat pesanan masuk melalui dashboard | Peminjam dan Pemilik Barang |
 | **Update** | Mengubah tanggal atau durasi selama pesanan berstatus Menunggu Pembayaran. Status berubah mengikuti alur Menunggu Pembayaran, Dikonfirmasi setelah pembayaran berhasil, dan Selesai setelah masa peminjaman berakhir | Peminjam dan sistem |
 | **Delete** | Membatalkan pesanan sebelum masa peminjaman dimulai. Status berubah menjadi Dibatalkan dan pembayaran yang belum selesai ikut dibatalkan | Peminjam |
-
 ---
 
 ## Integrasi API
@@ -123,7 +130,10 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 | **Tamu** | Pengguna yang belum login. Hanya dapat melihat halaman utama, mencari barang, dan melihat informasi produk secara terbatas. |
 | **Peminjam** | Mahasiswa UI yang sudah login. Dapat memesan barang sewa atau pinjam gratis, melihat titik temu, memantau riwayat pesanan, dan menghubungi pemilik lewat WhatsApp. |
 | **Pemilik Barang** | Pengguna yang menyewakan atau meminjamkan barang. Dapat menambah, mengedit, dan menghapus barang miliknya, serta melihat pesanan masuk. |
-| **Admin** | Memantau seluruh aktivitas platform, mengelola kategori barang, dan menghapus postingan barang yang melanggar aturan. |
+| **Admin** | Memantau seluruh aktivitas platform, mengelola kategori barang,  |
 
 ## LINK FIGMA 
 https://www.figma.com/design/cIcomyuXpNiIPvk3Wa4gwo/Design-System?node-id=0-1&p=f&t=STwAfPD95yE7Ky2X-0
+
+## LINK PWS 
+https://roisul-umam-pinjemin.pws.cs.ui.ac.id/

@@ -159,7 +159,7 @@
 }
 
 /* ---------- Sidebar ---------- */
-.hc-side { display: grid; gap: 24px; position: sticky; top: 16px; }
+.hc-side { display: grid; gap: 24px; position: sticky; top: calc(var(--site-header-height, 0px) + 16px); }
 
 .hc-menu { display: block; padding: 28px 24px 32px; }
 .hc-menu__title { display: block; margin: 0 0 18px 0; font-size: 1rem; font-weight: 700; }
