@@ -110,7 +110,7 @@ body:has(.pf-page) { overflow-x: clip; }
 .pf-tabs button:focus-visible, .pf-seg button:focus-visible { outline: 3px solid var(--pf-ink); outline-offset: 2px; }
 
 /* ---------- Sidebar ---------- */
-.pf-side { position: sticky; top: 16px; }
+.pf-side { position: sticky; top: calc(var(--site-header-height, 0px) + 16px); }
 .pf-menu { padding: 22px 16px 16px; }
 .pf-menu__title { margin: 0 0 12px 10px; font-size: 0.95rem; font-weight: 800; }
 .pf-menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }

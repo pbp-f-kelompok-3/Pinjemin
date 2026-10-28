@@ -1,0 +1,17 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+    initial = True
+    dependencies = []
+
+    operations = [
+        migrations.CreateModel(
+            name='GeocodingCache',
+            fields=[
+                ('key', models.CharField(max_length=120, primary_key=True, serialize=False)),
+                ('data', models.JSONField(default=dict)),
+                ('expires_at', models.DateTimeField()),
+            ],
+        ),
+    ]
