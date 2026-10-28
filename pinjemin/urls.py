@@ -20,12 +20,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
-from .views import home
+from pinjemin import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("akun/", include("accounts.urls")),
     path(' ', include('help_center.urls')),
-    path('', home, name='home'),
+    path('', views.home, name='home'),
     path("categories/", include("categories.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
