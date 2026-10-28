@@ -8,38 +8,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/barang.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+<link rel="stylesheet" href="{% static 'css/pickup-location.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
-<div class="br-page">
+<div class="br-page br-pickup-page">
 
   <!-- Header & Breadcrumbs -->
   <div class="br-header">
-    <div>
       <nav class="br-breadcrumbs" aria-label="Breadcrumb">
         <a href="{% url 'home' %}">Beranda</a>
         <span>/</span>
         <a href="{% url 'barang:dashboard' %}">Barang Saya</a>
         <span>/</span>
-        <span style="font-weight: 700; color: var(--br-black);">Edit Barang</span>
+        <span aria-current="page">Edit Barang</span>
       </nav>
-      <div class="br-badge-role">
-        <span class="br-pulse-dot"></span>
-        Mode Pemilik Barang (UI Student Hub)
-      </div>
-    </div>
-
-    <div>
-      <a href="{% url 'barang:dashboard' %}" class="br-btn-secondary">
-        &larr; Kembali ke Barang Saya
-      </a>
-    </div>
+      <span class="br-badge-role">Mode pemilik barang</span>
   </div>
 
   <div class="br-title-row" style="margin-bottom: 24px;">
     <div>
       <h1 class="br-title">Edit Informasi Barang</h1>
-      <p class="br-subtitle">Perbarui detail, tarif harian, atau ubah status penawaran barang milikmu.</p>
+      <p class="br-subtitle">Perbarui detail barang dan sesuaikan titik penjemputannya langsung di peta.</p>
     </div>
   </div>
 
@@ -53,7 +44,7 @@
   {% endif %}
 
   <!-- Form Layout -->
-  <form method="POST" action="" enctype="multipart/form-data">
+  <form method="POST" action="" enctype="multipart/form-data" data-item-edit>
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -70,16 +61,16 @@
         
         <!-- Foto Produk Utama & Ganti Foto -->
         <div class="br-form-group">
-          <label class="br-label">Foto Barang Utama</label>
+          <label for="id_foto_utama" class="br-label">Foto barang utama</label>
           
-          <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
+          <div class="pickup-upload">
             {% if barang.foto_utama %}
-              <div style="width: 100px; height: 100px; border-radius: var(--br-radius); overflow: hidden; border: 1px solid var(--br-border); background: #E5E7EB; flex-shrink: 0;">
+              <div class="pickup-upload-preview">
                 <img id="current-photo" src="{{ barang.foto_utama.url }}" alt="{{ barang.nama_barang }}" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
             {% endif %}
             
-            <div style="flex: 1;">
+            <div class="pickup-upload-copy">
               <div style="font-size: 13px; font-weight: 700; color: var(--br-black); margin-bottom: 4px;">Ganti Foto Produk (Opsional)</div>
               <div class="br-helper" style="margin-bottom: 8px;">Kosongkan jika ingin tetap menggunakan foto saat ini. Format JPG, PNG, atau WebP (Maksimal 5MB).</div>
               {{ form.foto_utama }}
@@ -91,7 +82,7 @@
         </div>
 
         <!-- Status Penawaran (Aktif vs Nonaktif) -->
-        <div class="br-form-group" style="padding: 16px; background: var(--br-bg-muted); border-radius: var(--br-radius); border: 1px solid var(--br-border);">
+        <div class="br-form-group pickup-edit-status">
           <label for="id_status_penawaran" class="br-label" style="margin-bottom: 4px;">Status Penawaran Barang</label>
           <div class="br-helper" style="margin-bottom: 10px;">
             Pilih <strong>Aktif</strong> agar barang muncul di pencarian publik mahasiswa, atau <strong>Nonaktif</strong> jika barang sedang kamu pakai sendiri tanpa menghapus data inventaris.
@@ -113,7 +104,7 @@
         </div>
 
         <!-- Kategori & Jenis Penawaran Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div class="pickup-item-fields">
           <!-- Kategori -->
           <div>
             <label for="id_kategori" class="br-label">Kategori <span style="color: var(--br-red);">*</span></label>
@@ -162,22 +153,17 @@
           {% endif %}
         </div>
 
-        <!-- Lokasi Penyimpanan -->
-        <div class="br-form-group">
-          <label for="id_lokasi" class="br-label">Lokasi Penyimpanan / Titik Temu UI <span style="color: var(--br-red);">*</span></label>
-          {{ form.lokasi }}
-          <div class="br-helper">Pilih area kampus UI yang paling dekat dengan kost atau tempat tinggalmu.</div>
-          {% if form.lokasi.errors %}
-            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.lokasi.errors.0 }}</div>
-          {% endif %}
-        </div>
+        {% include 'locations/picker.html' %}
 
         <!-- Tombol Submit -->
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--br-border);">
+        <div class="pickup-item-footer">
+          <p>Perubahan titik hanya diterapkan pada barang ini.</p>
+          <div>
           <a href="{% url 'barang:dashboard' %}" class="br-btn-secondary">Batal</a>
           <button type="submit" class="br-btn-primary">
             Simpan Perubahan
           </button>
+          </div>
         </div>
 
       </div>
@@ -257,4 +243,9 @@
     }
   });
 </script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
+<script src="{% static 'js/pickup-location.js' %}?v=2" defer></script>
 {% endblock %}

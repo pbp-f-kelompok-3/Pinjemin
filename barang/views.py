@@ -16,6 +16,8 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from .models import Barang, Kategori, Lokasi
 from .forms import BarangForm, BarangEditForm
+from .services import save_item_with_pickup, visible_item_locations
+from locations.services import pickup_context
 
 
 @login_required
@@ -93,7 +95,7 @@ def dashboard_barang_saya(request):
     page_obj = paginator.get_page(page_number)
 
     kategori_list = Kategori.objects.all()
-    lokasi_list = Lokasi.objects.all()
+    lokasi_list = visible_item_locations(request.user)
 
     context = {
         'page_obj': page_obj,
@@ -119,11 +121,9 @@ def tambah_barang(request):
     Pemilik otomatis terisi dari request.user.
     """
     if request.method == 'POST':
-        form = BarangForm(request.POST, request.FILES)
+        form = BarangForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
-            barang = form.save(commit=False)
-            barang.pemilik = request.user
-            barang.save()
+            barang = save_item_with_pickup(form, request.user)
             messages.success(
                 request,
                 f"Barang '{barang.nama_barang}' berhasil didaftarkan ke inventaris Barang Saya."
@@ -132,15 +132,16 @@ def tambah_barang(request):
         else:
             messages.error(request, "Silakan periksa kembali kolom formulir yang belum sesuai.")
     else:
-        form = BarangForm()
+        form = BarangForm(user=request.user)
 
     kategori_list = Kategori.objects.all()
-    lokasi_list = Lokasi.objects.all()
+    lokasi_list = visible_item_locations(request.user)
 
     context = {
         'form': form,
         'kategori_list': kategori_list,
         'lokasi_list': lokasi_list,
+        **pickup_context(request.user),
     }
     return render(request, 'barang/tambah.html', context)
 
@@ -155,9 +156,9 @@ def edit_barang(request, pk):
     barang = get_object_or_404(Barang, pk=pk, pemilik=request.user)
 
     if request.method == 'POST':
-        form = BarangEditForm(request.POST, request.FILES, instance=barang)
+        form = BarangEditForm(request.POST, request.FILES, instance=barang, user=request.user)
         if form.is_valid():
-            form.save()
+            save_item_with_pickup(form, request.user)
             messages.success(
                 request,
                 f"Perubahan informasi barang '{barang.nama_barang}' berhasil disimpan."
@@ -166,16 +167,24 @@ def edit_barang(request, pk):
         else:
             messages.error(request, "Terjadi kesalahan validasi saat menyimpan perubahan.")
     else:
-        form = BarangEditForm(instance=barang)
+        form = BarangEditForm(instance=barang, user=request.user)
 
     kategori_list = Kategori.objects.all()
-    lokasi_list = Lokasi.objects.all()
+    lokasi_list = visible_item_locations(request.user)
 
     context = {
         'form': form,
         'barang': barang,
         'kategori_list': kategori_list,
         'lokasi_list': lokasi_list,
+        **pickup_context(request.user),
+        'pickup_current_data': {
+            'id': 'current',
+            'label': form.current_pickup.nama_area,
+            'address': form.current_pickup.full_address or form.current_pickup.patokan,
+            'latitude': float(form.current_pickup.latitude) if form.current_pickup.latitude is not None else None,
+            'longitude': float(form.current_pickup.longitude) if form.current_pickup.longitude is not None else None,
+        },
     }
     return render(request, 'barang/edit.html', context)
 
@@ -250,11 +259,9 @@ def tambah_barang_ajax(request):
     """
     Endpoint AJAX POST untuk penambahan barang asinkronus atau integrasi Flutter.
     """
-    form = BarangForm(request.POST, request.FILES)
+    form = BarangForm(request.POST, request.FILES, user=request.user)
     if form.is_valid():
-        barang = form.save(commit=False)
-        barang.pemilik = request.user
-        barang.save()
+        barang = save_item_with_pickup(form, request.user)
 
         return JsonResponse({
             'status': 'success',

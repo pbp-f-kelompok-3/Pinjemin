@@ -121,6 +121,16 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 2. **SSO UI Service:** Mock API yang digunakan untuk simulasi sistem login mahasiswa Universitas Indonesia agar identitas pengguna terverifikasi.
 3. **Payment Gateway:** Mock API yang digunakan untuk simulasi sistem pembayaran transaksi sewa secara langsung.
 
+### Implementasi lokasi penjemputan
+
+Pada **Barang saya → Tambah Barang** dan **Edit Barang**, pengguna dapat memilih riwayat akun atau menyimpan label, alamat, dan titik baru. Peta Leaflet/OpenStreetMap mendukung klik peta, geser pin, lokasi perangkat, dan koordinat manual. Saat mengedit, **Lokasi saat ini** menampilkan salinan lokasi pada barang, termasuk ketika riwayat asal sudah dihapus. Menggeser pin lalu menyimpan perubahan hanya memperbarui lokasi barang tersebut. Riwayat dapat dikelola juga melalui **Akun saya → Lokasi Tersimpan**.
+
+- Jalankan `python manage.py migrate` setelah mengambil perubahan model lokasi.
+- Tampilan pemilih: `templates/locations/picker.html`, `static/js/pickup-location.js`, dan `static/css/pickup-location.css`.
+- Riwayat milik akun: `locations/models.py`, `locations/forms.py`, dan `locations/views.py`. Endpoint `/lokasi/api/penjemputan/` mendukung GET/POST; `/lokasi/api/penjemputan/<id>/` mendukung PATCH/DELETE dan memerlukan login serta CSRF untuk perubahan data.
+- `barang/services.py` menyimpan salinan lokasi pada barang. Mengubah atau menghapus riwayat tidak mengubah salinan tersebut. Data lokasi barang lama tetap didukung.
+- `OSM_TILE_URL` opsional untuk penyedia tile yang kompatibel; default menggunakan tile OpenStreetMap dengan atribusi. Tombol lokasi perangkat membutuhkan izin browser dan HTTPS atau localhost. Nominatim yang sudah ada tetap digunakan untuk nama wilayah di navbar; memilih/menyeret pin tidak memanggil Nominatim.
+
 ---
 
 ## Peran Pengguna

@@ -1,0 +1,79 @@
+{% load static %}
+<section class="pickup-picker" data-pickup-picker data-api="{% url 'locations:pickup_list' %}"
+         {% if manage_only %}data-manage-only="true"{% endif %} aria-labelledby="pickup-heading">
+  {{ pickup_locations_data|json_script:"pickup-locations-data" }}
+  {{ pickup_map_config|json_script:"pickup-map-config" }}
+  {% if pickup_current_data %}{{ pickup_current_data|json_script:"pickup-current-data" }}{% endif %}
+  <template data-pickup-pin-template><svg width="16" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></template>
+  {% csrf_token %}
+  {% if not manage_only %}
+    {{ form.lokasi.as_hidden }}{{ form.pickup_location }}{{ form.pickup_latitude }}{{ form.pickup_longitude }}{{ form.pickup_mode }}
+  {% endif %}
+  <h2 id="pickup-heading">{% if manage_only %}Lokasi tersimpan{% else %}Lokasi penjemputan <span aria-hidden="true">*</span>{% endif %}</h2>
+  <p class="pickup-intro">{% if pickup_current_data %}Gunakan lokasi pada barang ini, pilih dari riwayat, atau simpan lokasi baru. Pastikan titik penjemputannya sesuai.{% else %}Pilih dari riwayat akun atau simpan lokasi baru, lalu pastikan pinnya sesuai.{% endif %}</p>
+  <div class="pickup-tabs" aria-label="Pilihan lokasi penjemputan">
+    {% if pickup_current_data %}<button type="button" class="pickup-tab" data-pickup-mode="current" aria-pressed="false">Lokasi saat ini</button>{% endif %}
+    <button type="button" class="pickup-tab is-active" data-pickup-mode="saved" aria-pressed="true">Dari riwayat <span data-history-count>(0)</span></button>
+    <button type="button" class="pickup-tab" data-pickup-mode="new" aria-pressed="false">+ Tambahkan lokasi baru</button>
+    <button type="button" class="pickup-tab" data-manage-history>Kelola riwayat</button>
+  </div>
+  <div class="pickup-grid">
+    <div class="pickup-details">
+      <div data-history-pane>
+        <label class="pickup-label" for="pickup-history" data-location-select-label>Riwayat lokasi akun</label>
+        <select id="pickup-history" class="pickup-input" data-history-select><option value="">Pilih lokasi tersimpan</option></select>
+        <div class="pickup-selection" data-selected-card hidden>
+          <h3 data-selected-label></h3>
+          <p data-selected-address></p>
+          <p class="pickup-coordinates-value" data-selected-coordinates></p>
+          <span class="pickup-tag" data-selected-tag>Dari riwayat akun</span>
+        </div>
+        <p class="pickup-empty" data-history-empty>Belum ada lokasi tersimpan. Tambahkan lokasi baru dan pilih titiknya pada peta.</p>
+        <div class="pickup-other-locations" data-other-locations hidden>
+          <p class="pickup-help">Lokasi lain di riwayat</p>
+          <div data-other-list></div>
+        </div>
+      </div>
+      <div data-new-pane hidden>
+        <h3 class="pickup-editor-title" data-editor-title>Tambahkan lokasi baru</h3>
+        <label class="pickup-label" for="pickup-draft-label">Label lokasi</label>
+        <input id="pickup-draft-label" class="pickup-input" data-draft-label maxlength="100" placeholder="Misalnya Kos Kukusan" autocomplete="off">
+        <label class="pickup-label" for="pickup-draft-address">Alamat lengkap</label>
+        <textarea id="pickup-draft-address" class="pickup-input" data-draft-address rows="3" maxlength="255" placeholder="Jalan, nomor, area, dan patokan penjemputan" autocomplete="street-address"></textarea>
+        <p class="pickup-help">Klik peta atau geser pin untuk menentukan titik penjemputan.</p>
+        <button class="pickup-save" type="button" data-save-location>Simpan lokasi ke riwayat</button>
+        <p class="pickup-help">Lokasi tetap tersimpan meskipun barang belum didaftarkan.</p>
+      </div>
+    </div>
+    <div class="pickup-map-column">
+      <h3 class="pickup-label">Peta titik penjemputan</h3>
+      <div class="pickup-map" data-pickup-map role="region" aria-label="Peta OpenStreetMap untuk memilih titik penjemputan"></div>
+      <button class="pickup-current" type="button" data-current-position>Gunakan lokasi saya</button>
+      <p class="pickup-help">Klik peta atau geser pin untuk menyesuaikan titik temu.</p>
+      <details class="pickup-manual">
+        <summary>Atur koordinat secara manual</summary>
+        <div class="pickup-coordinate-inputs">
+          <label>Lintang<input class="pickup-input" type="number" step="0.000001" min="-90" max="90" data-manual-lat aria-label="Lintang titik penjemputan"></label>
+          <label>Bujur<input class="pickup-input" type="number" step="0.000001" min="-180" max="180" data-manual-lng aria-label="Bujur titik penjemputan"></label>
+        </div>
+      </details>
+    </div>
+  </div>
+  <p class="pickup-status" data-pickup-status role="status" aria-live="polite"></p>
+  {% for error in form.pickup_location.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
+  {% for error in form.pickup_latitude.errors %}<p class="pickup-error">Lintang: {{ error }}</p>{% endfor %}
+  {% for error in form.pickup_longitude.errors %}<p class="pickup-error">Bujur: {{ error }}</p>{% endfor %}
+  {% for error in form.lokasi.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
+  <div class="pickup-account-note">
+    <span class="pickup-info-symbol" aria-hidden="true">i</span>
+    <div><strong>Tersedia juga di akunmu.</strong><p>Riwayat ini bisa dilihat dan dikelola melalui <a href="{% url 'locations:saved' %}" target="_blank" rel="noopener">Akun saya → Lokasi tersimpan</a>.</p></div>
+  </div>
+  <noscript><p class="pickup-error">Aktifkan JavaScript untuk memilih titik penjemputan dan menyimpan lokasi.</p></noscript>
+  <dialog class="pickup-history-dialog" data-history-dialog aria-labelledby="pickup-manage-heading">
+    <div class="pickup-dialog-heading"><h2 id="pickup-manage-heading">Kelola riwayat lokasi</h2><button class="pickup-dialog-close" type="button" data-close-history aria-label="Tutup riwayat lokasi">×</button></div>
+    <p class="pickup-help">Perubahan riwayat tidak mengubah lokasi pada barang yang sudah didaftarkan.</p>
+    <div class="pickup-management-list" data-management-list></div>
+    <p class="pickup-status" data-management-status role="status" aria-live="polite"></p>
+    <button class="pickup-tab" type="button" data-add-from-history>+ Tambahkan lokasi baru</button>
+  </dialog>
+</section>
