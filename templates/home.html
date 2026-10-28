@@ -11,67 +11,23 @@
 <section class="featured-section" id="barang">
     <div class="featured-box"> 
         <h2>Featured Products</h2>
-    </div>
+    </div> 
 </section>
 
 <section class="category-section" id="kategori">
     <h2>Shop by Category</h2>
-    {% if categories %}
-        <div class="categories">
-            {% if categories|length > 5 %}
-                {% for category in categories|slice:":4" %}
-                    <div class="category">
-                        <div class="category-icon">
-                            {% if category.icon_url %}
-                                <img src="{{ category.icon_url }}"
-                                     alt="{{ category.name }}">
-                            {% else %}
-                                <span class="category-fallback">
-                                    {{ category.name|first }}
-                                </span>
-                            {% endif %}
-                        </div>
-
-                        <span class="category-name">
-                            {{ category.name }}
-                        </span>
-                    </div>
-                {% endfor %}
-
-                <a href="{% url 'categories:show_categories' %}"
-                   class="category more-category">
-                    <div class="category-icon more-icon">
-                        <span>•••</span>
-                    </div>
-                    <span class="category-name">More</span>
-                </a>
-
-            {% else %}
-                {% for category in categories %}
-                    <div class="category">
-                        <div class="category-icon">
-                            {% if category.icon_url %}
-                                <img src="{{ category.icon_url }}"
-                                     alt="{{ category.name }}">
-                            {% else %}
-                                <span class="category-fallback">
-                                    {{ category.name|first }}
-                                </span>
-                            {% endif %}
-                        </div>
-
-                        <span class="category-name">
-                            {{ category.name }}
-                        </span>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    {% else %}
-        <p class="no-categories">
-            Belum ada kategori yang ditambahkan.
-        </p>
-    {% endif %}
+    <div class="categories">
+        {% for category in categories %} 
+            <div class="category"> 
+                <div class="category-icon">
+                    {{ category.icon }} 
+                </div> 
+                <span class="category-name">
+                    {{ category.name }} 
+                </span> 
+            </div> 
+        {% endfor %}
+    </div>
 </section>
 
 </div>
