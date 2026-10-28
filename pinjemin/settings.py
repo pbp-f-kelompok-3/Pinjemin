@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'help_center',
+    'categories',
     'locations',
     'barang',
 ]

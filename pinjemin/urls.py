@@ -18,13 +18,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
-from .views import home
+from pinjemin import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='home'),
     path("akun/", include("accounts.urls")),
+    path(' ', include('help_center.urls')),
+    path('', views.home, name='home'),
+    path("categories/", include("categories.urls")),
     path('lokasi/', include('locations.urls')),
     path('bantuan/', include('help_center.urls')),
     path('barang/', include('barang.urls')),
