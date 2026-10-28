@@ -63,6 +63,7 @@ class Pembayaran(models.Model):
         PROCESSING = "processing", "Pengembalian dana diproses"
         MANUAL = "manual", "Perlu pengembalian manual"
         DONE = "done", "Pengembalian dana disetujui penyedia"
+        SIMULATED = "simulated", "Refund simulasi selesai"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     pesanan = models.ForeignKey(Pesanan, on_delete=models.PROTECT, related_name="pembayaran")

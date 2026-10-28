@@ -11,7 +11,7 @@ class Command(BaseCommand):
         failures = 0
         payments = Pembayaran.objects.filter(gateway_started=True).exclude(
             status__in=["deny", "cancel", "expire", "failure", "refund"]
-        ).exclude(refund_status=Pembayaran.Refund.DONE)
+        ).exclude(refund_status__in=[Pembayaran.Refund.DONE, Pembayaran.Refund.SIMULATED])
         for pk in payments.values_list("pk", flat=True):
             try:
                 services.reconcile(pk)

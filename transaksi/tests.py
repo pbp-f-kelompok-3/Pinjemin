@@ -12,6 +12,7 @@ from . import gateway, services
 from .models import Pesanan, Pembayaran
 
 
+@override_settings(REFUND_MODE="midtrans")
 class TransaksiTests(TestCase):
     def setUp(self):
         User = get_user_model()
@@ -192,6 +193,63 @@ class TransaksiTests(TestCase):
         self.assertEqual(keys, [str(payment.refund_key)] * 2)
         payment.refresh_from_db()
         self.assertEqual(payment.refund_status, Pembayaran.Refund.DONE)
+
+    @override_settings(REFUND_MODE="mock")
+    @patch("transaksi.gateway.request")
+    def test_mock_refund_is_local_idempotent_and_not_provider_refund(self, api):
+        order = self.order()
+        payment = order.pembayaran.get()
+        services.apply_status(payment.pk, self.status_data(payment))
+        services.cancel_order(order.pk, self.user)
+        services.refund_payment(payment.pk)
+        payment.refresh_from_db()
+        original_note = payment.catatan
+        services.refund_payment(payment.pk)
+        services.apply_status(payment.pk, self.status_data(payment))
+        payment.refresh_from_db()
+        order.refresh_from_db()
+        self.assertFalse(api.called)
+        self.assertEqual(payment.refund_status, Pembayaran.Refund.SIMULATED)
+        self.assertEqual(payment.status, "settlement")
+        self.assertEqual(payment.catatan, original_note)
+        self.assertEqual(order.status, Pesanan.Status.CANCELLED)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("transaksi:detail", args=[order.pk]))
+        self.assertContains(response, "Refund simulasi selesai")
+        self.assertContains(response, "Tidak ada pengembalian dana melalui Midtrans")
+
+    @override_settings(REFUND_MODE="mock")
+    @patch("transaksi.gateway.request")
+    def test_mock_refund_recovers_old_manual_but_requires_verified_payment(self, api):
+        order = self.order()
+        payment = order.pembayaran.get()
+        services.cancel_order(order.pk, self.user)
+        Pembayaran.objects.filter(pk=payment.pk).update(refund_status=Pembayaran.Refund.MANUAL)
+        services.refund_payment(payment.pk)
+        payment.refresh_from_db()
+        self.assertEqual(payment.refund_status, Pembayaran.Refund.MANUAL)
+        services.apply_status(payment.pk, self.status_data(payment))
+        services.refund_payment(payment.pk)
+        payment.refresh_from_db()
+        self.assertEqual(payment.refund_status, Pembayaran.Refund.SIMULATED)
+        self.assertFalse(api.called)
+
+    @override_settings(REFUND_MODE="mock")
+    @patch("transaksi.gateway.status")
+    @patch("transaksi.gateway.request")
+    def test_cancellation_view_automatically_simulates_full_refund(self, api, status):
+        order = self.order()
+        payment = order.pembayaran.get()
+        payment.gateway_started = True
+        payment.save()
+        status.return_value = self.status_data(payment)
+        services.apply_status(payment.pk, status.return_value)
+        self.client.force_login(self.user)
+        response = self.client.post(reverse("transaksi:batalkan", args=[order.pk]))
+        self.assertEqual(response.status_code, 302)
+        payment.refresh_from_db()
+        self.assertEqual(payment.refund_status, Pembayaran.Refund.SIMULATED)
+        self.assertFalse(api.called)
 
     def test_permissions_csrf_and_pages(self):
         draft = self.draft()

@@ -6,6 +6,7 @@ SQLite lokal hanya untuk pengembangan; select_for_update tidak mengunci baris.
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -184,7 +185,7 @@ def apply_status(payment_id, data):
             order.status = Pesanan.Status.CANCELLED
             order.alasan_pembatalan = "Pembayaran dikembalikan"
             order.save()
-    elif success and payment.refund_status != Pembayaran.Refund.DONE:
+    elif success and payment.refund_status not in [Pembayaran.Refund.DONE, Pembayaran.Refund.SIMULATED]:
         payment.status = state
         payment.dibayar_at = payment.dibayar_at or _paid_time(data)
         conflict = order.barang.daftar_pesanan.exclude(pk=order.pk).filter(
@@ -217,6 +218,12 @@ def apply_status(payment_id, data):
 def reconcile(payment_id):
     """Selalu baca status API terbaru; payload webhook hanya pemicu, bukan sumber status."""
     payment = Pembayaran.objects.select_related("pesanan").get(pk=payment_id)
+    if (settings.REFUND_MODE == "mock" and payment.dibayar_at
+            and payment.status in ["capture", "settlement"]
+            and payment.refund_status in [Pembayaran.Refund.REQUIRED, Pembayaran.Refund.MANUAL, Pembayaran.Refund.SIMULATED]
+            and (not payment.aktif or payment.pesanan.status == Pesanan.Status.CANCELLED)):
+        refund_payment(payment.pk)
+        return
     if payment.gateway_started:
         data = gateway.status(payment)
         if data:
@@ -234,6 +241,17 @@ def reconcile(payment_id):
 @transaction.atomic
 def refund_payment(payment_id):
     payment = Pembayaran.objects.select_for_update().get(pk=payment_id)
+    if settings.REFUND_MODE == "mock":
+        # Simulasi hanya untuk pembayaran yang sudah terverifikasi dan memang
+        # perlu dikembalikan. Tidak membuat request refund/transfer ke Midtrans.
+        if (payment.refund_status in [Pembayaran.Refund.REQUIRED, Pembayaran.Refund.MANUAL]
+                and payment.dibayar_at and payment.status in ["capture", "settlement"]
+                and (not payment.aktif or payment.pesanan.status == Pesanan.Status.CANCELLED)):
+            payment.refund_status = Pembayaran.Refund.SIMULATED
+            payment.catatan = (f"Simulasi refund penuh Rp{payment.jumlah} pada {timezone.localtime().isoformat(timespec='seconds')}. "
+                               "Tidak ada pengembalian dana melalui Midtrans.")
+            payment.save(update_fields=["refund_status", "catatan"])
+        return
     if payment.refund_status not in [Pembayaran.Refund.REQUIRED, Pembayaran.Refund.PROCESSING]:
         return
     if not settings_auto_refund():
@@ -266,7 +284,6 @@ def refund_payment(payment_id):
 
 
 def settings_auto_refund():
-    from django.conf import settings
     return settings.MIDTRANS_AUTO_REFUND
 
 

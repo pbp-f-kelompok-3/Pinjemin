@@ -1,6 +1,7 @@
 import json
 import uuid
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -77,7 +78,8 @@ def detail(request, pk):
         if phone.startswith("0"):
             phone = "62" + phone[1:]
     return render(request, "transaksi/detail.html", {"order": order, "payments": order.pembayaran.all(),
-                  "borrower": order.peminjam_id == request.user.pk, "phone": phone})
+                  "borrower": order.peminjam_id == request.user.pk, "phone": phone,
+                  "mock_refund": settings.REFUND_MODE == "mock"})
 
 
 @login_required
@@ -143,7 +145,8 @@ def batalkan(request, pk):
         except (ValidationError, gateway.GatewayError) as exc:
             _error(request, exc)
         return redirect("transaksi:detail", pk=pk)
-    return render(request, "transaksi/konfirmasi.html", {"order": order})
+    return render(request, "transaksi/konfirmasi.html", {"order": order,
+                  "mock_refund": settings.REFUND_MODE == "mock"})
 
 
 @login_required

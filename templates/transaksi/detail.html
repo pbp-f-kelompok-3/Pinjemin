@@ -21,6 +21,7 @@
   </div>
   {% endif %}
   {% if order.alasan_pembatalan %}<p>{{ order.alasan_pembatalan }}</p>{% endif %}
+  {% if mock_refund and order.total %}<p class="tr-notice">Mode demo: pembayaran memakai Midtrans Sandbox. Pengembalian dana disimulasikan di aplikasi.</p>{% endif %}
   {% if order.status != 'draft' %}
   <h2>Lokasi penjemputan</h2>
   <p>{{ order.lokasi_snapshot.label }} · {{ order.lokasi_snapshot.alamat }}<br>{{ order.lokasi_snapshot.patokan }}<br>{{ order.lokasi_snapshot.kota }}</p>
@@ -50,6 +51,7 @@
   <p>Rp{{ payment.jumlah }} · {{ payment.status_label }} {% if not payment.aktif %}(Tagihan lama, jangan dibayar){% endif %}</p>
   <p class="tr-reference">Referensi: {{ payment.gateway_order_id }}</p>
   {% if payment.refund_status != 'none' %}<p>{{ payment.get_refund_status_display }}</p>{% endif %}
+  {% if payment.refund_status == 'simulated' %}<p>Refund penuh Rp{{ payment.jumlah }} telah disimulasikan. Tidak ada pengembalian dana melalui Midtrans.</p>{% endif %}
   {% if payment.refund_status == 'required' %}<p>Pengembalian dana belum selesai. Jika saldo pengelola belum tersedia, proses dapat dicoba lagi melalui pemeriksaan status pembayaran.</p>{% endif %}
   {% if payment.refund_status == 'manual' %}<p>Pengelola perlu membantu pengembalian dana. Hubungi pusat bantuan dengan nomor pesananmu.</p>{% endif %}
 </div>
