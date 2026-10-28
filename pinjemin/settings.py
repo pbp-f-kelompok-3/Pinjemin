@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'accounts',
     'help_center',
     'locations',
+    'barang',
 ]
 
 MIDDLEWARE = [
