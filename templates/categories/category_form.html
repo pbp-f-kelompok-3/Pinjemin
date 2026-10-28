@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} {title} {% endblock %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'css/categories.css' %}">
+{% endblock %}
+
+{% block content %}
+    <header class="category-page__header"></header>
+        <div class="category-page__intro">
+            <h1 id="category-form-title" class="category-page__title">Buat Kategori</h1>            <p class="category-page__subtitle">Isi detail kategori, lalu simpan.</p>
+        </div>
+    </header>
+
+    <form method="post" class="category-panel category-form" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <ul class="category-form__errors category-form__errors--summary" role="alert">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="category-form__field">
+                {{ field.label_tag }}
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <p class="category-form__help">{{ field.help_text }}</p>
+                {% endif %}
+
+                {% if field.errors %}
+                    <ul class="category-form__errors">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="category-panel__actions">
+            <button type="submit" class="category-btn category-btn--primary">
+                Simpan Kategori
+            </button>
+            <a href="{% url 'categories:show_categories' %}"
+               class="category-btn category-btn--ghost">
+                Batal
+            </a>
+        </div>
+    </form>
+
+{% endblock %}
