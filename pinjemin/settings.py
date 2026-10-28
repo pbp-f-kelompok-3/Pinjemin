@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'help_center',
+    'locations',
 ]
 
 MIDDLEWARE = [
@@ -161,6 +162,15 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 CSRF_TRUSTED_ORIGINS = ["https://roisul-umam-pinjemin.pws.cs.ui.ac.id"]
+
+# Nominatim can be changed without updating application code.
+NOMINATIM_REVERSE_URL = os.getenv(
+    'NOMINATIM_REVERSE_URL', 'https://nominatim.openstreetmap.org/reverse'
+)
+NOMINATIM_USER_AGENT = os.getenv(
+    'NOMINATIM_USER_AGENT',
+    'Pinjemin/1.0 (+https://roisul-umam-pinjemin.pws.cs.ui.ac.id)',
+)
 
 if PRODUCTION:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

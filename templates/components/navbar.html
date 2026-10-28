@@ -1,39 +1,72 @@
 {% load static %}
-<header>
-  <div class="container navbar">
-
-    <a class="brand" href="{% url 'home' %}">
-      <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin" class="brand-logo">
+<header class="site-header">
+  <div class="header-container header-main">
+    <a class="brand" href="{% url 'home' %}" aria-label="Pinjemin, beranda">
+      <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin" class="brand-logo" width="108" height="36">
     </a>
 
-    <nav aria-label="Navigasi utama">
-      <form class="search-form" method="GET" action="{% url 'home' %}"> 
-        <input type="search" placeholder="Cari di Pinjemin..."> 
-        <button type="submit">Cari</button> 
-      </form>
+    <div class="nav-location" data-location-widget data-endpoint="{% url 'locations:current' %}">
+      <button class="nav-location__toggle" type="button" data-location-toggle aria-expanded="false" aria-controls="location-panel" aria-haspopup="dialog">
+        <svg class="nav-location__pin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/>
+          <circle cx="12" cy="10" r="2.5"/>
+        </svg>
+        <span class="nav-location__label" data-location-label>Pilih lokasi</span>
+        <svg class="nav-location__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <section class="nav-location__panel" id="location-panel" role="dialog" aria-labelledby="location-heading" hidden>
+        <div class="nav-location__panel-heading">
+          <h2 id="location-heading" data-location-caption>Lokasi kamu</h2>
+          <button class="nav-location__close" type="button" data-location-close aria-label="Tutup pilihan lokasi">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg>
+          </button>
+        </div>
+        <p class="nav-location__selected" data-location-selected>Belum ada lokasi dipilih</p>
+        <form data-location-form>
+          {% csrf_token %}
+          <button class="nav-location__detect" type="submit" data-location-detect>Gunakan lokasi saat ini</button>
+        </form>
+        <p class="nav-location__status" data-location-status role="status" aria-live="polite">Izinkan lokasi perangkat untuk menemukan wilayahmu.</p>
+        <div class="nav-location__footnote">
+          <p>Lokasi perkiraan diproses melalui OpenStreetMap.</p>
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">&copy; OpenStreetMap contributors</a>
+        </div>
+      </section>
+      <noscript><span class="nav-location__no-js">Aktifkan JavaScript untuk memilih lokasi.</span></noscript>
+    </div>
 
-      <a href="{% url 'home' %}">Beranda</a>
+    <form class="header-search" method="get" action="{% url 'home' %}" role="search" aria-label="Pencarian barang">
+      <input type="search" name="q" aria-label="Cari barang" placeholder="Cari barang yang kamu butuhkan..." value="{{ request.GET.q|default:'' }}">
+      <button type="submit" aria-label="Cari barang">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.3"/><path d="m16 16 4.5 4.5"/></svg>
+      </button>
+    </form>
 
-      <a href="#">
-        Cari Barang
+    <div class="header-actions">
+      {% if user.is_authenticated %}
+        <a class="header-account" href="{% url 'accounts:profile' %}">Akun saya</a>
+      {% else %}
+        <a class="header-account" href="{% url 'accounts:login' %}"><span class="header-desktop-label">Masuk / Daftar</span><span class="header-mobile-label">Masuk</span></a>
+      {% endif %}
+      <a class="header-lend" href="{% if user.is_authenticated %}{% url 'accounts:profile' %}{% else %}{% url 'accounts:login' %}{% endif %}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="header-desktop-label">Sewakan barang</span><span class="header-mobile-label">Sewakan</span>
       </a>
-
-      <a href="#">
-        Kategori
-      </a>
-
-      <a href="#">
-        Lokasi
-      </a>
-
-      <a href="{% url 'accounts:login' %}">
-        Login / Daftar
-      </a>
-
-      <a href="#">
-        Jual / Sewa
-      </a>
-    </nav>
-
+    </div>
   </div>
+
+  <nav class="site-subnav" aria-label="Navigasi utama">
+    <div class="header-container subnav-inner">
+      <a class="subnav-categories" href="{% url 'home' %}#kategori">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Semua kategori
+      </a>
+      <span class="subnav-divider" aria-hidden="true"></span>
+      <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>Beranda</a>
+      <a href="{% url 'home' %}#barang">Cari barang</a>
+      <a href="{% url 'help_center:help' %}">Cara meminjam</a>
+      <a href="{% url 'help_center:help' %}">Pusat bantuan</a>
+      <span class="subnav-note">Pakai bersama, lebih bermakna.</span>
+    </div>
+  </nav>
 </header>

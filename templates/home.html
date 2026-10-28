@@ -3,14 +3,18 @@
 {% block title %}Beranda - Pinjemin{% endblock %}
 
 {% block content %}
-<h1>Pinjemin</h1>
-<section class="featured-section"> 
+<div class="home-page">
+<div class="home-intro">
+    <h1>Mau pinjam apa hari ini?</h1>
+    <p>Temukan barang untuk kuliah, acara kampus, dan keseharianmu.</p>
+</div>
+<section class="featured-section" id="barang">
     <div class="featured-box"> 
         <h2>Featured Products</h2>
     </div> 
 </section>
 
-<section class="category-section">
+<section class="category-section" id="kategori">
     <h2>Shop by Category</h2>
     <div class="categories">
         {% for category in categories %} 
@@ -26,4 +30,5 @@
     </div>
 </section>
 
+</div>
 {% endblock %}
