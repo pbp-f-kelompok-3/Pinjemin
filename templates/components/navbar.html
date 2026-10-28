@@ -48,10 +48,13 @@
       {% else %}
         <a class="header-account" href="{% url 'accounts:login' %}"><span class="header-desktop-label">Masuk / Daftar</span><span class="header-mobile-label">Masuk</span></a>
       {% endif %}
-      <a class="header-lend" href="{% url 'barang:tambah' %}"{% if request.resolver_match.namespace == 'barang' %} aria-current="page"{% endif %}>
+      {% url 'barang:tambah' as tambah_barang_url %}
+      {% if tambah_barang_url %}
+      <a class="header-lend" href="{{ tambah_barang_url }}"{% if request.resolver_match.namespace == 'barang' %} aria-current="page"{% endif %}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         <span class="header-desktop-label">Sewakan barang</span><span class="header-mobile-label">Sewakan</span>
       </a>
+      {% endif %}
     </div>
   </div>
 

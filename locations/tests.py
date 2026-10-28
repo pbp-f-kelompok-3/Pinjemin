@@ -3,11 +3,45 @@ from datetime import timedelta
 from unittest.mock import Mock, patch
 
 import requests
-from django.test import Client, TestCase
-from django.urls import reverse
+from django.http import HttpResponse
+from django.test import Client, SimpleTestCase, TestCase, override_settings
+from django.urls import include, path, reverse
 from django.utils import timezone
 
+from pinjemin.urls import urlpatterns as project_urlpatterns
+
 from .models import GeocodingCache
+
+
+class NavbarWithoutBarangUrls:
+    urlpatterns = [
+        route for route in project_urlpatterns
+        if getattr(route, 'namespace', None) != 'barang'
+    ]
+
+
+class NavbarWithBarangUrls:
+    urlpatterns = [
+        *NavbarWithoutBarangUrls.urlpatterns,
+        path('barang/', include(([
+            path('tambah/', lambda request: HttpResponse('Tambah barang'), name='tambah'),
+        ], 'barang'), namespace='barang')),
+    ]
+
+
+class NavbarBarangAvailabilityTests(SimpleTestCase):
+    @override_settings(ROOT_URLCONF=NavbarWithoutBarangUrls)
+    def test_home_renders_when_barang_is_not_registered(self):
+        response = self.client.get(reverse('home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-location-widget')
+        self.assertNotContains(response, 'class="header-lend"')
+
+    @override_settings(ROOT_URLCONF=NavbarWithBarangUrls)
+    def test_lend_button_returns_when_barang_is_registered(self):
+        response = self.client.get(reverse('home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'class="header-lend" href="{reverse("barang:tambah")}"')
 
 
 class CurrentLocationTests(TestCase):
