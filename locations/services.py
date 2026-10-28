@@ -6,7 +6,19 @@ import requests
 from django.conf import settings
 from django.utils import timezone
 
-from .models import GeocodingCache
+from .models import GeocodingCache, PickupLocation
+
+
+def pickup_context(user):
+    return {
+        'pickup_locations_data': [location.as_dict() for location in
+                                  PickupLocation.objects.filter(owner=user, is_active=True)],
+        'pickup_map_config': {
+            'tileUrl': settings.OSM_TILE_URL,
+            'center': [-6.3621, 106.8279],
+            'zoom': 15,
+        },
+    }
 
 
 class GeocodingError(Exception):

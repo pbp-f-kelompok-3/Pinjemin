@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Lokasi Tersimpan - Pinjemin{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}?v=20261028-1">
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+<link rel="stylesheet" href="{% static 'css/pickup-location.css' %}?v=2">
+{% endblock %}
+{% block content %}
+<div class="pf-page pickup-account-page">
+  <div class="pf-head"><div><h1 class="pf-title">Lokasi tersimpan</h1><p class="pf-sub">Simpan titik penjemputan untuk dipilih saat mendaftarkan barang.</p></div></div>
+  <div class="pf-layout">
+    {% include 'accounts/_sidebar.html' with active='locations' %}
+    <div class="pf-card">{% include 'locations/picker.html' with manage_only=True %}</div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
+<script src="{% static 'js/pickup-location.js' %}?v=2" defer></script>
+{% endblock %}

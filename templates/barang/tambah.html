@@ -1,255 +1,105 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}Tambah Barang - Pinjemin{% endblock %}
-
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/barang.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+<link rel="stylesheet" href="{% static 'css/pickup-location.css' %}?v=2">
 {% endblock %}
-
 {% block content %}
-<div class="br-page">
-
-  <!-- Header & Breadcrumbs -->
+<div class="br-page br-pickup-page">
   <div class="br-header">
-    <div>
-      <nav class="br-breadcrumbs" aria-label="Breadcrumb">
-        <a href="{% url 'home' %}">Beranda</a>
-        <span>/</span>
-        <a href="{% url 'barang:dashboard' %}">Barang Saya</a>
-        <span>/</span>
-        <span style="font-weight: 700; color: var(--br-black);">Tambah Barang</span>
-      </nav>
-      <div class="br-badge-role">
-        <span class="br-pulse-dot"></span>
-        Mode Pemilik Barang (UI Student Hub)
-      </div>
-    </div>
-
-    <div>
-      <a href="{% url 'barang:dashboard' %}" class="br-btn-secondary">
-        &larr; Kembali ke Barang Saya
-      </a>
-    </div>
+    <nav class="br-breadcrumbs" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}">Beranda</a><span>/</span>
+      <a href="{% url 'barang:dashboard' %}">Barang saya</a><span>/</span>
+      <span aria-current="page">Tambah Barang</span>
+    </nav>
+    <span class="br-badge-role">Mode pemilik barang</span>
   </div>
-
-  <div class="br-title-row" style="margin-bottom: 24px;">
-    <div>
-      <h1 class="br-title">Tambah Barang Baru</h1>
-      <p class="br-subtitle">Daftarkan barang atau perlengkapanmu untuk dipinjamkan atau disewakan ke sesama mahasiswa UI.</p>
-    </div>
+  <div class="br-title-row">
+    <div><h1 class="br-title">Tambah Barang Baru</h1>
+      <p class="br-subtitle">Daftarkan barangmu, lalu pilih titik penjemputan langsung di formulir ini.</p></div>
   </div>
-
-  <!-- Form Layout -->
-  <form method="POST" action="" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" data-item-create>
     {% csrf_token %}
-
-    {% if form.non_field_errors %}
-      <div style="padding: 14px 18px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: var(--br-radius); color: #991B1B; font-size: 14px; margin-bottom: 20px;">
-        {% for error in form.non_field_errors %}
-          <p style="margin: 0;">{{ error }}</p>
-        {% endfor %}
-      </div>
-    {% endif %}
-
+    {% if form.non_field_errors %}<div class="pickup-form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
     <div class="br-form-layout">
-      <!-- Kolom Utama: Formulir Input -->
       <div class="br-form-card">
-        
-        <!-- Upload Foto Produk Utama -->
         <div class="br-form-group">
-          <label class="br-label">Foto Barang Utama <span style="color: var(--br-red);">*</span></label>
-          <div class="br-upload-dropzone" onclick="document.getElementById('id_foto_utama').click()">
-            <div style="margin-bottom: 8px; color: var(--br-text-muted);">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <label for="id_foto_utama" class="br-label">Foto barang utama *</label>
+          <div class="pickup-upload" data-upload-zone>
+            <div class="pickup-upload-preview">
+              <svg data-photo-placeholder width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 3-3 6 6"/></svg>
+              <img data-photo-preview alt="Pratinjau foto barang" hidden>
             </div>
-            <div style="font-size: 14px; font-weight: 700; color: var(--br-black); margin-bottom: 4px;">
-              Klik untuk memilih atau seret foto produk ke sini
-            </div>
-            <div class="br-helper">Format JPG, PNG, atau WebP (Maksimal 5MB). Pastikan foto jelas dan asli.</div>
-            
-            <div style="display: none;">
-              {{ form.foto_utama }}
-            </div>
-
-            <div id="preview-container" class="br-preview-img-container" style="display: none;">
-              <img id="image-preview" class="br-preview-img" src="" alt="Preview Foto Barang">
+            <div class="pickup-upload-copy">
+              <strong data-photo-name>Tambahkan foto barangmu</strong>
+              <p>Gunakan foto asli dengan pencahayaan yang jelas.</p>
+              <button class="br-btn-secondary" type="button" data-choose-photo>Pilih foto</button>
+              <p id="photo-help">JPG, PNG, atau WebP · Maksimal 5 MB</p>
+              <div class="pickup-file-input">{{ form.foto_utama }}</div>
             </div>
           </div>
-          {% if form.foto_utama.errors %}
-            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.foto_utama.errors.0 }}</div>
-          {% endif %}
+          <p class="pickup-error" data-photo-error role="status" aria-live="polite"></p>
+          {% for error in form.foto_utama.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
+          {% if form.is_bound %}<p class="br-helper">Pilih kembali foto setelah memperbaiki isian formulir.</p>{% endif %}
         </div>
-
-        <!-- Nama Barang -->
         <div class="br-form-group">
-          <label for="id_nama_barang" class="br-label">Nama Barang <span style="color: var(--br-red);">*</span></label>
-          {{ form.nama_barang }}
-          <div class="br-helper">Gunakan nama yang jelas dan spesifik (sertakan ukuran, seri, atau warna jika ada).</div>
-          {% if form.nama_barang.errors %}
-            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.nama_barang.errors.0 }}</div>
-          {% endif %}
+          <label for="id_nama_barang" class="br-label">Nama barang *</label>{{ form.nama_barang }}
+          <p class="br-helper">Gunakan nama yang spesifik agar mudah ditemukan.</p>
+          {% for error in form.nama_barang.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <!-- Kategori & Jenis Penawaran Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
-          <!-- Kategori -->
+        <div class="pickup-item-fields">
           <div>
-            <label for="id_kategori" class="br-label">Kategori <span style="color: var(--br-red);">*</span></label>
-            {{ form.kategori }}
-            {% if form.kategori.errors %}
-              <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.kategori.errors.0 }}</div>
-            {% endif %}
+            <label for="id_kategori" class="br-label">Kategori *</label>{{ form.kategori }}
+            <p class="br-helper">Pilih kategori barang.</p>
+            {% for error in form.kategori.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
           </div>
-
-          <!-- Jenis Peminjaman -->
           <div>
-            <label for="id_jenis_penawaran" class="br-label">Jenis Penawaran <span style="color: var(--br-red);">*</span></label>
-            {{ form.jenis_penawaran }}
-            {% if form.jenis_penawaran.errors %}
-              <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.jenis_penawaran.errors.0 }}</div>
-            {% endif %}
+            <label for="id_jenis_penawaran" class="br-label">Jenis penawaran *</label>{{ form.jenis_penawaran }}
+            <p class="br-helper">Peminjam membayar per 24 jam untuk barang sewa.</p>
+            {% for error in form.jenis_penawaran.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
           </div>
         </div>
-
-        <!-- Banner Info Khusus Pinjam Gratis -->
-        <div id="banner-gratis-info" style="display: none; padding: 12px 16px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: var(--br-radius); color: #065F46; font-size: 13px; margin-bottom: 20px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><strong>Pinjam Tanpa Biaya:</strong> Barang ini akan dipinjamkan secara sukarela untuk sesama mahasiswa UI tanpa tarif sewa (Rp 0).
+        <p class="pickup-free-note" data-free-note hidden>Barang ini dipinjamkan tanpa biaya. Tarif menjadi Rp0.</p>
+        <div class="br-form-group" data-price-group>
+          <label for="id_tarif_per_hari" class="br-label">Tarif sewa harian *</label>
+          <div class="br-input-price-group"><span class="br-price-prefix">Rp</span>{{ form.tarif_per_hari }}<span class="br-price-suffix">/ 24 jam</span></div>
+          <p class="br-helper">Tarif menjadi Rp0 jika memilih pinjam gratis.</p>
+          {% for error in form.tarif_per_hari.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <!-- Tarif Sewa Harian -->
-        <div class="br-form-group" id="group-tarif">
-          <label for="id_tarif_per_hari" class="br-label">Tarif Sewa Harian <span style="color: var(--br-red);">*</span></label>
-          <div class="br-input-price-group">
-            <span class="br-price-prefix">Rp</span>
-            {{ form.tarif_per_hari }}
-            <span class="br-price-suffix">/ 24 jam</span>
-          </div>
-          <div class="br-helper" id="tarif-helper">Tentukan tarif harian yang ramah bagi kantong mahasiswa. Otomatis Rp 0 jika memilih Gratis.</div>
-          {% if form.tarif_per_hari.errors %}
-            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.tarif_per_hari.errors.0 }}</div>
-          {% endif %}
-        </div>
-
-        <!-- Deskripsi Barang -->
         <div class="br-form-group">
-          <label for="id_deskripsi" class="br-label">Deskripsi Lengkap <span style="color: var(--br-red);">*</span></label>
-          {{ form.deskripsi }}
-          <div class="br-helper">Jelaskan kondisi fisik barang (mulus/ada lecet), kelengkapan aksesoris, aturan pemakaian, serta ketentuan pengembalian.</div>
-          {% if form.deskripsi.errors %}
-            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.deskripsi.errors.0 }}</div>
-          {% endif %}
+          <label for="id_deskripsi" class="br-label">Deskripsi lengkap *</label>{{ form.deskripsi }}
+          <p class="br-helper">Jelaskan kondisi fisik, kelengkapan, aturan penggunaan, dan pengembalian.</p>
+          {% for error in form.deskripsi.errors %}<p class="pickup-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <!-- Lokasi Penyimpanan -->
-        <div class="br-form-group">
-          <label for="id_lokasi" class="br-label">Lokasi Penyimpanan / Titik Temu UI <span style="color: var(--br-red);">*</span></label>
-          {{ form.lokasi }}
-          <div class="br-helper">Pilih area kampus UI yang paling dekat dengan kost atau tempat tinggalmu.</div>
-          {% if form.lokasi.errors %}
-            <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.lokasi.errors.0 }}</div>
-          {% endif %}
-        </div>
-
-        <!-- Tombol Submit -->
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--br-border);">
-          <a href="{% url 'barang:dashboard' %}" class="br-btn-secondary">Batal</a>
-          <button type="submit" class="br-btn-primary">
-            Daftarkan Barang
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Kolom Samping: Tips & Aturan Bisnis -->
-      <div>
-        <div class="br-info-box">
-          <div class="br-info-title">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Panduan Mahasiswa UI
-          </div>
-          <ul class="br-info-list">
-            <li><strong>Foto Asli:</strong> Unggah 1 foto produk asli dengan pencahayaan jelas untuk meningkatkan kepercayaan peminjam.</li>
-            <li><strong>Tarif Bersahabat:</strong> Rekomendasi sewa mahasiswa berkisar Rp 10.000 - Rp 50.000 per hari tergantung jenis barang.</li>
-            <li><strong>Titik Temu Aman:</strong> Utamakan serah terima di area kampus yang ramai seperti Kutek, Barel, atau Perpustakaan Pusat.</li>
-            <li><strong>Barang Pinjam Gratis:</strong> Barang seperti setrika kost, obeng, atau buku kuliah sangat dianjurkan dipinjamkan gratis untuk mendukung circular economy sesama mahasiswa.</li>
-          </ul>
-        </div>
-
-        <div style="background: var(--br-card-bg); border: 1px solid var(--br-border); border-radius: var(--br-radius); padding: 18px; font-size: 13px; color: var(--br-text-muted);">
-          <div style="font-weight: 700; color: var(--br-black); margin-bottom: 8px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Perlindungan Keamanan
-          </div>
-          Data pemilik barang terlindungi dan hanya nama serta titik temu kampus yang ditampilkan kepada mahasiswa peminjam yang terverifikasi SSO UI.
+        {% include 'locations/picker.html' %}
+        <div class="pickup-item-footer">
+          <p>Lokasi terpilih akan dicatat pada barang.</p>
+          <div><a href="{% url 'barang:dashboard' %}" class="br-btn-secondary">Batal</a>
+            <button type="submit" class="br-btn-primary">Daftarkan Barang</button></div>
         </div>
       </div>
+      <aside class="pickup-item-sidebar" aria-label="Panduan pendaftaran barang">
+        <div class="pickup-item-guide">
+          <h2>Panduan mahasiswa UI</h2>
+          <ul><li>Foto asli membantu peminjam mengenali kondisi barang.</li>
+            <li>Gunakan tarif yang bersahabat untuk sesama mahasiswa.</li>
+            <li>Pilih titik temu yang mudah dijangkau di sekitar kampus.</li></ul>
+        </div>
+        <div class="pickup-guide-note"><svg width="21" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><div><strong>Titik temu yang jelas</strong><p>Cek posisi pin sebelum menyimpan lokasi.</p></div></div>
+        <div class="pickup-guide-note"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg><div><strong>Riwayat tersimpan di akun</strong><p>Lokasi baru tetap ada di riwayat, termasuk saat kamu belum mendaftarkan barang.</p></div></div>
+        <div class="pickup-guide-note"><span class="pickup-info-symbol" aria-hidden="true">i</span><div><strong>Data barang tetap tersedia</strong><p>Berpindah antara riwayat dan lokasi baru tidak mengosongkan data barang yang sudah diisi.</p></div></div>
+      </aside>
     </div>
   </form>
-
 </div>
-
-<script>
-  // Dynamic handling of Foto Preview
-  var fileInput = document.getElementById('id_foto_utama');
-  var previewContainer = document.getElementById('preview-container');
-  var imagePreview = document.getElementById('image-preview');
-
-  if (fileInput) {
-    fileInput.addEventListener('change', function(e) {
-      var file = e.target.files[0];
-      if (file) {
-        var reader = new FileReader();
-        reader.onload = function(evt) {
-          imagePreview.src = evt.target.result;
-          previewContainer.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-
-  // Dynamic handling of Jenis Penawaran (Gratis vs Sewa)
-  var jenisSelect = document.getElementById('id_jenis_penawaran');
-  var tarifInput = document.getElementById('id_tarif_per_hari');
-  var groupTarif = document.getElementById('group-tarif');
-  var bannerGratis = document.getElementById('banner-gratis-info');
-
-  function updateTarifState() {
-    if (jenisSelect && tarifInput && groupTarif) {
-      if (jenisSelect.value === 'gratis') {
-        tarifInput.value = '0';
-        tarifInput.removeAttribute('required');
-        groupTarif.style.display = 'none';
-        if (bannerGratis) bannerGratis.style.display = 'block';
-      } else {
-        groupTarif.style.display = 'block';
-        tarifInput.setAttribute('required', 'required');
-        if (bannerGratis) bannerGratis.style.display = 'none';
-        if (tarifInput.value === '0' || !tarifInput.value) {
-          tarifInput.value = '25000';
-        }
-      }
-    }
-  }
-
-  if (jenisSelect) {
-    jenisSelect.addEventListener('change', updateTarifState);
-    updateTarifState();
-  }
-
-  // Cegah mouse wheel mengubah angka tarif saat scroll halaman
-  if (tarifInput) {
-    tarifInput.addEventListener('wheel', function(e) {
-      e.preventDefault();
-    }, { passive: false });
-  }
-
-  window.addEventListener('wheel', function() {
-    if (document.activeElement && document.activeElement.id === 'id_tarif_per_hari') {
-      document.activeElement.blur();
-    }
-  });
-</script>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
+<script src="{% static 'js/pickup-location.js' %}?v=2" defer></script>
+<script src="{% static 'js/barang-create.js' %}?v=1" defer></script>
 {% endblock %}

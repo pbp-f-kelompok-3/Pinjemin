@@ -35,17 +35,23 @@ class Kategori(models.Model):
 
 class Lokasi(models.Model):
     """
-    Model Lokasi Penyimpanan Barang di sekitar kampus UI.
+    Lokasi penjemputan pada barang, termasuk salinan titik dari riwayat akun.
     CATATAN INTEGRASI (Modul Manajemen Lokasi - I Nyoman Yadnya Suta Karmana):
     Model ini bertindak sebagai baseline klaster area kampus agar relasi ForeignKey
     pada Barang dapat berfungsi. Saat modul Nyoman di-merge, titik lokasi / OpenStreetMap
     dapat langsung disambungkan ke model Lokasi/TitikLokasi milik Nyoman.
     """
     nama_area = models.CharField(max_length=150, verbose_name=_("Nama Area Kampus"))
-    kecamatan_kota = models.CharField(max_length=200, default="Kecamatan Beji, Kota Depok, Jawa Barat")
-    kode_pos = models.CharField(max_length=10, default="16425")
+    kecamatan_kota = models.CharField(max_length=200, blank=True, default="Kecamatan Beji, Kota Depok, Jawa Barat")
+    kode_pos = models.CharField(max_length=10, blank=True, default="16425")
     patokan = models.CharField(max_length=255, verbose_name=_("Patokan Lokasi"))
     short_label = models.CharField(max_length=50, verbose_name=_("Label Ringkas"))
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                              null=True, blank=True, related_name='item_pickup_snapshots')
+    full_address = models.CharField(max_length=255, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    is_pickup_snapshot = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Lokasi Kampus")
@@ -118,7 +124,7 @@ class Barang(models.Model):
         Lokasi,
         on_delete=models.PROTECT,
         related_name='barang_di_lokasi',
-        verbose_name=_("Lokasi Penyimpanan")
+        verbose_name=_("Lokasi Penjemputan")
     )
     status_penawaran = models.CharField(
         max_length=10,

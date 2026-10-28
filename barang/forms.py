@@ -7,7 +7,9 @@
 
 from django import forms
 from django.utils.html import strip_tags
+from locations.models import PickupLocation
 from .models import Barang, Kategori, Lokasi
+from .services import visible_item_locations
 
 
 class BarangForm(forms.ModelForm):
@@ -16,6 +18,14 @@ class BarangForm(forms.ModelForm):
     Field sesuai spesifikasi README:
     - nama_barang, foto_utama, deskripsi, kategori, jenis_penawaran, tarif_per_hari, lokasi
     """
+    pickup_location = forms.ModelChoiceField(queryset=PickupLocation.objects.none(), required=False,
+                                            widget=forms.HiddenInput)
+    pickup_latitude = forms.DecimalField(max_digits=9, decimal_places=6, min_value=-90,
+                                        max_value=90, required=False, widget=forms.HiddenInput)
+    pickup_longitude = forms.DecimalField(max_digits=10, decimal_places=6, min_value=-180,
+                                         max_value=180, required=False, widget=forms.HiddenInput)
+    pickup_mode = forms.CharField(required=False, initial='saved', widget=forms.HiddenInput)
+
     class Meta:
         model = Barang
         fields = [
@@ -26,6 +36,7 @@ class BarangForm(forms.ModelForm):
             'jenis_penawaran',
             'tarif_per_hari',
             'lokasi',
+            'pickup_location', 'pickup_latitude', 'pickup_longitude', 'pickup_mode',
         ]
         widgets = {
             'nama_barang': forms.TextInput(attrs={
@@ -72,9 +83,19 @@ class BarangForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        self.current_pickup = self.instance.lokasi if self.instance.pk else None
         # Tarif per hari tidak required di level field HTML agar barang gratis bisa disubmit tanpa error
         self.fields['tarif_per_hari'].required = False
+        if not self.is_bound and not self.instance.pk:
+            self.initial['tarif_per_hari'] = ''
+        self.fields['lokasi'].required = False
+        self.fields['lokasi'].label = 'Lokasi penjemputan'
+        self.fields['lokasi'].queryset = visible_item_locations(user)
+        if user is not None and user.is_authenticated:
+            self.fields['pickup_location'].queryset = PickupLocation.objects.filter(
+                owner=user, is_active=True)
 
     def clean_nama_barang(self):
         nama = strip_tags(self.cleaned_data.get("nama_barang", "")).strip()
@@ -88,8 +109,38 @@ class BarangForm(forms.ModelForm):
             raise forms.ValidationError("Deskripsi tidak boleh kosong atau hanya berisi tag HTML.")
         return deskripsi
 
+    def clean_foto_utama(self):
+        photo = self.cleaned_data.get('foto_utama')
+        if photo and hasattr(photo, 'content_type'):
+            if photo.size > 5 * 1024 * 1024:
+                raise forms.ValidationError('Ukuran foto maksimal 5 MB.')
+            if photo.content_type not in {'image/jpeg', 'image/png', 'image/webp'}:
+                raise forms.ValidationError('Gunakan foto dalam format JPG, PNG, atau WebP.')
+        return photo
+
     def clean(self):
         cleaned_data = super().clean()
+        location = cleaned_data.get('pickup_location')
+        if location is not None:
+            latitude = cleaned_data.get('pickup_latitude')
+            longitude = cleaned_data.get('pickup_longitude')
+            if latitude is None and longitude is None:
+                cleaned_data['pickup_latitude'] = location.latitude
+                cleaned_data['pickup_longitude'] = location.longitude
+            elif latitude is None or longitude is None:
+                self.add_error('pickup_location', 'Pilih titik penjemputan yang valid pada peta.')
+        elif cleaned_data.get('pickup_mode') == 'current' and self.current_pickup is not None:
+            # Use the item's original location, never a different ID supplied by the browser.
+            cleaned_data['lokasi'] = self.current_pickup
+            latitude = cleaned_data.get('pickup_latitude')
+            longitude = cleaned_data.get('pickup_longitude')
+            if latitude is None and longitude is None:
+                cleaned_data['pickup_latitude'] = self.current_pickup.latitude
+                cleaned_data['pickup_longitude'] = self.current_pickup.longitude
+            elif latitude is None or longitude is None:
+                self.add_error('pickup_location', 'Isi kedua koordinat atau pilih titik pada peta.')
+        elif cleaned_data.get('pickup_mode') or not cleaned_data.get('lokasi'):
+            self.add_error('pickup_location', 'Pilih lokasi dari riwayat atau simpan lokasi baru terlebih dahulu.')
         jenis = cleaned_data.get('jenis_penawaran')
         tarif = cleaned_data.get('tarif_per_hari')
 
@@ -122,6 +173,12 @@ class BarangEditForm(BarangForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.current_pickup is not None:
+            self.initial.update({
+                'pickup_mode': 'current',
+                'pickup_latitude': self.current_pickup.latitude,
+                'pickup_longitude': self.current_pickup.longitude,
+            })
         # Foto utama tidak wajib diisi ulang jika sudah ada
         if self.instance and self.instance.pk and self.instance.foto_utama:
             self.fields['foto_utama'].required = False
