@@ -1,0 +1,19 @@
+{% extends "transaksi/base.html" %}
+{% block transaksi_content %}
+<div class="tr-card tr-narrow">
+  <h1>{% if order %}Ubah jadwal{% else %}Buat draft pesanan{% endif %}</h1>
+  <h2>{{ item.nama_barang }}</h2>
+  <p>{% if item.jenis_penawaran == 'gratis' %}Gratis{% else %}Rp{{ item.tarif_formatted }} / hari{% endif %}</p>
+  <p>Durasi 1 hari = 24 jam. Total = tarif harian × durasi.</p>
+  <p>Barang sewa: jadwal mulai minimal 24 jam 30 menit saat pengajuan. Barang gratis: minimal 24 jam.</p>
+  {% if order.status == 'menunggu_pembayaran' %}
+  <p class="tr-notice">Batas bayar tetap {{ order.batas_bayar|date:"d M Y H:i:s" }} WIB. Pilih mulai minimal 24 jam setelah batas tersebut. Jika tagihan berubah, gunakan halaman pembayaran terbaru.</p>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="tr-actions"><button class="tr-button" type="submit">Simpan {% if not order %}draft{% else %}perubahan{% endif %}</button>
+    <a href="{% url 'transaksi:daftar' %}">Kembali</a></div>
+  </form>
+</div>
+{% endblock %}

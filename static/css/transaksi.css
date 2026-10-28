@@ -1,0 +1,32 @@
+.tr-page { padding-top: 28px; }
+.tr-nav, .tr-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.tr-nav { border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 28px; }
+.tr-nav a { font-weight: 700; padding: 8px 0; }
+.tr-nav a:hover { text-decoration: underline; }
+.tr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr)); gap: 20px; margin-top: 24px; }
+.tr-card { border: 1px solid var(--border); border-radius: 16px; padding: 24px; background: white; }
+.tr-narrow { max-width: 740px; margin: 0 auto 24px; }
+.tr-card h1 { margin-top: 12px; font-size: clamp(24px, 4vw, 32px); }
+.tr-card h2 { font-size: 20px; }
+.tr-photo { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; }
+.tr-button { display: inline-block; border: 1px solid transparent; border-radius: 9px; padding: 11px 16px; font: inherit; font-weight: 700; background: var(--yellow); color: var(--black); cursor: pointer; text-align: center; }
+.tr-button:hover { filter: brightness(.95); }
+.tr-button:focus-visible, .tr-nav a:focus-visible { outline: 3px solid #735f00; outline-offset: 3px; }
+.tr-secondary { background: var(--gray); border-color: var(--border); }
+.tr-danger { background: #fff1f0; color: #a12820; border-color: #edc6c2; }
+.tr-button:disabled { opacity: .5; cursor: default; }
+.tr-actions { margin-top: 24px; }
+.tr-actions form { margin: 0; }
+.tr-status { display: inline-block; padding: 5px 12px; border-radius: 30px; background: #fff8ce; font-size: 14px; font-weight: 700; }
+.tr-notice { padding: 14px 18px; background: #fffbe2; border-radius: 10px; margin: 20px 0; }
+.tr-reference { font-size: 13px; overflow-wrap: anywhere; color: var(--gray-dark); }
+.tr-facts { display: grid; grid-template-columns: 140px 1fr; gap: 10px; }
+.tr-facts dd { margin: 0; }
+.tr-facts dt { color: var(--gray-dark); }
+.tr-card input, .tr-card select, .tr-filter select { display: block; width: 100%; border: 1px solid #aaa; padding: 11px; border-radius: 8px; font: inherit; margin-top: 6px; }
+.tr-card label { font-weight: 700; }
+.tr-filter { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.tr-filter select { width: auto; margin: 0; }
+.tr-payment { border-top: 1px solid var(--border); padding: 12px 0; }
+.errorlist { color: #a12820; padding-left: 20px; }
+@media(max-width: 480px) { .tr-card { padding: 18px; } .tr-facts { grid-template-columns: 100px 1fr; } }

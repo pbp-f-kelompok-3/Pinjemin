@@ -1,0 +1,12 @@
+{% extends "transaksi/base.html" %}
+{% block transaksi_content %}
+<div class="tr-card tr-narrow">
+  <h1>{% if delete %}Hapus draft permanen?{% else %}Batalkan pesanan?{% endif %}</h1>
+  <h2>{{ order.nama_barang }}</h2>
+  <p>{% if delete %}Draft akan dihapus dari database. Tindakan ini tidak dapat dibatalkan.{% else %}Slot barang akan dilepas. Pembayaran yang sudah berhasil diperiksa untuk refund penuh. Jika refund otomatis tidak tersedia, pengelola akan menangani secara manual.{% endif %}</p>
+  <form method="post">{% csrf_token %}
+    <div class="tr-actions"><button type="submit" class="tr-button tr-danger">{% if delete %}Ya, hapus draft{% else %}Ya, batalkan pesanan{% endif %}</button>
+    <a href="{% url 'transaksi:detail' order.pk %}">Kembali</a></div>
+  </form>
+</div>
+{% endblock %}

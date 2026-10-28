@@ -1,0 +1,22 @@
+{% extends "transaksi/base.html" %}
+{% block transaksi_content %}
+<h1>{% if incoming %}Pesanan Masuk{% else %}Pesanan Saya{% endif %}</h1>
+<p>{% if incoming %}Pesanan untuk barang milikmu. Konfirmasi berlangsung otomatis.{% else %}Kelola draft dan pantau perjalanan peminjamanmu.{% endif %}</p>
+{% if not incoming %}
+<form method="get" class="tr-filter"><label for="status">Status</label>
+<select name="status" id="status"><option value="">Semua</option>{% for value,label in statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<button type="submit" class="tr-button tr-secondary">Tampilkan</button></form>
+{% endif %}
+<div class="tr-grid">
+{% for order in orders %}
+<article class="tr-card">
+  <span class="tr-status">{{ order.get_status_display }}</span>
+  <h2><a href="{% url 'transaksi:detail' order.pk %}">{{ order.nama_barang }}</a></h2>
+  <p>{{ order.mulai|date:"d M Y H:i" }} WIB · {{ order.durasi }} hari</p>
+  <p>Total Rp{{ order.total }}</p>
+  {% if incoming %}<p>Peminjam: {{ order.peminjam.get_full_name|default:order.peminjam.username }}</p>{% endif %}
+  <a class="tr-button tr-secondary" href="{% url 'transaksi:detail' order.pk %}">Lihat rincian</a>
+</article>
+{% empty %}<p>Belum ada pesanan pada daftar ini.</p>{% endfor %}
+</div>
+{% endblock %}

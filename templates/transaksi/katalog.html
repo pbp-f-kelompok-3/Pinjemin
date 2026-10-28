@@ -1,0 +1,16 @@
+{% extends "transaksi/base.html" %}
+{% block transaksi_content %}
+<h1>Mau pinjam apa?</h1>
+<p>Pilih barang, simpan jadwal sebagai draft, lalu ajukan saat sudah siap.</p>
+<div class="tr-grid">
+{% for item in items %}
+<article class="tr-card">
+  {% if item.foto_utama %}<img class="tr-photo" src="{{ item.foto_utama.url }}" alt="{{ item.nama_barang }}" loading="lazy">{% endif %}
+  <h2>{{ item.nama_barang }}</h2>
+  <p>{{ item.deskripsi|truncatechars:140 }}</p>
+  <p>{% if item.jenis_penawaran == 'gratis' %}Gratis{% else %}Rp{{ item.tarif_formatted }} / hari{% endif %}</p>
+  <a class="tr-button" href="{% url 'transaksi:buat' item.pk %}">Pilih jadwal</a>
+</article>
+{% empty %}<p>Belum ada barang pengguna lain yang tersedia.</p>{% endfor %}
+</div>
+{% endblock %}
