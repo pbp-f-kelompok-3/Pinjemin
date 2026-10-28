@@ -134,3 +134,6 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 
 ## LINK FIGMA 
 https://www.figma.com/design/cIcomyuXpNiIPvk3Wa4gwo/Design-System?node-id=0-1&p=f&t=STwAfPD95yE7Ky2X-0
+
+## LINK PWS 
+https://roisul-umam-pinjemin.pws.cs.ui.ac.id/
