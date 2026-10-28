@@ -275,7 +275,7 @@
       a.addEventListener("click", function (e) {
         e.preventDefault();
         history.replaceState(null, "", "#" + a.dataset.hcTab);
-        show(a.dataset.hcTab);
+        window.dispatchEvent(new Event("hashchange"));
       });
     });
     window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });

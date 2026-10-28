@@ -286,6 +286,17 @@ html {
   text-underline-offset: 4px;
 }
 
+.header-account[aria-current],
+.header-lend[aria-current] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+.header-account[aria-current] {
+  color: var(--navbar-focus);
+}
+
 .header-lend {
   display: inline-flex;
   align-items: center;
@@ -341,9 +352,14 @@ html {
   font-weight: 500;
 }
 
-.site-subnav a:hover,
-.site-subnav a[aria-current="page"] {
-  border-bottom-color: var(--yellow);
+.site-subnav a:hover {
+  border-bottom-color: var(--navbar-control-active);
+}
+
+.site-subnav a[aria-current] {
+  border-bottom-color: var(--navbar-focus);
+  color: var(--navbar-focus);
+  font-weight: 600;
 }
 
 .site-subnav .subnav-categories {
