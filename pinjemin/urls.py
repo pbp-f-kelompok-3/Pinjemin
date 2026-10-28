@@ -28,4 +28,7 @@ urlpatterns = [
     path(' ', include('help_center.urls')),
     path('', views.home, name='home'),
     path("categories/", include("categories.urls")),
+    path('lokasi/', include('locations.urls')),
+    path('bantuan/', include('help_center.urls')),
+    path('barang/', include('barang.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

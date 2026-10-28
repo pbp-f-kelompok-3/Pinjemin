@@ -1,0 +1,109 @@
+<!-- ================= MODAL KONFIRMASI HAPUS BARANG (REFERENSI 4) ================= -->
+<div id="delete-modal-overlay" class="br-modal-overlay" onclick="closeDeleteModal(event)">
+  <div class="br-modal-card" onclick="event.stopPropagation()">
+    <!-- Tombol Tutup (X) -->
+    <button type="button" class="br-modal-close" onclick="closeDeleteModal()" aria-label="Tutup Modal">&times;</button>
+
+    <!-- Icon Badge Hapus -->
+    <div class="br-modal-badge">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+      </svg>
+    </div>
+
+    <!-- Judul & Keterangan -->
+    <h3 style="font-size: 20px; font-weight: 800; margin: 0 0 6px; color: var(--br-black);">Hapus Barang?</h3>
+    <p style="font-size: 13px; color: var(--br-text-muted); margin: 0 0 16px;">
+      Apakah kamu yakin ingin menghapus barang ini dari daftar Barang Saya? Tindakan ini tidak dapat dibatalkan.
+    </p>
+
+    <!-- Ringkasan Barang yang akan dihapus -->
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--br-bg-muted); border-radius: var(--br-radius); border: 1px solid var(--br-border); margin-bottom: 16px;">
+      <div style="width: 56px; height: 56px; border-radius: 8px; overflow: hidden; background: #E5E7EB; flex-shrink: 0;">
+        <img id="del-item-img" src="" alt="Thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+          <span id="del-item-cat" class="br-badge br-badge-category" style="font-size: 10px; padding: 2px 6px;">Kategori</span>
+          <span id="del-item-type" class="br-badge br-badge-sewa" style="font-size: 10px; padding: 2px 6px;">Sewa</span>
+        </div>
+        <div id="del-item-name" style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--br-black);">Nama Barang</div>
+        <div id="del-item-price" style="font-size: 12px; color: var(--br-text-muted); font-weight: 600;">Rp 25.000 / hari</div>
+      </div>
+    </div>
+
+    <!-- Peringatan Aturan Bisnis -->
+    <div id="del-item-warning-borrowed" style="display: none; padding: 12px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: var(--br-radius); margin-bottom: 20px; font-size: 12px; color: #991B1B;">
+      <strong>Peringatan (Aturan Bisnis Rule #6):</strong> Barang ini sedang dalam masa peminjaman aktif dan TIDAK DAPAT dihapus sampai transaksi selesai.
+    </div>
+
+    <div id="del-item-warning-safe" style="padding: 10px 12px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: var(--br-radius); margin-bottom: 20px; font-size: 12px; color: #92400E;">
+      Barang yang sedang dipinjam tidak dapat dihapus. Pastikan barang sudah tidak dibutuhkan lagi.
+    </div>
+
+    <!-- Form Aksi POST dengan CSRF Token -->
+    <form id="del-item-form" method="POST" action="">
+      {% csrf_token %}
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="br-btn-secondary" onclick="closeDeleteModal()">Batal</button>
+        <button type="submit" id="del-submit-btn" class="br-btn-danger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+          </svg>
+          Ya, Hapus
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openDeleteModal(itemId, itemName, itemPrice, itemCategory, itemType, itemImg, isBorrowed) {
+    var overlay = document.getElementById('delete-modal-overlay');
+    var form = document.getElementById('del-item-form');
+    var nameEl = document.getElementById('del-item-name');
+    var priceEl = document.getElementById('del-item-price');
+    var catEl = document.getElementById('del-item-cat');
+    var typeEl = document.getElementById('del-item-type');
+    var imgEl = document.getElementById('del-item-img');
+    var warnBorrowed = document.getElementById('del-item-warning-borrowed');
+    var warnSafe = document.getElementById('del-item-warning-safe');
+    var submitBtn = document.getElementById('del-submit-btn');
+
+    form.action = '/barang/' + itemId + '/hapus/';
+    nameEl.textContent = itemName;
+    priceEl.textContent = itemPrice;
+    catEl.textContent = itemCategory;
+    typeEl.textContent = itemType;
+    imgEl.src = itemImg;
+
+    if (isBorrowed) {
+      warnBorrowed.style.display = 'block';
+      warnSafe.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+    } else {
+      warnBorrowed.style.display = 'none';
+      warnSafe.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.style.cursor = 'pointer';
+    }
+
+    overlay.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDeleteModal(e) {
+    var overlay = document.getElementById('delete-modal-overlay');
+    overlay.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeDeleteModal();
+    }
+  });
+</script>
