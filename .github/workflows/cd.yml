@@ -1,0 +1,63 @@
+name: Django CD Pipeline
+
+# Deploy otomatis ke PWS setiap CI ("Django CI Pipeline") sukses di branch main.
+# Bisa juga dijalankan manual dari tab Actions (workflow_dispatch).
+on:
+  workflow_run:
+    workflows: ["Django CI Pipeline"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Cegah dua deploy jalan bersamaan
+concurrency:
+  group: deploy-pws
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to PWS
+    runs-on: ubuntu-latest
+
+    # Hanya deploy kalau CI-nya sukses (atau kalau dijalankan manual)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Pakai commit yang barusan lulus CI, bukan HEAD terbaru
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Push to PWS (master)
+        env:
+          PWS_REMOTE_URL: ${{ secrets.PWS_REMOTE_URL }}
+          PWS_USERNAME: ${{ secrets.PWS_USERNAME }}
+          PWS_PASSWORD: ${{ secrets.PWS_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PWS_REMOTE_URL:-}" ] || [ -z "${PWS_USERNAME:-}" ] || [ -z "${PWS_PASSWORD:-}" ]; then
+            echo "::error::Secret PWS_REMOTE_URL / PWS_USERNAME / PWS_PASSWORD belum diset di repo."
+            exit 1
+          fi
+
+          AUTH=$(printf '%s:%s' "$PWS_USERNAME" "$PWS_PASSWORD" | base64 -w0)
+          echo "::add-mask::$AUTH"
+
+          # PWS hanya membaca branch master, jadi commit saat ini di-push ke master.
+          # Kredensial dikirim lewat header supaya tidak tersimpan di URL / git config.
+          git -c http.extraheader="Authorization: Basic ${AUTH}" \
+            push "$PWS_REMOTE_URL" HEAD:refs/heads/master --force
+
+      - name: Deployment summary
+        run: |
+          {
+            echo "### Deploy ke PWS terkirim"
+            echo "- Commit: \`${{ github.event.workflow_run.head_sha || github.sha }}\`"
+            echo "- Cek status build di dashboard PWS."
+          } >> "$GITHUB_STEP_SUMMARY"
