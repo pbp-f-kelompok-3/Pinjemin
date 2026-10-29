@@ -19,6 +19,7 @@ from django.db import transaction
 import urllib.parse
 from .models import Barang, Kategori, Lokasi
 from categories.models import Category
+from transaksi.models import Pesanan
 from .forms import BarangForm, BarangEditForm
 from .services import save_item_with_pickup, visible_item_locations
 from locations.services import pickup_context
@@ -43,6 +44,7 @@ def dashboard_barang_saya(request):
     barang_tersedia = sum(1 for b in queryset if b.status_penawaran == 'aktif' and not b.is_sedang_dipinjam)
     sedang_dipinjam = sum(1 for b in queryset if b.is_sedang_dipinjam)
     tidak_aktif = queryset.filter(status_penawaran='nonaktif').count()
+    pesanan_masuk_count = Pesanan.objects.filter(pemilik=user).exclude(status=Pesanan.Status.DRAFT).count()
 
     # Filter Tab
     tab = request.GET.get('tab', 'semua')
@@ -107,6 +109,7 @@ def dashboard_barang_saya(request):
         'barang_tersedia': barang_tersedia,
         'sedang_dipinjam': sedang_dipinjam,
         'tidak_aktif': tidak_aktif,
+        'pesanan_masuk_count': pesanan_masuk_count,
         'kategori_list': kategori_list,
         'lokasi_list': lokasi_list,
         'active_tab': tab,

@@ -1,3 +1,4 @@
+import urllib.parse
 import json
 import uuid
 
@@ -75,14 +76,42 @@ def detail(request, pk):
     if order.status == Pesanan.Status.DRAFT and order.peminjam_id != request.user.pk:
         return HttpResponse(status=404)
     phone = ""
+    counterparty_name = ""
+    counterparty_role = ""
+    wa_link = ""
     if order.status != Pesanan.Status.DRAFT:
-        profile = getattr(order.pemilik, "profile", None)
-        phone = "".join(c for c in (profile.phone if profile else "") if c.isdigit())
-        if phone.startswith("0"):
-            phone = "62" + phone[1:]
-    return render(request, "transaksi/detail.html", {"order": order, "payments": order.pembayaran.all(),
-                  "borrower": order.peminjam_id == request.user.pk, "phone": phone,
-                  "mock_refund": settings.REFUND_MODE == "mock"})
+        is_borrower = order.peminjam_id == request.user.pk
+        counterparty = order.pemilik if is_borrower else order.peminjam
+        counterparty_role = "pemilik" if is_borrower else "peminjam"
+        counterparty_name = counterparty.get_full_name() or counterparty.username
+        profile = getattr(counterparty, "profile", None)
+        raw_digits = "".join(c for c in (profile.phone if profile else "") if c.isdigit())
+        if raw_digits.startswith("0"):
+            phone = "62" + raw_digits[1:]
+        elif raw_digits.startswith("62"):
+            phone = raw_digits
+        elif raw_digits:
+            phone = "62" + raw_digits
+
+        if phone:
+            loc_label = order.lokasi_snapshot.get("label") or order.lokasi_snapshot.get("alamat") or "titik temu kampus"
+            wa_msg = (
+                f"Halo {counterparty_name}, saya {request.user.get_full_name() or request.user.username} "
+                f"({'peminjam' if is_borrower else 'pemilik'}) barang '{order.nama_barang}' di Pinjemin UI. "
+                f"Mari koordinasikan serah terima barang di {loc_label}."
+            )
+            wa_link = f"https://wa.me/{phone}?text={urllib.parse.quote(wa_msg)}"
+
+    return render(request, "transaksi/detail.html", {
+        "order": order,
+        "payments": order.pembayaran.all(),
+        "borrower": order.peminjam_id == request.user.pk,
+        "phone": phone,
+        "wa_link": wa_link,
+        "counterparty_name": counterparty_name,
+        "counterparty_role": counterparty_role,
+        "mock_refund": settings.REFUND_MODE == "mock"
+    })
 
 
 @login_required

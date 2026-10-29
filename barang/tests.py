@@ -10,8 +10,11 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
 from barang.models import Kategori, Lokasi, Barang
 from categories.models import Category
+from transaksi.models import Pesanan
 
 User = get_user_model()
 
@@ -424,3 +427,163 @@ class BorrowFlowIntegrationTest(TestCase):
         response = self.client.get(reverse('transaksi:buat', args=[self.barang.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Kalkulator Ilmiah Casio")
+
+
+class Phase34BusinessRulesAndLenderTest(TestCase):
+    def setUp(self):
+        from accounts.models import Profile
+        self.owner = User.objects.create_user(username="lender_user", password="password123")
+        self.borrower = User.objects.create_user(username="renter_user", password="password123")
+        
+        owner_profile, _ = Profile.objects.get_or_create(user=self.owner)
+        owner_profile.phone = "081298765432"
+        owner_profile.save()
+        
+        borrower_profile, _ = Profile.objects.get_or_create(user=self.borrower)
+        borrower_profile.phone = "081211112222"
+        borrower_profile.save()
+
+        self.kategori = Category.objects.create(name="Alat Musik Kost")
+        self.lokasi = Lokasi.objects.create(
+            nama_area="Kutek UI",
+            short_label="Kutek",
+            patokan="Dekat Gang Kober"
+        )
+        self.barang = Barang.objects.create(
+            pemilik=self.owner,
+            nama_barang="Gitar Akustik Yamaha",
+            foto_utama=generate_test_image(),
+            deskripsi="Gitar akustik senar nilon empuk.",
+            kategori=self.kategori,
+            jenis_penawaran="sewa",
+            tarif_per_hari=20000,
+            lokasi=self.lokasi,
+            status_penawaran="aktif"
+        )
+
+    def test_dashboard_shows_pesanan_masuk_and_locked_status(self):
+        now = timezone.now()
+        Pesanan.objects.create(
+            peminjam=self.borrower,
+            barang=self.barang,
+            pemilik=self.owner,
+            mulai=now + timedelta(days=1),
+            durasi=2,
+            selesai=now + timedelta(days=3),
+            tarif_per_hari=20000,
+            total=40000,
+            nama_barang=self.barang.nama_barang,
+            lokasi_snapshot={"label": "Kutek", "alamat": "Kutek UI"},
+            status=Pesanan.Status.CONFIRMED
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse('barang:dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['pesanan_masuk_count'], 1)
+        self.assertContains(response, "Pesanan Masuk")
+        self.assertContains(response, "Terkunci")
+        self.assertNotContains(response, reverse('barang:edit', args=[self.barang.pk]))
+
+    def test_edit_barang_rejected_when_transaksi_terkunci(self):
+        now = timezone.now()
+        Pesanan.objects.create(
+            peminjam=self.borrower,
+            barang=self.barang,
+            pemilik=self.owner,
+            mulai=now + timedelta(days=1),
+            durasi=2,
+            selesai=now + timedelta(days=3),
+            tarif_per_hari=20000,
+            total=40000,
+            nama_barang=self.barang.nama_barang,
+            status=Pesanan.Status.CONFIRMED
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse('barang:edit', args=[self.barang.pk]))
+        self.assertRedirects(response, reverse('barang:dashboard'))
+
+        post_response = self.client.post(reverse('barang:edit', args=[self.barang.pk]), {
+            'nama_barang': 'Gitar Berubah',
+            'deskripsi': 'Gitar akustik senar nilon empuk.',
+            'jenis_penawaran': 'sewa',
+            'tarif_per_hari': 25000,
+            'kategori': self.kategori.pk,
+            'status_penawaran': 'aktif',
+            'pickup_point_choice': 'saved_1'
+        })
+        self.assertRedirects(post_response, reverse('barang:dashboard'))
+
+    def test_hapus_barang_rejected_when_not_can_be_deleted(self):
+        now = timezone.now()
+        Pesanan.objects.create(
+            peminjam=self.borrower,
+            barang=self.barang,
+            pemilik=self.owner,
+            mulai=now + timedelta(days=1),
+            durasi=2,
+            selesai=now + timedelta(days=3),
+            tarif_per_hari=20000,
+            total=40000,
+            nama_barang=self.barang.nama_barang,
+            status=Pesanan.Status.CONFIRMED
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse('barang:hapus', args=[self.barang.pk]))
+        self.assertRedirects(response, reverse('barang:dashboard'))
+        self.assertTrue(Barang.objects.filter(pk=self.barang.pk).exists())
+
+    def test_hapus_barang_ajax_rejected_when_not_can_be_deleted(self):
+        now = timezone.now()
+        Pesanan.objects.create(
+            peminjam=self.borrower,
+            barang=self.barang,
+            pemilik=self.owner,
+            mulai=now + timedelta(days=1),
+            durasi=2,
+            selesai=now + timedelta(days=3),
+            tarif_per_hari=20000,
+            total=40000,
+            nama_barang=self.barang.nama_barang,
+            status=Pesanan.Status.CONFIRMED
+        )
+
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse('barang:hapus_ajax', args=[self.barang.pk]),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(Barang.objects.filter(pk=self.barang.pk).exists())
+
+    def test_whatsapp_coordination_in_transaksi_detail(self):
+        now = timezone.now()
+        order = Pesanan.objects.create(
+            peminjam=self.borrower,
+            barang=self.barang,
+            pemilik=self.owner,
+            mulai=now + timedelta(days=1),
+            durasi=2,
+            selesai=now + timedelta(days=3),
+            tarif_per_hari=20000,
+            total=40000,
+            nama_barang=self.barang.nama_barang,
+            lokasi_snapshot={"label": "Kutek", "alamat": "Kutek UI"},
+            status=Pesanan.Status.CONFIRMED
+        )
+
+        # Borrower sees WhatsApp button to owner
+        self.client.force_login(self.borrower)
+        borrower_resp = self.client.get(reverse('transaksi:detail', args=[order.pk]))
+        self.assertEqual(borrower_resp.status_code, 200)
+        self.assertContains(borrower_resp, "Hubungi pemilik via WhatsApp")
+        self.assertContains(borrower_resp, "6281298765432")
+
+        # Owner sees WhatsApp button to borrower
+        self.client.force_login(self.owner)
+        owner_resp = self.client.get(reverse('transaksi:detail', args=[order.pk]))
+        self.assertEqual(owner_resp.status_code, 200)
+        self.assertContains(owner_resp, "Hubungi peminjam via WhatsApp")
+        self.assertContains(owner_resp, "6281211112222")
