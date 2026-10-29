@@ -558,6 +558,8 @@ color: var(--black);
 
 .home-page .featured-box {
   padding: 24px;
+  height: auto;
+  min-height: 150px;
 }
 
 .home-page .featured-box h2 {

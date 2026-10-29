@@ -17,6 +17,7 @@ urlpatterns = [
     # Formulir Pengelolaan Barang
     path('tambah/', views.tambah_barang, name='tambah'),
     path('tambah-ajax/', views.tambah_barang_ajax, name='tambah_ajax'),
+    path('<int:pk>/', views.detail_barang, name='detail'),
     path('<int:pk>/edit/', views.edit_barang, name='edit'),
     path('<int:pk>/hapus/', views.hapus_barang, name='hapus'),
 

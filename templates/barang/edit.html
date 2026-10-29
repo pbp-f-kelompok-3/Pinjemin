@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static %}
 
 {% block title %}Edit {{ barang.nama_barang }} - Pinjemin{% endblock %}
@@ -44,14 +44,22 @@
   {% endif %}
 
   <!-- Form Layout -->
-  <form method="POST" action="" enctype="multipart/form-data" data-item-edit>
+  <form method="POST" action="{% url 'barang:edit' barang.pk %}" enctype="multipart/form-data" data-item-edit novalidate>
     {% csrf_token %}
 
-    {% if form.non_field_errors %}
-      <div style="padding: 14px 18px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: var(--br-radius); color: #991B1B; font-size: 14px; margin-bottom: 20px;">
-        {% for error in form.non_field_errors %}
-          <p style="margin: 0;">{{ error }}</p>
-        {% endfor %}
+    {% if form.errors %}
+      <div style="padding: 14px 18px; background: #FEF2F2; border: 1.5px solid #F87171; border-radius: var(--br-radius); color: #991B1B; font-size: 14px; margin-bottom: 20px;">
+        <div style="font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Periksa kembali kesalahan pengisian berikut:
+        </div>
+        <ul style="margin: 0; padding-left: 24px; font-size: 13.5px; line-height: 1.6;">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
       </div>
     {% endif %}
 
@@ -138,6 +146,7 @@
             <span class="br-price-suffix">/ 24 jam</span>
           </div>
           <div class="br-helper" id="tarif-helper">Tentukan tarif harian yang ramah bagi kantong mahasiswa. Otomatis Rp 0 jika memilih Gratis.</div>
+          <p class="pickup-error" id="edit-tarif-error" style="color: #DC2626; font-size: 12.5px; font-weight: 600; margin-top: 6px; display: none;"></p>
           {% if form.tarif_per_hari.errors %}
             <div style="color: var(--br-red); font-size: 12px; margin-top: 4px;">{{ form.tarif_per_hari.errors.0 }}</div>
           {% endif %}
@@ -206,6 +215,32 @@
   var tarifInput = document.getElementById('id_tarif_per_hari');
   var groupTarif = document.getElementById('group-tarif');
   var bannerGratis = document.getElementById('banner-gratis-info');
+  var tarifError = document.getElementById('edit-tarif-error');
+  var editForm = document.querySelector('form[data-item-edit]');
+
+  function checkEditTarifValidity() {
+    if (!jenisSelect || !tarifInput || !tarifError) return true;
+    if (jenisSelect.value === 'sewa') {
+      var val = Number(tarifInput.value);
+      if (tarifInput.value === '' || isNaN(val)) {
+        tarifError.textContent = '⚠️ Tarif sewa harian wajib diisi untuk barang sewa.';
+        tarifError.style.display = 'block';
+        return false;
+      } else if (val <= 0) {
+        tarifError.textContent = '⚠️ Tarif sewa harian tidak boleh Rp 0 atau bernilai minus. Harap masukkan nominal minimal Rp 1.';
+        tarifError.style.display = 'block';
+        return false;
+      } else {
+        tarifError.textContent = '';
+        tarifError.style.display = 'none';
+        return true;
+      }
+    } else {
+      tarifError.textContent = '';
+      tarifError.style.display = 'none';
+      return true;
+    }
+  }
 
   function updateTarifState() {
     if (jenisSelect && tarifInput && groupTarif) {
@@ -217,11 +252,13 @@
       } else {
         groupTarif.style.display = 'block';
         tarifInput.setAttribute('required', 'required');
+        tarifInput.min = '1';
         if (bannerGratis) bannerGratis.style.display = 'none';
         if (tarifInput.value === '0' || !tarifInput.value) {
           tarifInput.value = '25000';
         }
       }
+      checkEditTarifValidity();
     }
   }
 
@@ -230,11 +267,54 @@
     updateTarifState();
   }
 
-  // Cegah mouse wheel mengubah angka tarif saat scroll halaman
   if (tarifInput) {
+    tarifInput.addEventListener('input', checkEditTarifValidity);
     tarifInput.addEventListener('wheel', function(e) {
       e.preventDefault();
     }, { passive: false });
+  }
+
+  if (editForm) {
+    editForm.addEventListener('submit', function(e) {
+      // 1. Cek validitas nama barang
+      var namaInput = document.getElementById('id_nama_barang');
+      if (namaInput && !namaInput.value.trim()) {
+        e.preventDefault();
+        alert('⚠️ Nama barang wajib diisi dan tidak boleh kosong.');
+        namaInput.focus();
+        namaInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+
+      // 2. Cek validitas kategori
+      var katSelect = document.getElementById('id_kategori');
+      if (katSelect && !katSelect.value) {
+        e.preventDefault();
+        alert('⚠️ Kategori barang wajib dipilih.');
+        katSelect.focus();
+        katSelect.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+
+      // 3. Cek validitas tarif jika sewa
+      if (!checkEditTarifValidity()) {
+        e.preventDefault();
+        alert(tarifError ? tarifError.textContent : '⚠️ Tarif sewa harian tidak boleh Rp 0 atau bernilai minus.');
+        tarifInput.focus();
+        tarifInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+
+      // 4. Cek validitas deskripsi
+      var descInput = document.getElementById('id_deskripsi');
+      if (descInput && !descInput.value.trim()) {
+        e.preventDefault();
+        alert('⚠️ Deskripsi lengkap barang wajib diisi.');
+        descInput.focus();
+        descInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+    });
   }
 
   window.addEventListener('wheel', function() {
@@ -247,5 +327,5 @@
 
 {% block extra_js %}
 <script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
-<script src="{% static 'js/pickup-location.js' %}?v=2" defer></script>
+<script src="{% static 'js/pickup-location.js' %}?v=20261029-final" defer></script>
 {% endblock %}

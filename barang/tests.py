@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests untuk Modul Manajemen Barang (Fauzan Taqiy Santosa - NPM: 2506607272)
 Sesuai Rubrik Penilaian Proyek Pemrograman Berbasis Platform (PBP) Fasilkom UI
 """
@@ -11,6 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from barang.models import Kategori, Lokasi, Barang
+from categories.models import Category
 
 User = get_user_model()
 
@@ -27,11 +28,7 @@ def generate_test_image():
 class BarangModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="fauzan_test", password="testpassword123")
-        self.kategori = Kategori.objects.create(
-            nama="Elektronik Kost",
-            slug="elektronik-kost",
-            deskripsi="Peralatan elektronik kebutuhan mahasiswa kost."
-        )
+        self.kategori = Category.objects.create(name="Elektronik Kost")
         self.lokasi = Lokasi.objects.create(
             nama_area="Area Kutek UI",
             short_label="Kutek UI",
@@ -106,7 +103,7 @@ class BarangViewTest(TestCase):
     def setUp(self):
         self.client = Client(SERVER_NAME='localhost')
         self.user = User.objects.create_user(username="fauzan_mhs", password="password123")
-        self.kategori = Kategori.objects.create(nama="Pakaian", slug="pakaian")
+        self.kategori = Category.objects.create(name="Pakaian")
         self.lokasi = Lokasi.objects.create(nama_area="Barel UI", short_label="Barel UI", patokan="Dekat Kober")
         self.barang = Barang.objects.create(
             pemilik=self.user,
@@ -194,7 +191,7 @@ class BarangAPITest(TestCase):
     def setUp(self):
         self.client = Client(SERVER_NAME='localhost')
         self.user = User.objects.create_user(username="api_user", password="password123")
-        self.kategori = Kategori.objects.create(nama="Buku", slug="buku")
+        self.kategori = Category.objects.create(name="Buku")
         self.lokasi = Lokasi.objects.create(nama_area="Pocin", short_label="Pocin", patokan="Stasiun Pocin")
         self.barang = Barang.objects.create(
             pemilik=self.user,

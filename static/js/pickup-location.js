@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   'use strict';
   const root = document.querySelector('[data-pickup-picker]');
   if (!root) return;
@@ -341,10 +341,32 @@
   });
   if (itemForm) itemForm.addEventListener('submit', event => {
     syncItem();
+    const isEdit = itemForm.hasAttribute('data-item-edit') || Boolean(currentRecord);
+    if (isEdit) {
+      // Pada mode edit barang, JANGAN PERNAH batalkan submit karena urusan lokasi!
+      // Jika pengguna memilih titik dari riwayat yang valid, gunakan titik tersebut.
+      // Jika tidak, otomatis fallback mempertahankan lokasi barang saat ini.
+      if (mode === 'saved' && selection && validPoint(selection.latitude, selection.longitude)) {
+        hiddenMode.value = 'saved';
+        hiddenId.value = selection.id;
+        hiddenLat.value = selection.latitude;
+        hiddenLng.value = selection.longitude;
+      } else {
+        hiddenMode.value = 'current';
+        if (currentRecord) {
+          hiddenId.value = '';
+          hiddenLat.value = currentRecord.latitude ?? '';
+          hiddenLng.value = currentRecord.longitude ?? '';
+        }
+      }
+      return; // Loloskan submit edit dengan aman!
+    }
+
     const keepCurrent = mode === 'current' && selection?.id === 'current';
     if (!keepCurrent && (mode !== 'saved' || !selection || !validPoint(selection.latitude, selection.longitude))) {
       event.preventDefault();
       message('Pilih lokasi tersimpan atau simpan lokasi baru sebelum menyimpan barang.', true);
+      alert('Pemberitahuan: Harap pilih titik penjemputan pada peta atau pilih dari riwayat lokasi sebelum menyimpan barang.');
       root.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
   });

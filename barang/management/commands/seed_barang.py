@@ -1,5 +1,6 @@
-from django.core.management.base import BaseCommand
+﻿from django.core.management.base import BaseCommand
 from barang.models import Kategori, Lokasi
+from categories.models import Category
 
 
 class Command(BaseCommand):
@@ -58,7 +59,11 @@ class Command(BaseCommand):
                 slug=k['slug'],
                 defaults={'nama': k['nama'], 'deskripsi': k['deskripsi']}
             )
-            if created:
+            cat_obj, cat_created = Category.objects.get_or_create(
+                id=obj.id,
+                defaults={'name': k['nama']}
+            )
+            if created or cat_created:
                 self.stdout.write(self.style.SUCCESS(f"Kategori '{obj.nama}' berhasil ditambahkan."))
 
         for loc in lokasi_data:

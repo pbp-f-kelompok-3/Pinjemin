@@ -1,4 +1,4 @@
-"""
+﻿"""
 @module: pinjemin.barang.views
 @author: Fauzan Taqiy Santosa (NPM: 2506607272)
 @feature: Manajemen Barang (Dashboard Barang Saya, Tambah, Edit, Hapus, dan API JSON/XML)
@@ -13,8 +13,10 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q
-from .models import Barang, Kategori, Lokasi
+from django.db.models import Q, F
+import urllib.parse
+from .models import Barang, Lokasi
+from categories.models import Category
 from .forms import BarangForm, BarangEditForm
 from .services import save_item_with_pickup, visible_item_locations
 from locations.services import pickup_context
@@ -94,7 +96,7 @@ def dashboard_barang_saya(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
-    kategori_list = Kategori.objects.all()
+    kategori_list = Category.objects.all()
     lokasi_list = visible_item_locations(request.user)
 
     context = {
@@ -130,11 +132,16 @@ def tambah_barang(request):
             )
             return redirect('barang:dashboard')
         else:
-            messages.error(request, "Silakan periksa kembali kolom formulir yang belum sesuai.")
+            messages.error(request, "Gagal mendaftarkan barang. Silakan periksa kesalahan berikut:")
+            for field, errors in form.errors.items():
+                field_label = form.fields[field].label if field in form.fields and form.fields[field].label else field
+                unique_errs = list(dict.fromkeys(errors))
+                for err in unique_errs:
+                    messages.error(request, f"• {field_label}: {err}" if field != '__all__' else f"• {err}")
     else:
         form = BarangForm(user=request.user)
 
-    kategori_list = Kategori.objects.all()
+    kategori_list = Category.objects.all()
     lokasi_list = visible_item_locations(request.user)
 
     context = {
@@ -165,11 +172,16 @@ def edit_barang(request, pk):
             )
             return redirect('barang:dashboard')
         else:
-            messages.error(request, "Terjadi kesalahan validasi saat menyimpan perubahan.")
+            messages.error(request, "Gagal menyimpan perubahan barang. Silakan periksa kesalahan berikut:")
+            for field, errors in form.errors.items():
+                field_label = form.fields[field].label if field in form.fields and form.fields[field].label else field
+                unique_errs = list(dict.fromkeys(errors))
+                for err in unique_errs:
+                    messages.error(request, f"• {field_label}: {err}" if field != '__all__' else f"• {err}")
     else:
         form = BarangEditForm(instance=barang, user=request.user)
 
-    kategori_list = Kategori.objects.all()
+    kategori_list = Category.objects.all()
     lokasi_list = visible_item_locations(request.user)
 
     context = {
@@ -276,3 +288,73 @@ def tambah_barang_ajax(request):
             'status': 'error',
             'errors': form.errors,
         }, status=400)
+
+
+def detail_barang(request, pk):
+    """
+    HALAMAN RINCIAN / DETAIL BARANG (Publik & Calon Peminjam)
+    Menampilkan detail lengkap barang:
+    - Foto produk asli ukuran penuh
+    - Nama barang, kategori, jenis penawaran (sewa/gratis), tarif
+    - Status ketersediaan (Tersedia / Sedang Dipinjam)
+    - Deskripsi lengkap kondisi & aturan barang
+    - Profil nama asli pemilik (nama lengkap dari Profile SSO UI)
+    - Titik lokasi penjemputan interaktif pada peta Leaflet
+    - Tombol aksi Pinjam Barang / Hubungi Pemilik via WhatsApp
+    """
+    barang = get_object_or_404(
+        Barang.objects.select_related('kategori', 'lokasi', 'pemilik', 'pemilik__profile'),
+        pk=pk
+    )
+
+    # Tambah counter dilihat jika bukan pemilik sendiri yang membuka halaman
+    if not request.user.is_authenticated or request.user != barang.pemilik:
+        Barang.objects.filter(pk=pk).update(dilihat_count=F('dilihat_count') + 1)
+        barang.dilihat_count += 1
+
+    is_owner = request.user.is_authenticated and request.user == barang.pemilik
+
+    # Aturan Privasi & Keamanan:
+    # Nomor WhatsApp pemilik HANYA boleh terbuka setelah peminjam membayar / pesanan terkonfirmasi.
+    has_paid = False
+    if request.user.is_authenticated and not is_owner:
+        for rel_name in ['daftar_pesanan', 'pesanan_set', 'transaksi_set', 'transaksi']:
+            manager = getattr(barang, rel_name, None)
+            if manager is not None and hasattr(manager, 'filter'):
+                if manager.filter(
+                    peminjam=request.user,
+                    status__in=['dikonfirmasi', 'selesai', 'dipinjam', 'aktif']
+                ).exists():
+                    has_paid = True
+                    break
+
+    # Format kontak WhatsApp pemilik jika berhak melihat (sudah membayar atau pemilik sendiri)
+    profile = getattr(barang.pemilik, 'profile', None)
+    phone = ''
+    wa_link = ''
+    if (has_paid or is_owner) and profile and profile.phone:
+        raw_digits = ''.join(c for c in profile.phone if c.isdigit())
+        if raw_digits.startswith('0'):
+            phone = '62' + raw_digits[1:]
+        elif raw_digits.startswith('62'):
+            phone = raw_digits
+        elif raw_digits:
+            phone = '62' + raw_digits
+
+        if phone:
+            loc_label = barang.lokasi.short_label or barang.lokasi.nama_area
+            wa_message = (
+                f"Halo {barang.nama_pemilik_lengkap}, saya peminjam '{barang.nama_barang}' di Pinjemin UI. "
+                f"Pembayaran peminjaman saya telah terkonfirmasi. Mari atur waktu dan penyerahan barang di {loc_label}."
+            )
+            wa_link = f"https://wa.me/{phone}?text={urllib.parse.quote(wa_message)}"
+
+    context = {
+        'barang': barang,
+        'profile': profile,
+        'phone': phone,
+        'wa_link': wa_link,
+        'is_owner': is_owner,
+        'has_paid': has_paid,
+    }
+    return render(request, 'barang/detail.html', context)

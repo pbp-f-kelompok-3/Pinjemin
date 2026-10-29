@@ -184,6 +184,35 @@ class Barang(models.Model):
         return not self.is_sedang_dipinjam
 
     @property
+    def nama_pemilik_lengkap(self):
+        """
+        Nama lengkap asli pemilik barang (dari Profile SSO UI, get_full_name, atau username).
+        Digunakan pada rincian / detail barang.
+        """
+        profile = getattr(self.pemilik, 'profile', None)
+        if profile and profile.full_name and profile.full_name.strip():
+            return profile.full_name.strip()
+        full_name = self.pemilik.get_full_name().strip()
+        if full_name:
+            return full_name
+        return self.pemilik.username
+
+    @property
+    def nama_pemilik_display(self):
+        """
+        Nama pemilik ringkas untuk display kartu beranda / katalog:
+        Jika nama lebih dari 2 kata, tampilkan 2 kata pertama + inisial sisa katanya
+        (misal: 'Fauzan Taqiy Santosa' -> 'Fauzan Taqiy S.').
+        """
+        raw_name = self.nama_pemilik_lengkap
+        words = raw_name.split()
+        if len(words) <= 2:
+            return raw_name
+        first_two = " ".join(words[:2])
+        initials = " ".join(f"{w[0].upper()}." for w in words[2:])
+        return f"{first_two} {initials}"
+
+    @property
     def tarif_formatted(self):
         """Format tarif ke format ribuan rupiah Indonesia (misal 50000 -> 50.000)"""
         if self.tarif_per_hari:
