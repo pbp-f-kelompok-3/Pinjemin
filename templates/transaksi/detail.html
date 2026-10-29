@@ -1,0 +1,62 @@
+{% extends "transaksi/base.html" %}
+{% load static %}
+{% block transaksi_content %}
+<div class="tr-card tr-narrow">
+  <span class="tr-status">{{ order.get_status_display }}</span>
+  <h1>{{ order.nama_barang }}</h1>
+  <p class="tr-reference">Nomor pesanan: {{ order.pk }}</p>
+  <dl class="tr-facts">
+    <dt>Mulai</dt><dd>{{ order.mulai|date:"d M Y H:i" }} WIB</dd>
+    <dt>Selesai</dt><dd>{{ order.selesai|date:"d M Y H:i" }} WIB</dd>
+    <dt>Durasi</dt><dd>{{ order.durasi }} hari</dd>
+    <dt>Tarif per hari</dt><dd>Rp{{ order.tarif_per_hari }}</dd>
+    <dt>Total</dt><dd><strong>Rp{{ order.total }}</strong></dd>
+  </dl>
+  {% if order.status == 'draft' %}<p class="tr-notice">Draft belum memesan slot barang. Harga dan ketersediaan diperiksa lagi saat diajukan.</p>{% endif %}
+  {% if order.status == 'menunggu_pembayaran' %}
+  <div class="tr-notice" data-payment-deadline="{{ order.batas_bayar|date:'c' }}" data-server-now="{% now 'c' %}">
+    <p>Selesaikan pembayaran sebelum {{ order.batas_bayar|date:"d M Y H:i:s" }} WIB.</p>
+    <strong>Sisa waktu: <span data-countdown>menghitung…</span></strong>
+    <p data-expired hidden>Waktu pembayaran berakhir. Periksa status pembayaran untuk hasil terbaru.</p>
+  </div>
+  {% endif %}
+  {% if order.alasan_pembatalan %}<p>{{ order.alasan_pembatalan }}</p>{% endif %}
+  {% if mock_refund and order.total %}<p class="tr-notice">Mode demo: pembayaran memakai Midtrans Sandbox. Pengembalian dana disimulasikan di aplikasi.</p>{% endif %}
+  {% if order.status != 'draft' %}
+  <h2>Lokasi penjemputan</h2>
+  <p>{{ order.lokasi_snapshot.label }} · {{ order.lokasi_snapshot.alamat }}<br>{{ order.lokasi_snapshot.patokan }}<br>{{ order.lokasi_snapshot.kota }}</p>
+  {% if phone %}<a href="https://wa.me/{{ phone }}" target="_blank" rel="noopener noreferrer">Hubungi pemilik melalui WhatsApp</a>{% endif %}
+  {% endif %}
+  <div class="tr-actions">
+  {% if borrower %}
+    {% if order.bisa_diubah %}<a class="tr-button tr-secondary" href="{% url 'transaksi:edit' order.pk %}">Ubah jadwal</a>{% endif %}
+    {% if order.status == 'draft' %}
+      <form method="post" action="{% url 'transaksi:ajukan' order.pk %}">{% csrf_token %}<button class="tr-button" type="submit">Ajukan pesanan</button></form>
+      <a class="tr-button tr-danger" href="{% url 'transaksi:hapus' order.pk %}">Hapus draft</a>
+    {% endif %}
+    {% if order.status == 'menunggu_pembayaran' %}
+      <form method="post" action="{% url 'transaksi:bayar' order.pk %}">{% csrf_token %}<button class="tr-button" type="submit" data-pay>Bayar melalui Midtrans</button></form>
+    {% endif %}
+    {% if order.status != 'draft' and order.total %}
+      <form method="post" action="{% url 'transaksi:periksa' order.pk %}">{% csrf_token %}<button class="tr-button tr-secondary" type="submit">Periksa status pembayaran</button></form>
+    {% endif %}
+    {% if order.bisa_dibatalkan %}<a class="tr-button tr-danger" href="{% url 'transaksi:batalkan' order.pk %}">Batalkan pesanan</a>{% endif %}
+  {% endif %}
+  </div>
+</div>
+{% if payments %}
+<section class="tr-card tr-narrow"><h2>Riwayat pembayaran</h2>
+{% for payment in payments %}
+<div class="tr-payment">
+  <p>Rp{{ payment.jumlah }} · {{ payment.status_label }} {% if not payment.aktif %}(Tagihan lama, jangan dibayar){% endif %}</p>
+  <p class="tr-reference">Referensi: {{ payment.gateway_order_id }}</p>
+  {% if payment.refund_status != 'none' %}<p>{{ payment.get_refund_status_display }}</p>{% endif %}
+  {% if payment.refund_status == 'simulated' %}<p>Refund penuh Rp{{ payment.jumlah }} telah disimulasikan. Tidak ada pengembalian dana melalui Midtrans.</p>{% endif %}
+  {% if payment.refund_status == 'required' %}<p>Pengembalian dana belum selesai. Jika saldo pengelola belum tersedia, proses dapat dicoba lagi melalui pemeriksaan status pembayaran.</p>{% endif %}
+  {% if payment.refund_status == 'manual' %}<p>Pengelola perlu membantu pengembalian dana. Hubungi pusat bantuan dengan nomor pesananmu.</p>{% endif %}
+</div>
+{% endfor %}
+</section>
+{% endif %}
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/transaksi.js' %}" defer></script>{% endblock %}

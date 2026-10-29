@@ -14,8 +14,9 @@ from django.core.paginator import Paginator
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q, F
+from django.db import transaction
 import urllib.parse
-from .models import Barang, Lokasi
+from .models import Barang, Kategori, Lokasi
 from categories.models import Category
 from .forms import BarangForm, BarangEditForm
 from .services import save_item_with_pickup, visible_item_locations
@@ -154,13 +155,18 @@ def tambah_barang(request):
 
 
 @login_required
+@transaction.atomic
 def edit_barang(request, pk):
     """
     FORM EDIT BARANG (Fauzan Taqiy Santosa)
     Edit barang yang sudah ada. Hanya pemilik sah yang dapat mengakses.
     Menyediakan pengaturan Status Penawaran (Aktif vs Nonaktifkan Sementara).
     """
-    barang = get_object_or_404(Barang, pk=pk, pemilik=request.user)
+    barang = get_object_or_404(Barang.objects.select_for_update(), pk=pk, pemilik=request.user)
+
+    if barang.transaksi_terkunci:
+        messages.error(request, "Barang terkunci karena memiliki pesanan yang sudah dikonfirmasi.")
+        return redirect('barang:dashboard')
 
     if request.method == 'POST':
         form = BarangEditForm(request.POST, request.FILES, instance=barang, user=request.user)
@@ -203,6 +209,7 @@ def edit_barang(request, pk):
 
 @login_required
 @require_POST
+@transaction.atomic
 def hapus_barang(request, pk):
     """
     PEMROSESAN HAPUS BARANG (Fauzan Taqiy Santosa)
@@ -211,12 +218,12 @@ def hapus_barang(request, pk):
     - Hanya pemilik sah
     - Memvalidasi Aturan Bisnis Rule #6: Barang yang sedang dipinjam TIDAK DAPAT dihapus.
     """
-    barang = get_object_or_404(Barang, pk=pk, pemilik=request.user)
+    barang = get_object_or_404(Barang.objects.select_for_update(), pk=pk, pemilik=request.user)
 
     if not barang.can_be_deleted():
         messages.error(
             request,
-            f"Barang '{barang.nama_barang}' tidak dapat dihapus karena saat ini sedang dalam masa peminjaman aktif!"
+            f"Barang '{barang.nama_barang}' tidak dapat dihapus karena sudah memiliki draft atau riwayat pesanan."
         )
         return redirect('barang:dashboard')
 
