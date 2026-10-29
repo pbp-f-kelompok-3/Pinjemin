@@ -358,3 +358,69 @@ class KatalogBerandaTest(TestCase):
         self.assertEqual(response.context['current_q'], 'Proyektor')
         self.assertEqual(response.context['current_kategori'], str(self.kat_elektronik.pk))
         self.assertEqual(response.context['current_sort'], 'harga_desc')
+
+
+class BorrowFlowIntegrationTest(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner_user", password="password123")
+        self.borrower = User.objects.create_user(username="borrower_user", password="password123")
+        self.kategori = Category.objects.create(name="Peralatan Belajar")
+        self.lokasi = Lokasi.objects.create(
+            nama_area="Perpustakaan Pusat UI",
+            short_label="Perpusat UI",
+            patokan="Lantai 1 dekat Starbucks"
+        )
+        self.barang = Barang.objects.create(
+            pemilik=self.owner,
+            nama_barang="Kalkulator Ilmiah Casio",
+            foto_utama=generate_test_image(),
+            deskripsi="Kalkulator scientific fx-991EX mulus.",
+            kategori=self.kategori,
+            jenis_penawaran="sewa",
+            tarif_per_hari=15000,
+            lokasi=self.lokasi,
+            status_penawaran="aktif"
+        )
+
+    def test_detail_page_cta_anonymous_user(self):
+        response = self.client.get(reverse('barang:detail', args=[self.barang.pk]))
+        self.assertEqual(response.status_code, 200)
+        login_url = reverse('accounts:login')
+        self.assertContains(response, f'{login_url}?next=')
+        self.assertContains(response, "Masuk dengan SSO UI untuk Pinjam")
+
+    def test_detail_page_cta_for_owner(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse('barang:detail', args=[self.barang.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ini adalah barang inventaris milikmu sendiri")
+        self.assertContains(response, reverse('barang:edit', args=[self.barang.pk]))
+        self.assertNotContains(response, 'onclick="openBorrowModal()"')
+
+    def test_detail_page_cta_for_borrower(self):
+        self.client.force_login(self.borrower)
+        response = self.client.get(reverse('barang:detail', args=[self.barang.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'onclick="openBorrowModal()"')
+        self.assertContains(response, "Sewa Barang Sekarang")
+        self.assertContains(response, reverse('transaksi:buat', args=[self.barang.pk]))
+
+    def test_detail_page_cta_for_inactive_item(self):
+        self.barang.status_penawaran = "nonaktif"
+        self.barang.save()
+        self.client.force_login(self.borrower)
+        response = self.client.get(reverse('barang:detail', args=[self.barang.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Barang Dinonaktifkan Sementara")
+        self.assertNotContains(response, 'onclick="openBorrowModal()"')
+
+    def test_checkout_create_view_rejects_owner(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse('transaksi:buat', args=[self.barang.pk]))
+        self.assertRedirects(response, reverse('barang:detail', args=[self.barang.pk]))
+
+    def test_checkout_create_view_allows_borrower(self):
+        self.client.force_login(self.borrower)
+        response = self.client.get(reverse('transaksi:buat', args=[self.barang.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Kalkulator Ilmiah Casio")

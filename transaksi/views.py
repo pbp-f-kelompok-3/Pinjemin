@@ -53,6 +53,9 @@ def katalog(request):
 @login_required
 def buat(request, item_id):
     item = get_object_or_404(Barang, pk=item_id, status_penawaran="aktif")
+    if item.pemilik_id == request.user.pk:
+        messages.warning(request, "Kamu tidak dapat meminjam barang inventaris milikmu sendiri.")
+        return redirect("barang:detail", pk=item.pk)
     form = JadwalForm(request.POST if request.method == "POST" else None)
     if request.method == "POST" and form.is_valid():
         try:

@@ -13,7 +13,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <div class="tr-actions"><button class="tr-button" type="submit">Simpan {% if not order %}draft{% else %}perubahan{% endif %}</button>
-    <a href="{% url 'transaksi:daftar' %}">Kembali</a></div>
+    <a class="tr-button tr-secondary" href="{% if order %}{% url 'transaksi:detail' order.pk %}{% else %}{% url 'barang:detail' item.pk %}{% endif %}">Kembali</a></div>
   </form>
 </div>
 {% endblock %}
