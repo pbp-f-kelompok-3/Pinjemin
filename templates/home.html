@@ -18,49 +18,22 @@
     <h2>Shop by Category</h2>
     {% if categories %}
         <div class="categories">
-            {% if categories|length > 5 %}
-                {% for category in categories|slice:":4" %}
-                    <a href="?{% if current_kategori == category.pk|stringformat:'s' %}{% if current_q %}q={{ current_q|urlencode }}&{% endif %}{% if current_price_type %}price_type={{ current_price_type }}&{% endif %}{% if current_min_price %}min_price={{ current_min_price }}&{% endif %}{% if current_max_price %}max_price={{ current_max_price }}&{% endif %}{% if current_sort and current_sort != 'terbaru' %}sort={{ current_sort }}{% endif %}{% else %}kategori={{ category.pk }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_price_type %}&price_type={{ current_price_type }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}{% if current_max_price %}&max_price={{ current_max_price }}{% endif %}{% if current_sort and current_sort != 'terbaru' %}&sort={{ current_sort }}{% endif %}{% endif %}#barang"
-                       class="category" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon" style="{% if current_kategori == category.pk|stringformat:'s' %}background: var(--yellow, #FEE75C); border: 2px solid var(--black);{% endif %}">
-                            {% if category.icon_url %}
-                                <img src="{{ category.icon_url }}" alt="{{ category.name }}">
-                            {% else %}
-                                <span class="category-fallback">{{ category.name|first }}</span>
-                            {% endif %}
-                        </div>
-
-                        <span class="category-name" style="{% if current_kategori == category.pk|stringformat:'s' %}font-weight: 700;{% endif %}">
-                            {{ category.name }}
-                        </span>
-                    </a>
-                {% endfor %}
-
-                <a href="{% url 'categories:show_categories' %}" class="category more-category">
-                    <div class="category-icon more-icon">
-                        <span>•••</span>
+            {% for category in categories %}
+                <a href="?{% if current_kategori == category.pk|stringformat:'s' %}{% if current_q %}q={{ current_q|urlencode }}&{% endif %}{% if current_price_type %}price_type={{ current_price_type }}&{% endif %}{% if current_min_price %}min_price={{ current_min_price }}&{% endif %}{% if current_max_price %}max_price={{ current_max_price }}&{% endif %}{% if current_sort and current_sort != 'terbaru' %}sort={{ current_sort }}{% endif %}{% else %}kategori={{ category.pk }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_price_type %}&price_type={{ current_price_type }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}{% if current_max_price %}&max_price={{ current_max_price }}{% endif %}{% if current_sort and current_sort != 'terbaru' %}&sort={{ current_sort }}{% endif %}{% endif %}#barang"
+                   class="category" style="text-decoration: none; color: inherit;">
+                    <div class="category-icon" style="{% if current_kategori == category.pk|stringformat:'s' %}background: var(--yellow, #FEE75C); border: 2px solid var(--black);{% endif %}">
+                        {% if category.icon_url %}
+                            <img src="{{ category.icon_url }}" alt="{{ category.name }}">
+                        {% else %}
+                            <span class="category-fallback">{{ category.name|first }}</span>
+                        {% endif %}
                     </div>
-                    <span class="category-name">More</span>
+
+                    <span class="category-name" style="{% if current_kategori == category.pk|stringformat:'s' %}font-weight: 700;{% endif %}">
+                        {{ category.name }}
+                    </span>
                 </a>
-
-            {% else %}
-                {% for category in categories %}
-                    <a href="?{% if current_kategori == category.pk|stringformat:'s' %}{% if current_q %}q={{ current_q|urlencode }}&{% endif %}{% if current_price_type %}price_type={{ current_price_type }}&{% endif %}{% if current_min_price %}min_price={{ current_min_price }}&{% endif %}{% if current_max_price %}max_price={{ current_max_price }}&{% endif %}{% if current_sort and current_sort != 'terbaru' %}sort={{ current_sort }}{% endif %}{% else %}kategori={{ category.pk }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_price_type %}&price_type={{ current_price_type }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}{% if current_max_price %}&max_price={{ current_max_price }}{% endif %}{% if current_sort and current_sort != 'terbaru' %}&sort={{ current_sort }}{% endif %}{% endif %}#barang"
-                       class="category" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon" style="{% if current_kategori == category.pk|stringformat:'s' %}background: var(--yellow, #FEE75C); border: 2px solid var(--black);{% endif %}">
-                            {% if category.icon_url %}
-                                <img src="{{ category.icon_url }}" alt="{{ category.name }}">
-                            {% else %}
-                                <span class="category-fallback">{{ category.name|first }}</span>
-                            {% endif %}
-                        </div>
-
-                        <span class="category-name" style="{% if current_kategori == category.pk|stringformat:'s' %}font-weight: 700;{% endif %}">
-                            {{ category.name }}
-                        </span>
-                    </a>
-                {% endfor %}
-            {% endif %}
+            {% endfor %}
         </div>
     {% else %}
         <p class="no-categories">Belum ada kategori yang ditambahkan.</p>
