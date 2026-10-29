@@ -1,4 +1,4 @@
-<!-- ================= MODAL KONFIRMASI HAPUS BARANG (REFERENSI 4) ================= -->
+<!-- ================= MODAL KONFIRMASI HAPUS BARANG (TUTORIAL 05 & 06 PBP - AJAX) ================= -->
 <div id="delete-modal-overlay" class="br-modal-overlay" onclick="closeDeleteModal(event)">
   <div class="br-modal-card" onclick="event.stopPropagation()">
     <!-- Tombol Tutup (X) -->
@@ -50,15 +50,49 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
           </svg>
-          Ya, Hapus
+          <span id="del-btn-text">Ya, Hapus</span>
         </button>
       </div>
     </form>
   </div>
 </div>
 
+<!-- Toast Container untuk Notifikasi AJAX -->
+<div id="ajax-toast" style="position: fixed; top: 24px; right: 24px; z-index: 9999; display: none; align-items: center; gap: 10px; padding: 14px 20px; background: #065F46; color: #FFFFFF; border-radius: 10px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); font-size: 14px; font-weight: 600; opacity: 0; transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="ajax-toast-msg">Barang berhasil dihapus.</span>
+</div>
+
 <script>
+  var currentDeleteId = null;
+
+  function showDeleteToast(message, isError) {
+    var toast = document.getElementById('ajax-toast');
+    var msg = document.getElementById('ajax-toast-msg');
+    if (!toast || !msg) return;
+
+    msg.textContent = message;
+    if (isError) {
+      toast.style.background = '#991B1B';
+    } else {
+      toast.style.background = '#065F46';
+    }
+
+    toast.style.display = 'flex';
+    setTimeout(function() {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    }, 10);
+
+    setTimeout(function() {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-10px)';
+      setTimeout(function() { toast.style.display = 'none'; }, 300);
+    }, 3500);
+  }
+
   function openDeleteModal(itemId, itemName, itemPrice, itemCategory, itemType, itemImg, isBorrowed) {
+    currentDeleteId = itemId;
     var overlay = document.getElementById('delete-modal-overlay');
     var form = document.getElementById('del-item-form');
     var nameEl = document.getElementById('del-item-name');
@@ -97,9 +131,83 @@
 
   function closeDeleteModal(e) {
     var overlay = document.getElementById('delete-modal-overlay');
-    overlay.classList.remove('is-open');
+    if (overlay) {
+      overlay.classList.remove('is-open');
+    }
     document.body.style.overflow = '';
   }
+
+  // INTERAKTIVITAS SISI KLIEN: HAPUS VIA AJAX (TUTORIAL 06 PBP)
+  document.getElementById('del-item-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!currentDeleteId) return;
+
+    var submitBtn = document.getElementById('del-submit-btn');
+    var btnText = document.getElementById('del-btn-text');
+    var originalText = btnText ? btnText.textContent : 'Ya, Hapus';
+
+    submitBtn.disabled = true;
+    if (btnText) btnText.textContent = 'Menghapus...';
+
+    try {
+      var csrfToken = document.querySelector('#del-item-form [name=csrfmiddlewaretoken]').value;
+      var ajaxUrl = '/barang/' + currentDeleteId + '/hapus-ajax/';
+
+      var response = await fetch(ajaxUrl, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Accept': 'application/json'
+        }
+      });
+
+      var data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        closeDeleteModal();
+
+        // 1. Animasi kartu barang memudar halus & mengecil lalu terhapus dari grid
+        var card = document.getElementById('barang-card-' + currentDeleteId);
+        if (card) {
+          card.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.92) translateY(-10px)';
+          setTimeout(function() {
+            card.remove();
+
+            // Jika semua kartu di halaman sudah terhapus, muat ulang untuk menampilkan empty state
+            var grid = document.getElementById('barang-grid');
+            if (grid && grid.querySelectorAll('.br-card').length === 0) {
+              window.location.reload();
+            }
+          }, 350);
+        }
+
+        // 2. Perbarui counter metrik di layar secara realtime tanpa reload
+        var metricTotal = document.getElementById('metric-total-barang');
+        if (metricTotal && data.total_barang !== undefined) {
+          metricTotal.textContent = data.total_barang;
+        }
+
+        var metricTersedia = document.getElementById('metric-barang-tersedia');
+        if (metricTersedia && data.barang_tersedia !== undefined) {
+          metricTersedia.textContent = data.barang_tersedia;
+        }
+
+        // 3. Tampilkan toast notification
+        showDeleteToast(data.message || 'Barang berhasil dihapus.', false);
+
+      } else {
+        showDeleteToast(data.message || 'Gagal menghapus barang.', true);
+      }
+    } catch (err) {
+      console.error('AJAX Delete Error:', err);
+      showDeleteToast('Terjadi kesalahan jaringan saat menghapus barang.', true);
+    } finally {
+      submitBtn.disabled = false;
+      if (btnText) btnText.textContent = originalText;
+    }
+  });
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {

@@ -186,6 +186,21 @@ class BarangViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Barang.objects.filter(pk=self.barang.pk).exists())
 
+    def test_hapus_barang_ajax_success(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('barang:hapus_ajax', kwargs={'pk': self.barang.pk}))
+        self.assertEqual(response.status_code, 200)
+        json_data = response.json()
+        self.assertEqual(json_data['status'], 'success')
+        self.assertFalse(Barang.objects.filter(pk=self.barang.pk).exists())
+
+    def test_hapus_barang_ajax_unauthorized_user(self):
+        other_user = User.objects.create_user(username="other", password="password")
+        self.client.force_login(other_user)
+        response = self.client.post(reverse('barang:hapus_ajax', kwargs={'pk': self.barang.pk}))
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Barang.objects.filter(pk=self.barang.pk).exists())
+
 
 class BarangAPITest(TestCase):
     def setUp(self):
