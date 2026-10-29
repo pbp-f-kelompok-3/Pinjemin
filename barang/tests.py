@@ -14,7 +14,7 @@ from django.utils import timezone
 from datetime import timedelta
 from barang.models import Kategori, Lokasi, Barang
 from categories.models import Category
-from transaksi.models import Pesanan
+from transaksi.models import Pesanan, Ulasan
 
 User = get_user_model()
 
@@ -587,3 +587,160 @@ class Phase34BusinessRulesAndLenderTest(TestCase):
         self.assertEqual(owner_resp.status_code, 200)
         self.assertContains(owner_resp, "Hubungi peminjam via WhatsApp")
         self.assertContains(owner_resp, "6281211112222")
+
+
+class Phase56ReturnAndReviewTest(TestCase):
+    def setUp(self):
+        from accounts.models import Profile
+        self.owner = User.objects.create_user(username="owner_user", password="password123")
+        self.borrower = User.objects.create_user(username="renter_user", password="password123")
+        self.third_party = User.objects.create_user(username="other_user", password="password123")
+
+        self.owner_profile, _ = Profile.objects.get_or_create(user=self.owner)
+        self.owner_profile.full_name = "Fauzan Owner"
+        self.owner_profile.phone = "081298765432"
+        self.owner_profile.is_onboarded = True
+        self.owner_profile.save()
+
+        self.borrower_profile, _ = Profile.objects.get_or_create(user=self.borrower)
+        self.borrower_profile.full_name = "Budi Borrower"
+        self.borrower_profile.phone = "081211112222"
+        self.borrower_profile.is_onboarded = True
+        self.borrower_profile.save()
+
+        self.kategori = Category.objects.create(name="Perlengkapan Belajar")
+        self.lokasi = Lokasi.objects.create(
+            nama_area="Kutek UI",
+            short_label="Kutek",
+            patokan="Kutek Dekat Indomaret"
+        )
+        self.barang = Barang.objects.create(
+            pemilik=self.owner,
+            nama_barang="Kalkulator Saintifik Casio",
+            foto_utama=generate_test_image(),
+            deskripsi="Kalkulator saintifik FX-991EX mulus.",
+            kategori=self.kategori,
+            jenis_penawaran="sewa",
+            tarif_per_hari=15000,
+            lokasi=self.lokasi,
+            status_penawaran="aktif"
+        )
+        now = timezone.now()
+        self.order = Pesanan.objects.create(
+            peminjam=self.borrower,
+            barang=self.barang,
+            pemilik=self.owner,
+            mulai=now - timedelta(days=1),
+            durasi=2,
+            selesai=now + timedelta(days=1),
+            tarif_per_hari=15000,
+            total=30000,
+            nama_barang=self.barang.nama_barang,
+            lokasi_snapshot={"label": "Kutek", "alamat": "Kutek Dekat Indomaret"},
+            status=Pesanan.Status.CONFIRMED
+        )
+
+    def test_owner_can_complete_confirmed_order(self):
+        # Initial state: barang sedang dipinjam
+        self.assertTrue(self.barang.is_sedang_dipinjam)
+
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse('transaksi:selesaikan', args=[self.order.pk]))
+        self.assertRedirects(response, reverse('transaksi:detail', args=[self.order.pk]))
+
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Pesanan.Status.COMPLETED)
+        # Barang is now available again
+        self.assertFalse(self.barang.is_sedang_dipinjam)
+
+    def test_non_owner_cannot_complete_order(self):
+        self.client.force_login(self.borrower)
+        response = self.client.post(reverse('transaksi:selesaikan', args=[self.order.pk]))
+        self.assertRedirects(response, reverse('transaksi:detail', args=[self.order.pk]))
+
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Pesanan.Status.CONFIRMED)
+
+    def test_borrower_can_submit_review_on_completed_order(self):
+        # Complete order first
+        self.order.status = Pesanan.Status.COMPLETED
+        self.order.save()
+
+        self.client.force_login(self.borrower)
+        get_resp = self.client.get(reverse('transaksi:beri_ulasan', args=[self.order.pk]))
+        self.assertEqual(get_resp.status_code, 200)
+
+        post_resp = self.client.post(reverse('transaksi:beri_ulasan', args=[self.order.pk]), {
+            'rating': 5,
+            'komentar': 'Kalkulator sangat bagus, baterai awet, pemilik sangat ramah!'
+        })
+        self.assertRedirects(post_resp, reverse('transaksi:detail', args=[self.order.pk]))
+
+        ulasan = Ulasan.objects.get(pesanan=self.order)
+        self.assertEqual(ulasan.rating, 5)
+        self.assertEqual(ulasan.komentar, 'Kalkulator sangat bagus, baterai awet, pemilik sangat ramah!')
+        self.assertEqual(ulasan.peminjam, self.borrower)
+        self.assertEqual(ulasan.pemilik, self.owner)
+        self.assertEqual(ulasan.barang, self.barang)
+
+    def test_duplicate_review_is_prevented(self):
+        self.order.status = Pesanan.Status.COMPLETED
+        self.order.save()
+
+        Ulasan.objects.create(
+            pesanan=self.order,
+            peminjam=self.borrower,
+            pemilik=self.owner,
+            barang=self.barang,
+            rating=5,
+            komentar="Review pertama."
+        )
+
+        self.client.force_login(self.borrower)
+        response = self.client.post(reverse('transaksi:beri_ulasan', args=[self.order.pk]), {
+            'rating': 4,
+            'komentar': 'Mencoba review kedua.'
+        })
+        self.assertRedirects(response, reverse('transaksi:detail', args=[self.order.pk]))
+        self.assertEqual(Ulasan.objects.filter(pesanan=self.order).count(), 1)
+
+    def test_non_borrower_cannot_review(self):
+        self.order.status = Pesanan.Status.COMPLETED
+        self.order.save()
+
+        self.client.force_login(self.third_party)
+        response = self.client.get(reverse('transaksi:beri_ulasan', args=[self.order.pk]))
+        self.assertRedirects(response, reverse('transaksi:detail', args=[self.order.pk]), target_status_code=404)
+
+    def test_cannot_review_uncompleted_order(self):
+        # Order is still CONFIRMED
+        self.client.force_login(self.borrower)
+        response = self.client.get(reverse('transaksi:beri_ulasan', args=[self.order.pk]))
+        self.assertRedirects(response, reverse('transaksi:detail', args=[self.order.pk]))
+
+    def test_public_profile_displays_reputation_and_reviews(self):
+        self.order.status = Pesanan.Status.COMPLETED
+        self.order.save()
+
+        Ulasan.objects.create(
+            pesanan=self.order,
+            peminjam=self.borrower,
+            pemilik=self.owner,
+            barang=self.barang,
+            rating=5,
+            komentar="Pemilik sangat ramah dan barang terawat prima!"
+        )
+
+        self.client.force_login(self.borrower)
+        response = self.client.get(reverse('accounts:profile_public', args=[self.owner_profile.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "5.0")
+        self.assertContains(response, "Pemilik sangat ramah dan barang terawat prima!")
+        self.assertContains(response, "Kalkulator Saintifik Casio")
+
+    def test_detail_barang_contains_profile_link(self):
+        response = self.client.get(reverse('barang:detail', args=[self.barang.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Lihat Profil")
+        self.assertContains(response, reverse('accounts:profile_public', args=[self.owner_profile.pk]))
+

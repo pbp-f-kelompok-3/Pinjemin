@@ -1,3 +1,6 @@
+from django.db.models import Avg
+from transaksi.models import Ulasan, Pesanan
+from barang.models import Barang
 import xml.etree.ElementTree as ET
 
 import requests
@@ -144,9 +147,28 @@ def profile_edit(request):
 @login_required
 def profile_public(request, pk):
     profile = get_object_or_404(Profile, pk=pk, is_onboarded=True)
+    user = profile.user
+
+    # Transaksi selesai milik pemilik barang ini
+    done_count = Pesanan.objects.filter(pemilik=user, status=Pesanan.Status.COMPLETED).count()
+
+    # Ulasan yang diterima pemilik ini dari para peminjam
+    reviews = Ulasan.objects.filter(pemilik=user).select_related("peminjam", "peminjam__profile", "barang")
+    review_count = reviews.count()
+    avg_rating = reviews.aggregate(Avg("rating"))["rating__avg"]
+    rating = f"{avg_rating:.1f}" if avg_rating is not None else "-"
+
+    # Barang aktif yang sedang dipinjamkan / ditawarkan
+    barang_list = Barang.objects.filter(pemilik=user, status_penawaran="aktif").select_related("kategori", "lokasi")
+
     return render(request, "accounts/profile_public.html", {
         "profile": profile,
         "is_owner": profile.user_id == request.user.id,
+        "done_count": done_count,
+        "review_count": review_count,
+        "rating": rating,
+        "reviews": reviews,
+        "barang_list": barang_list,
     })
 
 

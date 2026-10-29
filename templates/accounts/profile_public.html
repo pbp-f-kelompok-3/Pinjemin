@@ -72,13 +72,92 @@
       </section>
 
       <section class="pf-card" aria-labelledby="pf-items-title">
-        <h2 class="pf-card__title" id="pf-items-title">Barang yang Dipinjamkan</h2>
-        {# TODO (modul katalog): daftar barang milik pengguna ini #}
-        <div class="pf-empty pf-empty--compact">
-          <p class="pf-empty__text">Belum ada barang yang ditampilkan.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h2 class="pf-card__title" id="pf-items-title" style="margin: 0;">Barang yang Dipinjamkan</h2>
+          {% if barang_list %}
+            <span style="font-size: 12px; font-weight: 700; color: var(--pf-muted, #6B7280);">{{ barang_list|length }} Barang Aktif</span>
+          {% endif %}
         </div>
+        {% if barang_list %}
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            {% for item in barang_list %}
+              <a href="{% url 'barang:detail' item.pk %}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--pf-bg-alt, #F9FAFB); border: 1px solid var(--pf-border, #E5E7EB); border-radius: 10px; text-decoration: none; color: inherit; transition: all 0.15s ease;">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                  <div style="width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: #E5E7EB; flex-shrink: 0;">
+                    {% if item.foto_utama %}
+                      <img src="{{ item.foto_utama.url }}" alt="{{ item.nama_barang }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                      <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF; font-size: 20px;">📦</div>
+                    {% endif %}
+                  </div>
+                  <div style="min-width: 0;">
+                    <div style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #111827;">{{ item.nama_barang }}</div>
+                    <div style="font-size: 12px; color: var(--pf-muted, #6B7280); margin-top: 2px;">{{ item.kategori.nama }} · {{ item.lokasi.short_label|default:item.lokasi.nama_area }}</div>
+                  </div>
+                </div>
+                <div style="font-size: 13px; font-weight: 800; color: #1E40AF; flex-shrink: 0; margin-left: 10px;">
+                  {% if item.jenis_penawaran == 'sewa' %}Rp {{ item.tarif_formatted }} / hr{% else %}<span style="color: #059669;">Gratis</span>{% endif %}
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="pf-empty pf-empty--compact">
+            <p class="pf-empty__text">Belum ada barang aktif yang ditampilkan.</p>
+          </div>
+        {% endif %}
       </section>
     </div>
+
+    <!-- Riwayat Ulasan & Testimoni Peminjam -->
+    <section class="pf-card" style="margin-top: 24px;" aria-labelledby="pf-reviews-title">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 class="pf-card__title" id="pf-reviews-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+          <span>⭐</span>
+          Ulasan dari Peminjam
+        </h2>
+        <span style="font-size: 13px; font-weight: 700; color: var(--pf-muted, #6B7280);">{{ review_count }} Ulasan Diterima</span>
+      </div>
+
+      {% if reviews %}
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          {% for r in reviews %}
+            <article style="padding: 16px; background: var(--pf-bg-alt, #F9FAFB); border: 1px solid var(--pf-border, #E5E7EB); border-radius: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <div>
+                  <div style="font-weight: 800; font-size: 14px; color: #111827;">
+                    {{ r.peminjam.get_full_name|default:r.peminjam.username }}
+                  </div>
+                  <div style="font-size: 12px; color: var(--pf-muted, #6B7280); margin-top: 2px;">
+                    Meminjam: <strong>{{ r.barang.nama_barang }}</strong>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 3px; background: #FFFBEB; padding: 4px 8px; border-radius: 6px; border: 1px solid #FDE68A;">
+                  {% for _ in "12345" %}
+                    {% if forloop.counter <= r.rating %}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="#ffc400"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+                    {% else %}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="#E5E7EB"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+                    {% endif %}
+                  {% endfor %}
+                  <span style="font-size: 12px; font-weight: 800; color: #92400E; margin-left: 2px;">{{ r.rating }}.0</span>
+                </div>
+              </div>
+              <p style="margin: 8px 0 0; font-size: 13.5px; line-height: 1.6; color: #374151;">
+                "{{ r.komentar }}"
+              </p>
+              <div style="margin-top: 8px; font-size: 11.5px; color: var(--pf-muted, #9CA3AF);">
+                {{ r.created_at|date:"j F Y H:i" }} WIB
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="pf-empty pf-empty--compact">
+          <p class="pf-empty__text">Belum ada ulasan untuk pemilik ini. Transaksi peminjaman yang selesai akan ditampilkan di sini.</p>
+        </div>
+      {% endif %}
+    </section>
 
   </div>
 </div>

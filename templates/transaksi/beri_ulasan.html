@@ -1,0 +1,24 @@
+{% extends "transaksi/base.html" %}
+{% block transaksi_content %}
+<div class="tr-card tr-narrow">
+  <h1>Beri Rating & Ulasan</h1>
+  <h2>{{ order.nama_barang }}</h2>
+  <p style="color: var(--br-text-muted, #6B7280); font-size: 14px;">
+    Pemilik barang: <strong>{{ order.pemilik.get_full_name|default:order.pemilik.username }}</strong>
+  </p>
+  <p style="font-size: 13.5px; line-height: 1.6; margin: 12px 0 20px;">
+    Bagikan pengalamanmu meminjam barang ini untuk membantu mahasiswa UI lainnya mengetahui keandalan barang dan reputasi pemilik.
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="tr-actions" style="margin-top: 24px;">
+      <button class="tr-button" type="submit" style="background: var(--yellow, #FCD34D); font-weight: 700;">
+        Kirim Ulasan Bintang
+      </button>
+      <a class="tr-button tr-secondary" href="{% url 'transaksi:detail' order.pk %}">Batal</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
