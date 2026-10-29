@@ -29,7 +29,7 @@ def home(request):
 
     selected_category = None
     if kategori_id and kategori_id.isdigit():
-        selected_category = Category.objects.filter(pk=kategori_id).first()
+        selected_category = categories.filter(pk=kategori_id).first()
 
     if price_type == "gratis":
         items = items.filter(jenis_penawaran="gratis")
