@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse
+from django.conf import settings
 from django.db.models import Q, F
 from django.db import transaction
 import urllib.parse
@@ -395,9 +396,22 @@ def detail_barang(request, pk):
             )
             wa_link = f"https://wa.me/{phone}?text={urllib.parse.quote(wa_message)}"
 
+    can_view_pickup = is_owner or has_paid
+    location = barang.lokasi
+    pickup_detail_data = None
+    if can_view_pickup and location.latitude is not None and location.longitude is not None:
+        pickup_detail_data = {
+            'label': location.nama_area,
+            'latitude': float(location.latitude),
+            'longitude': float(location.longitude),
+            'tileUrl': settings.OSM_TILE_URL,
+        }
+
     context = {
         'barang': barang,
         'profile': profile,
+        'can_view_pickup': can_view_pickup,
+        'pickup_detail_data': pickup_detail_data,
         'phone': phone,
         'wa_link': wa_link,
         'is_owner': is_owner,

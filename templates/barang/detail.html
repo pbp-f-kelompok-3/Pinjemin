@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static l10n %}
 
 {% block title %}{{ barang.nama_barang }} - Detail Barang - Pinjemin{% endblock %}
 
@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/barang.css' %}">
 <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+<link rel="stylesheet" href="{% static 'css/pickup-location.css' %}?v=20261029-4">
 
 <style>
   .br-detail-layout {
@@ -130,7 +131,7 @@
       </div>
 
       <!-- Peta Lokasi Penjemputan -->
-      <div class="br-detail-card" style="margin-top: 24px;">
+      <div class="br-detail-card pickup-picker" style="margin-top: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <h3 style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -145,6 +146,7 @@
           {{ barang.lokasi.nama_area }}
         </p>
 
+        {% if can_view_pickup %}
         {% if barang.lokasi.patokan or barang.lokasi.full_address %}
           <p style="margin: 0 0 6px; font-size: 13px; color: var(--br-text-muted);">
             <strong>Patokan / Alamat:</strong> {{ barang.lokasi.patokan|default:barang.lokasi.full_address }}
@@ -157,10 +159,12 @@
           </p>
         {% endif %}
 
-        {% if barang.lokasi.latitude and barang.lokasi.longitude %}
-          <div id="detail-map" style="height: 250px; border-radius: var(--br-radius); border: 1px solid var(--br-border); z-index: 1;"></div>
+        {% if pickup_detail_data %}
+          {{ pickup_detail_data|json_script:"pickup-detail-data" }}
+          <div id="detail-map" class="pickup-map" data-pickup-detail-map role="region" aria-label="Peta titik penjemputan barang" style="height: 250px;"></div>
+          <p data-pickup-detail-status role="status" aria-live="polite" class="pickup-help"></p>
           <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
-            <a href="https://www.google.com/maps?q={{ barang.lokasi.latitude }},{{ barang.lokasi.longitude }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; color: var(--br-blue); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+            <a href="https://www.google.com/maps/search/?api=1&amp;query={{ barang.lokasi.latitude|unlocalize }},{{ barang.lokasi.longitude|unlocalize }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; color: var(--br-blue); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
               Buka di Google Maps ↗
             </a>
           </div>
@@ -168,6 +172,9 @@
           <div style="padding: 16px; background: var(--br-bg-muted); border-radius: var(--br-radius); font-size: 13px; color: var(--br-text-muted); text-align: center;">
             📍 Titik penjemputan berada di sekitar area <strong>{{ barang.lokasi.nama_area }}</strong>. Hubungi pemilik untuk konfirmasi titik temu spesifik.
           </div>
+        {% endif %}
+        {% else %}
+          <p class="br-helper">Alamat lengkap dan titik penjemputan tersedia untuk pemilik dan peminjam dengan pesanan terkonfirmasi.</p>
         {% endif %}
       </div>
     </div>
@@ -388,29 +395,11 @@
   });
 </script>
 
-{% if barang.lokasi.latitude and barang.lokasi.longitude %}
-<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var lat = {{ barang.lokasi.latitude }};
-    var lng = {{ barang.lokasi.longitude }};
-    var mapContainer = document.getElementById('detail-map');
-    if (mapContainer && window.L) {
-      var map = L.map('detail-map', {
-        scrollWheelZoom: false,
-        zoomControl: true
-      }).setView([lat, lng], 16);
+{% endblock %}
 
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }).addTo(map);
-
-      var marker = L.marker([lat, lng]).addTo(map);
-      marker.bindPopup("<strong>Titik Penjemputan:</strong><br>{{ barang.lokasi.nama_area|escapejs }}").openPopup();
-    }
-  });
-</script>
+{% block extra_js %}
+{% if pickup_detail_data %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
+<script src="{% static 'js/pickup-detail.js' %}?v=20261029-3" defer></script>
 {% endif %}
-
 {% endblock %}

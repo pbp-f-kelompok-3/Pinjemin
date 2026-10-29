@@ -28,7 +28,7 @@ def generate_test_image():
 class BarangModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="fauzan_test", password="testpassword123")
-        self.kategori = Category.objects.create(name="Elektronik Kost")
+        self.kategori, _ = Category.objects.get_or_create(name="Elektronik Kost")
         self.lokasi = Lokasi.objects.create(
             nama_area="Area Kutek UI",
             short_label="Kutek UI",
