@@ -20,7 +20,8 @@
         <div class="categories">
             {% if categories|length > 5 %}
                 {% for category in categories|slice:":4" %}
-                    <a href="?kategori={{ category.pk }}#barang" class="category" style="text-decoration: none; color: inherit;">
+                    <a href="?{% if current_kategori == category.pk|stringformat:'s' %}{% if current_q %}q={{ current_q|urlencode }}&{% endif %}{% if current_price_type %}price_type={{ current_price_type }}&{% endif %}{% if current_min_price %}min_price={{ current_min_price }}&{% endif %}{% if current_max_price %}max_price={{ current_max_price }}&{% endif %}{% if current_sort and current_sort != 'terbaru' %}sort={{ current_sort }}{% endif %}{% else %}kategori={{ category.pk }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_price_type %}&price_type={{ current_price_type }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}{% if current_max_price %}&max_price={{ current_max_price }}{% endif %}{% if current_sort and current_sort != 'terbaru' %}&sort={{ current_sort }}{% endif %}{% endif %}#barang"
+                       class="category" style="text-decoration: none; color: inherit;">
                         <div class="category-icon" style="{% if current_kategori == category.pk|stringformat:'s' %}background: var(--yellow, #FEE75C); border: 2px solid var(--black);{% endif %}">
                             {% if category.icon_url %}
                                 <img src="{{ category.icon_url }}" alt="{{ category.name }}">
@@ -44,7 +45,8 @@
 
             {% else %}
                 {% for category in categories %}
-                    <a href="?kategori={{ category.pk }}#barang" class="category" style="text-decoration: none; color: inherit;">
+                    <a href="?{% if current_kategori == category.pk|stringformat:'s' %}{% if current_q %}q={{ current_q|urlencode }}&{% endif %}{% if current_price_type %}price_type={{ current_price_type }}&{% endif %}{% if current_min_price %}min_price={{ current_min_price }}&{% endif %}{% if current_max_price %}max_price={{ current_max_price }}&{% endif %}{% if current_sort and current_sort != 'terbaru' %}sort={{ current_sort }}{% endif %}{% else %}kategori={{ category.pk }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_price_type %}&price_type={{ current_price_type }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}{% if current_max_price %}&max_price={{ current_max_price }}{% endif %}{% if current_sort and current_sort != 'terbaru' %}&sort={{ current_sort }}{% endif %}{% endif %}#barang"
+                       class="category" style="text-decoration: none; color: inherit;">
                         <div class="category-icon" style="{% if current_kategori == category.pk|stringformat:'s' %}background: var(--yellow, #FEE75C); border: 2px solid var(--black);{% endif %}">
                             {% if category.icon_url %}
                                 <img src="{{ category.icon_url }}" alt="{{ category.name }}">
@@ -80,75 +82,91 @@
                 </h2>
                 <p style="margin: 4px 0 0; font-size: 13px; color: var(--gray-dark);">
                     Daftar barang inventaris mahasiswa UI yang siap dipinjam atau disewa
+                    {% if total_barang is not None %}
+                        <span style="font-weight: 600; color: var(--br-black);">({{ total_barang }} barang)</span>
+                    {% endif %}
                 </p>
             </div>
 
-            {% if current_q or current_kategori %}
+            {% if current_q or current_kategori or current_price_type or current_min_price or current_max_price or current_sort and current_sort != 'terbaru' %}
                 <a href="{% url 'home' %}#barang" class="br-btn-secondary" style="font-size: 12px; padding: 6px 14px;">
-                    ✕ Reset Filter
+                    ✕ Reset Semua Filter
                 </a>
             {% endif %}
         </div>
 
-        {% if barang_list %}
-            <form method="get" action="{% url 'home' %}#barang" class="price-filter">
+        <!-- Filter & Sorting Bar -->
+        <form method="get" action="{% url 'home' %}#barang" class="price-filter">
+            {% if current_q %}
+                <input type="hidden" name="q" value="{{ current_q }}">
+            {% endif %}
+            {% if current_kategori %}
+                <input type="hidden" name="kategori" value="{{ current_kategori }}">
+            {% endif %}
 
-                {% if current_q %}
-                    <input type="hidden" name="q" value="{{ current_q }}">
-                {% endif %}
-                {% if current_kategori %}
-                    <input type="hidden" name="kategori" value="{{ current_kategori }}">
-                {% endif %}
-                <div class="price-filter-field">
-                    <label for="price_type">Jenis harga</label>
-                    <select name="price_type" id="price_type">
-                        <option value="" {% if not current_price_type %}selected{% endif %}>
-                            Semua harga
-                        </option>
-                        <option value="gratis" {% if current_price_type == "gratis" %}selected{% endif %}>
-                            Gratis
-                        </option>
-                        <option value="sewa" {% if current_price_type == "sewa" %}selected{% endif %}>
-                            Berbayar
-                        </option>
-                    </select>
-                </div>
+            <div class="price-filter-field">
+                <label for="price_type">Jenis Harga</label>
+                <select name="price_type" id="price_type">
+                    <option value="" {% if not current_price_type %}selected{% endif %}>
+                        Semua Harga
+                    </option>
+                    <option value="gratis" {% if current_price_type == "gratis" %}selected{% endif %}>
+                        Gratis
+                    </option>
+                    <option value="sewa" {% if current_price_type == "sewa" %}selected{% endif %}>
+                        Sewa (Berbayar)
+                    </option>
+                </select>
+            </div>
 
-                <div class="price-filter-field">
-                    <label for="min_price">Harga minimum (Rp/hari)</label>
-                    <input
-                        type="number"
-                        name="min_price"
-                        id="min_price"
-                        min="0"
-                        placeholder="Contoh: 10000"
-                        value="{{ current_min_price }}"
-                    >
-                </div>
-                <div class="price-filter-field">
-                    <label for="max_price">Harga maksimum (Rp/hari)</label>
-                    <input
-                        type="number"
-                        name="max_price"
-                        id="max_price"
-                        min="0"
-                        placeholder="Contoh: 50000"
-                        value="{{ current_max_price }}"
-                    >
-                </div>
-
-                <button type="submit" class="br-btn-primary">
-                    Terapkan filter
-                </button>
-
-                <a
-                    href="{% url 'home' %}{% if current_q %}?q={{ current_q|urlencode }}{% endif %}{% if current_kategori %}{% if current_q %}&{% else %}?{% endif %}kategori={{ current_kategori }}{% endif %}#barang"
-                    class="br-btn-secondary"
+            <div class="price-filter-field">
+                <label for="min_price">Harga Min (Rp/hari)</label>
+                <input
+                    type="number"
+                    name="min_price"
+                    id="min_price"
+                    min="0"
+                    placeholder="Contoh: 10000"
+                    value="{{ current_min_price }}"
                 >
-                    Reset harga
-                </a>
+            </div>
 
-            </form>
+            <div class="price-filter-field">
+                <label for="max_price">Harga Maks (Rp/hari)</label>
+                <input
+                    type="number"
+                    name="max_price"
+                    id="max_price"
+                    min="0"
+                    placeholder="Contoh: 50000"
+                    value="{{ current_max_price }}"
+                >
+            </div>
+
+            <div class="price-filter-field">
+                <label for="sort_by">Urutkan</label>
+                <select name="sort" id="sort_by" onchange="this.form.submit()">
+                    <option value="terbaru" {% if current_sort == 'terbaru' %}selected{% endif %}>Terbaru</option>
+                    <option value="nama_asc" {% if current_sort == 'nama_asc' %}selected{% endif %}>Nama (A - Z)</option>
+                    <option value="harga_asc" {% if current_sort == 'harga_asc' %}selected{% endif %}>Tarif Termurah</option>
+                    <option value="harga_desc" {% if current_sort == 'harga_desc' %}selected{% endif %}>Tarif Termahal</option>
+                    <option value="sering_dipinjam" {% if current_sort == 'sering_dipinjam' %}selected{% endif %}>Paling Populer</option>
+                </select>
+            </div>
+
+            <button type="submit" class="br-btn-primary">
+                Terapkan Filter
+            </button>
+
+            <a
+                href="{% url 'home' %}{% if current_q or current_kategori %}?{% if current_q %}q={{ current_q|urlencode }}{% endif %}{% if current_kategori %}{% if current_q %}&{% endif %}kategori={{ current_kategori }}{% endif %}{% endif %}#barang"
+                class="br-btn-secondary"
+            >
+                Reset Harga
+            </a>
+        </form>
+
+        {% if barang_list %}
             <div class="br-grid" style="margin-bottom: 0;">
                 {% for item in barang_list %}
                     <a href="{% url 'barang:detail' item.pk %}" class="br-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column;">
@@ -209,10 +227,10 @@
         {% else %}
             <div class="br-empty-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                <h3 style="font-size: 16px; font-weight: 700; color: var(--br-black); margin-bottom: 6px;">Belum Ada Barang yang Tersedia</h3>
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--br-black); margin-bottom: 6px;">Belum Ada Barang yang Cocok</h3>
                 <p style="font-size: 13px; color: var(--br-text-muted); margin: 0;">
-                    {% if current_q or current_kategori %}
-                        Tidak ada barang yang cocok dengan filter yang dipilih. <a href="{% url 'home' %}#barang">Lihat semua barang</a>
+                    {% if current_q or current_kategori or current_price_type or current_min_price or current_max_price or current_sort and current_sort != 'terbaru' %}
+                        Tidak ada barang yang cocok dengan kriteria pencarian atau filter yang dipilih. <a href="{% url 'home' %}#barang" style="font-weight: 600; text-decoration: underline;">Reset semua filter</a>
                     {% else %}
                         Saat ini belum ada barang yang didaftarkan untuk dipinjamkan.
                     {% endif %}
