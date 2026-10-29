@@ -4,6 +4,34 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def sync_categories(apps, schema_editor):
+    Category = apps.get_model('categories', 'Category')
+    connection = schema_editor.connection
+
+    # 1. Salin data dari model/tabel Kategori lama jika ada
+    try:
+        OldKategori = apps.get_model('barang', 'Kategori')
+        for old in OldKategori.objects.all():
+            Category.objects.get_or_create(
+                id=old.id,
+                defaults={'name': getattr(old, 'nama', f'Kategori {old.id}')}
+            )
+    except Exception:
+        pass
+
+    # 2. Pastikan seluruh kategori_id yang terlanjur dirujuk oleh barang_barang ada di Category baru
+    try:
+        with connection.cursor() as cursor:
+            tables = connection.introspection.table_names(cursor)
+            if 'barang_barang' in tables:
+                cursor.execute("SELECT DISTINCT kategori_id FROM barang_barang WHERE kategori_id IS NOT NULL")
+                for (cat_id,) in cursor.fetchall():
+                    if not Category.objects.filter(id=cat_id).exists():
+                        Category.objects.create(id=cat_id, name=f"Kategori {cat_id}")
+    except Exception:
+        pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -12,6 +40,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(sync_categories, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='barang',
             name='kategori',
