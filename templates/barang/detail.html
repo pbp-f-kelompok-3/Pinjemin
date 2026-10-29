@@ -257,6 +257,12 @@
               Mahasiswa Universitas Indonesia
             </div>
           </div>
+          {% if profile and profile.is_onboarded %}
+            <a href="{% url 'accounts:profile_public' profile.pk %}" class="br-btn-secondary" style="font-size: 12px; padding: 7px 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              Lihat Profil
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          {% endif %}
         </div>
 
         <!-- Aturan Privasi Nomor WhatsApp: Baru terlihat setelah membayar -->

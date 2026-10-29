@@ -54,8 +54,37 @@
       <form method="post" action="{% url 'transaksi:periksa' order.pk %}">{% csrf_token %}<button class="tr-button tr-secondary" type="submit">Periksa status pembayaran</button></form>
     {% endif %}
     {% if order.bisa_dibatalkan %}<a class="tr-button tr-danger" href="{% url 'transaksi:batalkan' order.pk %}">Batalkan pesanan</a>{% endif %}
+    {% if order.status == 'selesai' and not order.ulasan %}
+      <a class="tr-button" href="{% url 'transaksi:beri_ulasan' order.pk %}" style="background: var(--yellow, #FCD34D); color: var(--black, #111827); font-weight: 700;">
+        ⭐ Beri Rating & Ulasan Pemilik
+      </a>
+    {% endif %}
+  {% else %}
+    {% if order.status == 'dikonfirmasi' %}
+      <form method="post" action="{% url 'transaksi:selesaikan' order.pk %}" style="display: inline;">
+        {% csrf_token %}
+        <button class="tr-button" style="background: #10B981; color: white;" type="submit" onclick="return confirm('Apakah barang telah benar-benar dikembalikan oleh peminjam dalam kondisi baik?')">
+          ✓ Konfirmasi Barang Diterima (Selesai)
+        </button>
+      </form>
+    {% endif %}
   {% endif %}
   </div>
+  {% if order.ulasan %}
+    <div style="margin-top: 18px; padding: 14px 16px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 10px;">
+      <strong style="color: #92400E; display: block; margin-bottom: 4px;">
+        {% if borrower %}Ulasan yang Kamu Berikan:{% else %}Ulasan dari Peminjam ({{ order.peminjam.get_full_name|default:order.peminjam.username }}):{% endif %}
+      </strong>
+      <div style="font-size: 15px; margin-bottom: 6px;">
+        {% for _ in "12345" %}
+          {% if forloop.counter <= order.ulasan.rating %}⭐{% endif %}
+        {% endfor %}
+        <span style="font-size: 13px; font-weight: 700; color: #78350F; margin-left: 4px;">({{ order.ulasan.rating }}/5)</span>
+      </div>
+      <p style="margin: 0; font-size: 13.5px; color: #78350F; font-style: italic;">"{{ order.ulasan.komentar }}"</p>
+      <span style="display: block; margin-top: 6px; font-size: 11px; color: #B45309;">Ditulis pada {{ order.ulasan.created_at|date:"d M Y H:i" }} WIB</span>
+    </div>
+  {% endif %}
 </div>
 {% if payments %}
 <section class="tr-card tr-narrow"><h2>Riwayat pembayaran</h2>

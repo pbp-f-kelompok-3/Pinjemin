@@ -15,4 +15,6 @@ urlpatterns = [
     path("<uuid:pk>/batalkan/", views.batalkan, name="batalkan"),
     path("<uuid:pk>/bayar/", views.bayar, name="bayar"),
     path("<uuid:pk>/periksa/", views.periksa, name="periksa"),
+    path("<uuid:pk>/selesaikan/", views.selesaikan, name="selesaikan"),
+    path("<uuid:pk>/ulasan/", views.beri_ulasan, name="beri_ulasan"),
 ]

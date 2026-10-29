@@ -299,3 +299,14 @@ def maintain_orders():
                 order.alasan_pembatalan = "Batas pembayaran 30 menit berakhir"
                 order.save()
     Pesanan.objects.filter(status=Pesanan.Status.CONFIRMED, selesai__lte=now).update(status=Pesanan.Status.COMPLETED)
+
+@transaction.atomic
+def complete_order(pk, user):
+    order = _lock_order(pk)
+    if order.pemilik_id != user.pk:
+        raise ValidationError("Hanya pemilik barang yang dapat mengonfirmasi pengembalian barang.")
+    if order.status != Pesanan.Status.CONFIRMED:
+        raise ValidationError("Hanya pesanan yang telah dikonfirmasi yang dapat diselesaikan.")
+    order.status = Pesanan.Status.COMPLETED
+    order.save()
+    return order

@@ -99,3 +99,48 @@ class Pembayaran(models.Model):
             "authorize": "Menunggu penyelesaian pembayaran", "refund": "Pengembalian dana",
             "partial_refund": "Pengembalian sebagian dana",
         }.get(self.status, "Sedang diperiksa")
+
+
+class Ulasan(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    pesanan = models.OneToOneField(
+        Pesanan,
+        on_delete=models.CASCADE,
+        related_name="ulasan",
+        verbose_name="Pesanan"
+    )
+    peminjam = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ulasan_diberikan",
+        verbose_name="Peminjam"
+    )
+    pemilik = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ulasan_diterima",
+        verbose_name="Pemilik Barang"
+    )
+    barang = models.ForeignKey(
+        "barang.Barang",
+        on_delete=models.CASCADE,
+        related_name="ulasan_barang",
+        verbose_name="Barang"
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name="Rating Bintang (1-5)"
+    )
+    komentar = models.TextField(
+        max_length=1000,
+        verbose_name="Ulasan & Komentar"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Ulasan Peminjaman"
+        verbose_name_plural = "Daftar Ulasan Peminjaman"
+
+    def __str__(self):
+        return f"Ulasan {self.peminjam} untuk {self.barang} ({self.rating}★)"

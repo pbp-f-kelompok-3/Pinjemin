@@ -15,8 +15,8 @@ from django.views.decorators.http import require_POST
 
 from barang.models import Barang
 from . import gateway, services
-from .forms import JadwalForm
-from .models import Pesanan, Pembayaran
+from .forms import JadwalForm, UlasanForm
+from .models import Pesanan, Pembayaran, Ulasan
 
 
 def _error(request, exc):
@@ -229,3 +229,59 @@ def webhook(request):
     except gateway.GatewayError:
         return HttpResponse(status=503)  # Midtrans boleh mencoba ulang.
     return JsonResponse({"received": True})
+
+
+@login_required
+@require_POST
+def selesaikan(request, pk):
+    services.maintain_orders()
+    order = get_object_or_404(Pesanan, pk=pk)
+    if order.pemilik_id != request.user.pk:
+        messages.error(request, "Hanya pemilik barang yang dapat mengonfirmasi pengembalian barang.")
+        return redirect("transaksi:detail", pk=pk)
+    try:
+        services.complete_order(pk, request.user)
+        messages.success(request, "Peminjaman selesai. Barang telah berhasil dikonfirmasi diterima kembali.")
+    except ValidationError as exc:
+        _error(request, exc)
+    return redirect("transaksi:detail", pk=pk)
+
+
+@login_required
+def beri_ulasan(request, pk):
+    services.maintain_orders()
+    order = get_object_or_404(
+        Pesanan.objects.select_related("barang", "pemilik", "peminjam"),
+        pk=pk
+    )
+    if order.peminjam_id != request.user.pk:
+        messages.error(request, "Hanya peminjam yang dapat memberikan ulasan untuk pesanan ini.")
+        return redirect("transaksi:detail", pk=pk)
+    if order.status != Pesanan.Status.COMPLETED:
+        messages.error(request, "Ulasan hanya dapat diberikan setelah transaksi peminjaman selesai.")
+        return redirect("transaksi:detail", pk=pk)
+    if hasattr(order, "ulasan"):
+        messages.info(request, "Kamu sudah memberikan ulasan untuk pesanan ini.")
+        return redirect("transaksi:detail", pk=pk)
+
+    if request.method == "POST":
+        form = UlasanForm(request.POST)
+        if form.is_valid():
+            ulasan = form.save(commit=False)
+            ulasan.pesanan = order
+            ulasan.peminjam = request.user
+            ulasan.pemilik = order.pemilik
+            ulasan.barang = order.barang
+            ulasan.save()
+            messages.success(
+                request,
+                f"Terima kasih! Ulasan bintang {ulasan.rating} berhasil disimpan untuk {order.pemilik.get_full_name() or order.pemilik.username}."
+            )
+            return redirect("transaksi:detail", pk=pk)
+    else:
+        form = UlasanForm()
+
+    return render(request, "transaksi/beri_ulasan.html", {
+        "form": form,
+        "order": order
+    })
