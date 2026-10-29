@@ -602,3 +602,60 @@ color: var(--black);
     padding: 20px;
   }
 }
+
+/* FILTER HARGA */
+
+.price-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 12px;
+    margin: 16px 0 24px;
+    padding: 16px;
+    background: #f7f7f7;
+    border-radius: 12px;
+}
+
+.price-filter label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.price-filter select,
+.price-filter input {
+    box-sizing: border-box;
+    min-width: 140px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+}
+
+.price-filter button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #333;
+    color: white;
+    cursor: pointer;
+}
+
+.price-filter a {
+    padding: 10px 0;
+    color: #333;
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .price-filter {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .price-filter select,
+    .price-filter input,
+    .price-filter button {
+        width: 100%;
+    }
+}
