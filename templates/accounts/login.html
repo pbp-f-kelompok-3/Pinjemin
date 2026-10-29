@@ -44,7 +44,7 @@
         </p>
 
         {% for message in messages %}
-          <div class="alert-error" role="alert">{{ message }}</div>
+          <div class="{% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}" role="alert">{{ message }}</div>
         {% endfor %}
 
         <a href="{% url 'accounts:sso_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn-login">

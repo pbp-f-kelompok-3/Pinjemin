@@ -12,12 +12,10 @@ class Profile(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
     )
 
-    # Data dari SSO UI (read-only di sisi user)
     npm = models.CharField(max_length=20, blank=True)
     full_name = models.CharField(max_length=150, blank=True)
     kode_org = models.CharField(max_length=50, blank=True)
 
-    # Data yang bisa diedit user
     phone = models.CharField(
         max_length=16,
         blank=True,
@@ -27,15 +25,19 @@ class Profile(models.Model):
     location = models.CharField(max_length=100, blank=True)
     photo = models.ImageField(upload_to="profile_photos/", blank=True, null=True)
 
-    # Mode & onboarding
     mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.RENTER)
     is_onboarded = models.BooleanField(default=False)
     accepted_privacy_at = models.DateTimeField(null=True, blank=True)
+    deactivated_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.full_name or self.user.username} ({self.npm})"
+
+    @property
+    def is_deactivated(self):
+        return self.deactivated_at is not None
 
     @property
     def is_seller_mode(self):

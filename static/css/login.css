@@ -127,6 +127,15 @@ body.login-body {
 }
 .login-subtitle strong { color: var(--ink); font-weight: 500; }
 
+.alert-success {
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #dff5e6;
+  color: #14783a;
+  font-size: 0.85rem;
+}
+
 .alert-error {
   margin-bottom: 20px;
   padding: 10px 14px;

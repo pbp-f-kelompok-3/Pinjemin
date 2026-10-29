@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import OnboardingForm, ProfileForm
 from .models import Profile
+from .services import get_blocking_transactions
 from .sso import get_login_url, validate_ticket
 
 User = get_user_model()
@@ -82,9 +83,25 @@ def sso_callback(request):
     profile.npm = attrs.get("npm", profile.npm)
     profile.full_name = attrs.get("nama", profile.full_name)
     profile.kode_org = attrs.get("kd_org", profile.kode_org)
+
+    # Akun yang pernah dinonaktifkan diaktifkan kembali (SSO sudah membuktikan identitasnya)
+    reactivated = profile.deactivated_at is not None
+    if reactivated:
+        profile.deactivated_at = None
+        if not user.is_active:
+            user.is_active = True
+            user.save(update_fields=["is_active"])
     profile.save()
 
+    # Akun yang dinonaktifkan pengelola (bukan oleh pemiliknya sendiri) tetap ditolak
+    if not user.is_active:
+        messages.error(request, "Akun ini tidak dapat digunakan. Hubungi pengelola.")
+        return redirect("accounts:login")
+
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+    if reactivated:
+        messages.success(request, "Selamat datang kembali! Akunmu sudah aktif lagi.")
 
     if not profile.is_onboarded:
         return redirect("accounts:onboarding")
@@ -147,6 +164,8 @@ def profile_edit(request):
 @login_required
 def profile_public(request, pk):
     profile = get_object_or_404(Profile, pk=pk, is_onboarded=True)
+    if profile.deactivated_at:
+        return render(request, "accounts/profile_unavailable.html", status=404)
     user = profile.user
 
     # Transaksi selesai milik pemilik barang ini
@@ -189,3 +208,34 @@ def toggle_mode(request):
     if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         next_url = "/"
     return redirect(next_url)
+
+
+@login_required
+def deactivate_account(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    blocking = get_blocking_transactions(request.user)
+
+    if request.method == "POST":
+        if blocking:
+            messages.error(request, "Akun belum bisa dinonaktifkan karena masih ada transaksi berjalan.")
+        elif request.POST.get("confirm") != "yes":
+            messages.error(request, "Centang konfirmasi dulu untuk melanjutkan.")
+        else:
+            user = request.user
+            profile.deactivated_at = timezone.now()
+            profile.save(update_fields=["deactivated_at"])
+            # is_active=False juga mengakhiri sesi di perangkat lain dan dikenali filter
+            # `pemilik__is_active=True` yang sudah dipakai modul katalog
+            user.is_active = False
+            user.save(update_fields=["is_active"])
+            logout(request)
+            messages.success(
+                request,
+                "Akunmu sudah dinonaktifkan. Login lagi dengan SSO UI kapan saja untuk mengaktifkannya kembali.",
+            )
+            return redirect("accounts:login")
+
+    return render(request, "accounts/account_deactivate.html", {
+        "profile": profile,
+        "blocking": blocking,
+    })

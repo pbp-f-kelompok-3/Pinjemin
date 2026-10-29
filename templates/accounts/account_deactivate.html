@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nonaktifkan Akun{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="pf-page">
+
+  <div class="pf-head">
+    <div>
+      <h1 class="pf-title">Nonaktifkan Akun</h1>
+      <p class="pf-sub">Baca dulu apa yang akan terjadi sebelum melanjutkan.</p>
+    </div>
+  </div>
+
+  <div class="pf-layout">
+    {% include "accounts/_sidebar.html" with active="" %}
+
+    <div class="pf-main pf-main--single">
+
+      {% if blocking %}
+        <section class="pf-card pf-alert" role="alert" aria-labelledby="blk-title">
+          <h2 class="pf-card__title" id="blk-title">Kamu belum bisa menonaktifkan akun</h2>
+          <p class="pf-alert__text">Masih ada transaksi yang berjalan. Selesaikan atau batalkan dulu di halaman transaksi supaya pihak lain tidak terkatung-katung:</p>
+          <ul class="pf-bullets">
+            {% for item in blocking %}<li>{{ item.label }}</li>{% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      <section class="pf-card pf-deactivate" aria-labelledby="dz-title">
+        <h2 class="pf-card__title" id="dz-title">Yang akan terjadi</h2>
+        <ul class="pf-bullets">
+          <li>Profilmu disembunyikan dari pengguna lain, dan barang yang kamu pinjamkan tidak tampil lagi di katalog.</li>
+          <li>Kamu keluar dari akun ini.</li>
+          <li>Riwayat transaksi tetap tersimpan. Namamu tetap terlihat di riwayat pengguna lain dengan penanda "Akun nonaktif".</li>
+          <li>Kamu bisa mengaktifkan akun lagi kapan saja dengan login lewat SSO UI.</li>
+        </ul>
+
+        <form method="post" id="deactivateForm" novalidate>
+          {% csrf_token %}
+          <label class="pf-confirm">
+            <input type="checkbox" name="confirm" value="yes" id="confirmBox" {% if blocking %}disabled{% endif %}>
+            <span>Saya mengerti dan ingin menonaktifkan akun saya.</span>
+          </label>
+
+          <div class="pf-form__actions">
+            <a class="pf-btn pf-btn--outline" href="{% url 'accounts:profile' %}">Batal</a>
+            <button type="submit" class="pf-btn pf-btn--danger" id="deactivateBtn" disabled>Nonaktifkan Akun</button>
+          </div>
+        </form>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var box = document.getElementById("confirmBox");
+    var btn = document.getElementById("deactivateBtn");
+    var blocked = box.disabled;
+    function sync() { btn.disabled = blocked || !box.checked; }
+    box.addEventListener("change", sync);
+    sync();
+  })();
+</script>
+{% endblock %}
