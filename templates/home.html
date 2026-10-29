@@ -91,6 +91,64 @@
         </div>
 
         {% if barang_list %}
+            <form method="get" action="{% url 'home' %}#barang" class="price-filter">
+
+                {% if current_q %}
+                    <input type="hidden" name="q" value="{{ current_q }}">
+                {% endif %}
+                {% if current_kategori %}
+                    <input type="hidden" name="kategori" value="{{ current_kategori }}">
+                {% endif %}
+                <div class="price-filter-field">
+                    <label for="price_type">Jenis harga</label>
+                    <select name="price_type" id="price_type">
+                        <option value="" {% if not current_price_type %}selected{% endif %}>
+                            Semua harga
+                        </option>
+                        <option value="gratis" {% if current_price_type == "gratis" %}selected{% endif %}>
+                            Gratis
+                        </option>
+                        <option value="sewa" {% if current_price_type == "sewa" %}selected{% endif %}>
+                            Berbayar
+                        </option>
+                    </select>
+                </div>
+
+                <div class="price-filter-field">
+                    <label for="min_price">Harga minimum (Rp/hari)</label>
+                    <input
+                        type="number"
+                        name="min_price"
+                        id="min_price"
+                        min="0"
+                        placeholder="Contoh: 10000"
+                        value="{{ current_min_price }}"
+                    >
+                </div>
+                <div class="price-filter-field">
+                    <label for="max_price">Harga maksimum (Rp/hari)</label>
+                    <input
+                        type="number"
+                        name="max_price"
+                        id="max_price"
+                        min="0"
+                        placeholder="Contoh: 50000"
+                        value="{{ current_max_price }}"
+                    >
+                </div>
+
+                <button type="submit" class="br-btn-primary">
+                    Terapkan filter
+                </button>
+
+                <a
+                    href="{% url 'home' %}{% if current_q %}?q={{ current_q|urlencode }}{% endif %}{% if current_kategori %}{% if current_q %}&{% else %}?{% endif %}kategori={{ current_kategori }}{% endif %}#barang"
+                    class="br-btn-secondary"
+                >
+                    Reset harga
+                </a>
+
+            </form>
             <div class="br-grid" style="margin-bottom: 0;">
                 {% for item in barang_list %}
                     <a href="{% url 'barang:detail' item.pk %}" class="br-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column;">
