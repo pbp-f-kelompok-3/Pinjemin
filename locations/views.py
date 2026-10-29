@@ -4,7 +4,7 @@ import math
 from django.db import DatabaseError
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
@@ -83,7 +83,9 @@ def pickup_locations(request):
 def pickup_location_detail(request, pk):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Silakan masuk kembali untuk mengelola lokasi.'}, status=401)
-    location = get_object_or_404(PickupLocation, pk=pk, owner=request.user, is_active=True)
+    location = PickupLocation.objects.filter(pk=pk, owner=request.user, is_active=True).first()
+    if location is None:
+        return JsonResponse({'error': 'Lokasi ini tidak lagi tersedia. Pilih lokasi lain atau muat ulang riwayat.'}, status=404)
     if request.method == 'DELETE':
         location.is_active = False
         location.save(update_fields=['is_active', 'updated_at'])

@@ -21,6 +21,7 @@
   const draftAddress = find('[data-draft-address]');
   const manualLat = find('[data-manual-lat]');
   const manualLng = find('[data-manual-lng]');
+  const googleMapsLink = find('[data-google-maps-link]');
   const saveButton = find('[data-save-location]');
   let mode = 'saved';
   let editingId = null;
@@ -57,6 +58,13 @@
     const valid = point && validPoint(point.latitude, point.longitude);
     manualLat.value = valid ? point.latitude.toFixed(6) : '';
     manualLng.value = valid ? point.longitude.toFixed(6) : '';
+    if (googleMapsLink) {
+      googleMapsLink.hidden = !valid;
+      if (valid) {
+        const coordinates = point.latitude.toFixed(6) + ',' + point.longitude.toFixed(6);
+        googleMapsLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(coordinates);
+      } else googleMapsLink.removeAttribute('href');
+    }
     if (map) {
       if (valid) {
         if (!marker) {
@@ -341,32 +349,15 @@
   });
   if (itemForm) itemForm.addEventListener('submit', event => {
     syncItem();
-    const isEdit = itemForm.hasAttribute('data-item-edit') || Boolean(currentRecord);
-    if (isEdit) {
-      // Pada mode edit barang, JANGAN PERNAH batalkan submit karena urusan lokasi!
-      // Jika pengguna memilih titik dari riwayat yang valid, gunakan titik tersebut.
-      // Jika tidak, otomatis fallback mempertahankan lokasi barang saat ini.
-      if (mode === 'saved' && selection && validPoint(selection.latitude, selection.longitude)) {
-        hiddenMode.value = 'saved';
-        hiddenId.value = selection.id;
-        hiddenLat.value = selection.latitude;
-        hiddenLng.value = selection.longitude;
-      } else {
-        hiddenMode.value = 'current';
-        if (currentRecord) {
-          hiddenId.value = '';
-          hiddenLat.value = currentRecord.latitude ?? '';
-          hiddenLng.value = currentRecord.longitude ?? '';
-        }
-      }
-      return; // Loloskan submit edit dengan aman!
-    }
-
-    const keepCurrent = mode === 'current' && selection?.id === 'current';
-    if (!keepCurrent && (mode !== 'saved' || !selection || !validPoint(selection.latitude, selection.longitude))) {
+    const keepLegacy = mode === 'current' && selection?.id === 'current'
+      && selection.latitude == null && selection.longitude == null
+      && manualLat.value.trim() === '' && manualLng.value.trim() === '';
+    const validSelection = ['saved', 'current'].includes(mode) && selection
+      && validPoint(selection.latitude, selection.longitude);
+    if (!keepLegacy && (!validSelection || !validPoint(number(manualLat.value), number(manualLng.value)))) {
       event.preventDefault();
-      message('Pilih lokasi tersimpan atau simpan lokasi baru sebelum menyimpan barang.', true);
-      alert('Pemberitahuan: Harap pilih titik penjemputan pada peta atau pilih dari riwayat lokasi sebelum menyimpan barang.');
+      message(mode === 'new' ? 'Simpan lokasi baru ke riwayat terlebih dahulu, atau pilih Lokasi saat ini.'
+        : 'Pilih lokasi dan titik penjemputan yang valid sebelum menyimpan barang.', true);
       root.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
   });
