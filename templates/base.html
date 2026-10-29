@@ -5,17 +5,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <title>{% block title %}Pinjemin{% endblock %}</title>
 
-  <!-- Tailwind CSS CDN (Framework CSS Responsive PBP) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Framework CSS Responsive: Tailwind CSS (Aman tanpa reset preflight/container conflict) -->
   <script>
-    tailwind.config = {
-      corePlugins: {
-        preflight: false,
+    window.tailwind = {
+      config: {
+        corePlugins: {
+          preflight: false,
+          container: false,
+        }
       }
-    }
+    };
   </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}?v=20261028-5">
   <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20261028-8">
@@ -26,7 +32,7 @@
 
   {% include "components/navbar.html" %}
 
-  <main class="container">
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
     {% if messages %}
       <div style="margin: 16px 0 24px; display: flex; flex-direction: column; gap: 10px;">
         {% for message in messages %}

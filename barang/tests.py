@@ -1,4 +1,4 @@
-﻿"""
+"""
 Unit Tests untuk Modul Manajemen Barang (Fauzan Taqiy Santosa - NPM: 2506607272)
 Sesuai Rubrik Penilaian Proyek Pemrograman Berbasis Platform (PBP) Fasilkom UI
 """
@@ -236,3 +236,125 @@ class BarangAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/xml')
         self.assertContains(response, "<django-objects")
+
+
+class KatalogBerandaTest(TestCase):
+    def setUp(self):
+        self.client = Client(SERVER_NAME='localhost')
+        self.user = User.objects.create_user(username="katalog_user", password="password123")
+        self.kat_buku = Category.objects.create(name="Buku")
+        self.kat_elektronik = Category.objects.create(name="Elektronik")
+        self.lokasi = Lokasi.objects.create(nama_area="Pocin", short_label="Pocin", patokan="Stasiun Pocin")
+
+        # Barang 1: Buku - Gratis - dilihat 5
+        self.b1 = Barang.objects.create(
+            pemilik=self.user,
+            nama_barang="Buku Kalkulus Purcel",
+            foto_utama=generate_test_image(),
+            deskripsi="Buku paket edisi 9.",
+            kategori=self.kat_buku,
+            jenis_penawaran="gratis",
+            tarif_per_hari=0,
+            lokasi=self.lokasi,
+            dilihat_count=5
+        )
+        # Barang 2: Mouse Wireless - Sewa 15.000 - dilihat 20
+        self.b2 = Barang.objects.create(
+            pemilik=self.user,
+            nama_barang="Mouse Logitech Wireless",
+            foto_utama=generate_test_image(),
+            deskripsi="Mouse ergonomis kondisi mulus.",
+            kategori=self.kat_elektronik,
+            jenis_penawaran="sewa",
+            tarif_per_hari=15000,
+            lokasi=self.lokasi,
+            dilihat_count=20
+        )
+        # Barang 3: Proyektor Epson - Sewa 50.000 - dilihat 10
+        self.b3 = Barang.objects.create(
+            pemilik=self.user,
+            nama_barang="Proyektor Epson HDMI",
+            foto_utama=generate_test_image(),
+            deskripsi="Proyektor terang untuk presentasi.",
+            kategori=self.kat_elektronik,
+            jenis_penawaran="sewa",
+            tarif_per_hari=50000,
+            lokasi=self.lokasi,
+            dilihat_count=10
+        )
+
+    def test_home_status_code_and_render(self):
+        response = self.client.get(reverse('home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "home.html")
+        self.assertEqual(len(response.context['barang_list']), 3)
+
+    def test_home_search_query(self):
+        response = self.client.get(reverse('home'), {'q': 'Logitech'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['barang_list']), 1)
+        self.assertEqual(response.context['barang_list'][0].pk, self.b2.pk)
+        self.assertEqual(response.context['current_q'], 'Logitech')
+
+    def test_home_filter_kategori(self):
+        response = self.client.get(reverse('home'), {'kategori': self.kat_elektronik.pk})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['barang_list']), 2)
+        self.assertEqual(response.context['current_kategori'], str(self.kat_elektronik.pk))
+
+    def test_home_filter_price_type_and_range(self):
+        # Filter sewa dengan harga 10.000 s.d 20.000
+        response = self.client.get(reverse('home'), {
+            'price_type': 'sewa',
+            'min_price': '10000',
+            'max_price': '20000',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['barang_list']), 1)
+        self.assertEqual(response.context['barang_list'][0].pk, self.b2.pk)
+        self.assertEqual(response.context['current_price_type'], 'sewa')
+        self.assertEqual(response.context['current_min_price'], 10000)
+        self.assertEqual(response.context['current_max_price'], 20000)
+        # Check inputs value retained in HTML
+        self.assertContains(response, 'value="10000"')
+        self.assertContains(response, 'value="20000"')
+
+    def test_home_sorting_harga_asc(self):
+        response = self.client.get(reverse('home'), {'sort': 'harga_asc'})
+        self.assertEqual(response.status_code, 200)
+        items = list(response.context['barang_list'])
+        self.assertEqual([item.pk for item in items], [self.b1.pk, self.b2.pk, self.b3.pk])
+
+    def test_home_sorting_harga_desc(self):
+        response = self.client.get(reverse('home'), {'sort': 'harga_desc'})
+        self.assertEqual(response.status_code, 200)
+        items = list(response.context['barang_list'])
+        self.assertEqual([item.pk for item in items], [self.b3.pk, self.b2.pk, self.b1.pk])
+
+    def test_home_sorting_nama_asc(self):
+        response = self.client.get(reverse('home'), {'sort': 'nama_asc'})
+        self.assertEqual(response.status_code, 200)
+        items = list(response.context['barang_list'])
+        self.assertEqual([item.pk for item in items], [self.b1.pk, self.b2.pk, self.b3.pk])
+
+    def test_home_sorting_sering_dipinjam(self):
+        response = self.client.get(reverse('home'), {'sort': 'sering_dipinjam'})
+        self.assertEqual(response.status_code, 200)
+        items = list(response.context['barang_list'])
+        self.assertEqual([item.pk for item in items], [self.b2.pk, self.b3.pk, self.b1.pk])
+
+    def test_home_combined_filters_preservation(self):
+        response = self.client.get(reverse('home'), {
+            'kategori': self.kat_elektronik.pk,
+            'q': 'Proyektor',
+            'price_type': 'sewa',
+            'min_price': '30000',
+            'max_price': '60000',
+            'sort': 'harga_desc'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['barang_list']), 1)
+        self.assertEqual(response.context['barang_list'][0].pk, self.b3.pk)
+        self.assertEqual(response.context['current_q'], 'Proyektor')
+        self.assertEqual(response.context['current_kategori'], str(self.kat_elektronik.pk))
+        self.assertEqual(response.context['current_sort'], 'harga_desc')

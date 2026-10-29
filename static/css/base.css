@@ -35,7 +35,7 @@ body {
   display: flex;
   flex-direction: column;
 
-  font-family: Arial, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--black);
   background: var(--white);
   line-height: 1.5;
@@ -46,10 +46,15 @@ a {
   text-decoration: none;
 }
 
-.container {
-  width: 90%;
-  max-width: 1100px;
-  margin: 0 auto;
+.container,
+main.container {
+  width: 90% !important;
+  max-width: 1150px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  box-sizing: border-box !important;
 }
 
 
@@ -603,59 +608,85 @@ color: var(--black);
   }
 }
 
-/* FILTER HARGA */
+/* ==============================================================================
+   FILTER HARGA & KATEGORI (MODUL KATALOG PINJEMIN)
+   ============================================================================== */
 
 .price-filter {
     display: flex;
     flex-wrap: wrap;
-    align-items: end;
-    gap: 12px;
-    margin: 16px 0 24px;
-    padding: 16px;
-    background: #f7f7f7;
-    border-radius: 12px;
+    align-items: flex-end;
+    gap: 14px;
+    margin: 20px 0 28px;
+    padding: 18px 22px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.price-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .price-filter label {
     display: block;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #4B5563;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .price-filter select,
 .price-filter input {
     box-sizing: border-box;
-    min-width: 140px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: white;
+    min-width: 150px;
+    padding: 10px 14px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    background: #FAFAFA;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: #1F2937;
+    transition: all 0.2s ease;
 }
 
-.price-filter button {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 6px;
-    background: #333;
-    color: white;
-    cursor: pointer;
+.price-filter select:focus,
+.price-filter input:focus {
+    background: #FFFFFF;
+    border-color: #3B82F6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
-.price-filter a {
-    padding: 10px 0;
-    color: #333;
-    text-decoration: underline;
+.price-filter button.br-btn-primary,
+.price-filter a.br-btn-secondary {
+    align-self: flex-end;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .price-filter {
-        align-items: stretch;
         flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .price-filter-field {
+        width: 100%;
     }
 
     .price-filter select,
     .price-filter input,
-    .price-filter button {
+    .price-filter button,
+    .price-filter a {
         width: 100%;
     }
 }
