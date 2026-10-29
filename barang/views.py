@@ -1,4 +1,4 @@
-﻿"""
+"""
 @module: pinjemin.barang.views
 @author: Fauzan Taqiy Santosa (NPM: 2506607272)
 @feature: Manajemen Barang (Dashboard Barang Saya, Tambah, Edit, Hapus, dan API JSON/XML)
@@ -227,6 +227,45 @@ def hapus_barang(request, pk):
         f"Barang '{nama}' telah berhasil dihapus dari inventaris Barang Saya."
     )
     return redirect('barang:dashboard')
+
+
+@login_required
+@require_POST
+def hapus_barang_ajax(request, pk):
+    """
+    PEMROSESAN HAPUS BARANG VIA AJAX (Standar Tutorial 06 PBP - Fauzan Taqiy Santosa)
+    Menghapus barang secara asinkronus tanpa me-refresh halaman:
+    - Wajib login (@login_required) & hanya pemilik sah
+    - Memvalidasi aturan bisnis: Barang yang sedang dipinjam aktif TIDAK DAPAT dihapus
+    - Mengembalikan JsonResponse untuk manipulasi DOM sisi klien secara realtime
+    """
+    try:
+        barang = Barang.objects.get(pk=pk, pemilik=request.user)
+    except Barang.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Barang tidak ditemukan atau Anda tidak memiliki hak akses.'
+        }, status=404)
+
+    if not barang.can_be_deleted():
+        return JsonResponse({
+            'status': 'error',
+            'message': f"Barang '{barang.nama_barang}' tidak dapat dihapus karena saat ini sedang dalam masa peminjaman aktif!"
+        }, status=400)
+
+    nama = barang.nama_barang
+    barang.delete()
+
+    total_barang = Barang.objects.filter(pemilik=request.user).count()
+    barang_tersedia = Barang.objects.filter(pemilik=request.user, status_penawaran='aktif').count()
+
+    return JsonResponse({
+        'status': 'success',
+        'message': f"Barang '{nama}' telah berhasil dihapus.",
+        'deleted_id': pk,
+        'total_barang': total_barang,
+        'barang_tersedia': barang_tersedia,
+    }, status=200)
 
 
 # ==============================================================================

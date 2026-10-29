@@ -20,6 +20,7 @@ urlpatterns = [
     path('<int:pk>/', views.detail_barang, name='detail'),
     path('<int:pk>/edit/', views.edit_barang, name='edit'),
     path('<int:pk>/hapus/', views.hapus_barang, name='hapus'),
+    path('<int:pk>/hapus-ajax/', views.hapus_barang_ajax, name='hapus_ajax'),
 
     # Endpoint Serialisasi Data (Standar PBP Fasilkom UI & Integrasi Mobile/Flutter)
     path('json/', views.show_json, name='show_json'),

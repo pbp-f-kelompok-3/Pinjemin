@@ -50,7 +50,7 @@
     <div class="br-metric-card">
       <div>
         <div class="br-metric-title">Total Barang</div>
-        <div class="br-metric-value">{{ total_barang }}</div>
+        <div class="br-metric-value" id="metric-total-barang">{{ total_barang }}</div>
       </div>
       <div class="br-metric-icon br-icon-yellow">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
@@ -60,7 +60,7 @@
     <div class="br-metric-card">
       <div>
         <div class="br-metric-title">Barang Tersedia</div>
-        <div class="br-metric-value">{{ barang_tersedia }}</div>
+        <div class="br-metric-value" id="metric-barang-tersedia">{{ barang_tersedia }}</div>
       </div>
       <div class="br-metric-icon br-icon-green">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -147,9 +147,9 @@
 
   <!-- Grid Daftar Barang -->
   {% if page_obj %}
-    <div class="br-grid">
+    <div class="br-grid" id="barang-grid">
       {% for item in page_obj %}
-        <div class="br-card">
+        <div class="br-card" id="barang-card-{{ item.pk }}">
           <!-- Thumbnail Gambar & Badges -->
           <div class="br-card-img-wrap">
             {% if item.foto_utama %}
