@@ -90,7 +90,7 @@
 
             {% if current_q or current_kategori or current_price_type or current_min_price or current_max_price or current_sort and current_sort != 'terbaru' %}
                 <a href="{% url 'home' %}#barang" class="br-btn-secondary" style="font-size: 12px; padding: 6px 14px;">
-                    ✕ Reset Semua Filter
+                    ✕ Reset Filter
                 </a>
             {% endif %}
         </div>
@@ -157,13 +157,6 @@
             <button type="submit" class="br-btn-primary">
                 Terapkan Filter
             </button>
-
-            <a
-                href="{% url 'home' %}{% if current_q or current_kategori %}?{% if current_q %}q={{ current_q|urlencode }}{% endif %}{% if current_kategori %}{% if current_q %}&{% endif %}kategori={{ current_kategori }}{% endif %}{% endif %}#barang"
-                class="br-btn-secondary"
-            >
-                Reset Harga
-            </a>
         </form>
 
         {% if barang_list %}
