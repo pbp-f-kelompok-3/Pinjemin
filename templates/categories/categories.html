@@ -26,7 +26,11 @@
 
     <ul class="category-page__grid">
         {% for category in categories %}
-            <li class="category-card">
+        <li class="category-card">
+            <a href="{% url 'home' %}?kategori={{ category.pk }}#barang"
+            class="category-card__link"
+            aria-label="Lihat barang kategori {{ category.name }}">
+
                 <div class="category-card__media">
                     {% if category.icon_url %}
                         <img
@@ -34,31 +38,39 @@
                             src="{{ category.icon_url }}"
                             width="74"
                             height="74"
+                            alt=""
                         >
-                        <span class="category-card__fallback" aria-hidden="true" hidden>{{ category.name|slice:":1"|upper }}</span>
+                        <span class="category-card__fallback"
+                            aria-hidden="true"
+                            hidden>
+                            {{ category.name|slice:":1"|upper }}
+                        </span>
                     {% else %}
-                        <span class="category-card__fallback" aria-hidden="true">{{ category.name|slice:":1"|upper }}</span>
+                        <span class="category-card__fallback" aria-hidden="true">
+                            {{ category.name|slice:":1"|upper }}
+                        </span>
                     {% endif %}
                 </div>
 
                 <h2 class="category-card__name">{{ category.name }}</h2>
+            </a>
 
-                {% if user.is_staff or user.is_superuser %}
-                    <div class="category-card__actions">
-                        <a href="{% url 'categories:update_category' category.id %}"
-                           class="category-btn category-btn--secondary"
-                           aria-label="Perbarui Kategori {{ category.name }}">
-                            Perbarui Kategori
-                        </a>
+            {% if user.is_staff or user.is_superuser %}
+                <div class="category-card__actions">
+                    <a href="{% url 'categories:update_category' category.id %}"
+                    class="category-btn category-btn--secondary"
+                    aria-label="Perbarui Kategori {{ category.name }}">
+                        Perbarui Kategori
+                    </a>
 
-                        <a href="{% url 'categories:delete_category' category.id %}"
-                           class="category-btn category-btn--danger"
-                           aria-label="Hapus Kategori {{ category.name }}">
-                            Hapus Kategori
-                        </a>
-                    </div>
-                {% endif %}
-            </li>
+                    <a href="{% url 'categories:delete_category' category.id %}"
+                    class="category-btn category-btn--danger"
+                    aria-label="Hapus Kategori {{ category.name }}">
+                        Hapus Kategori
+                    </a>
+                </div>
+            {% endif %}
+        </li>
         {% empty %}
             <li class="category-page__empty">
                 <p>Kategori belum dibuat.</p>

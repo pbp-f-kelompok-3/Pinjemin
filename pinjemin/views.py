@@ -25,9 +25,15 @@ def home(request):
 
     items = items.order_by('-created_at')
 
+    current_kategori = request.GET.get("kategori", "").strip()
     selected_category = None
-    if kategori_id and kategori_id.isdigit():
-        selected_category = Category.objects.filter(pk=kategori_id).first()
+    if current_kategori.isdigit():
+        selected_category = categories.filter(pk=current_kategori).first()
+
+        if selected_category:
+            items = items.filter(
+                kategori=selected_category
+            )
 
     price_type = request.GET.get("price_type", "")
     min_price = request.GET.get("min_price", "").strip()
