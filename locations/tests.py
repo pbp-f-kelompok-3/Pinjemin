@@ -1,4 +1,4 @@
-import json
+﻿import json
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
@@ -29,7 +29,7 @@ class NavbarWithBarangUrls:
     ]
 
 
-class NavbarBarangAvailabilityTests(SimpleTestCase):
+class NavbarBarangAvailabilityTests(TestCase):
     @override_settings(ROOT_URLCONF=NavbarWithoutBarangUrls)
     def test_home_renders_when_barang_is_not_registered(self):
         response = self.client.get(reverse('home'))

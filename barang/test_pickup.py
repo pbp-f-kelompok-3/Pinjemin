@@ -1,4 +1,4 @@
-from decimal import Decimal
+﻿from decimal import Decimal
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
@@ -8,7 +8,8 @@ from django.urls import reverse
 
 from locations.models import PickupLocation
 from .forms import BarangForm
-from .models import Barang, Kategori, Lokasi
+from categories.models import Category
+from .models import Barang, Lokasi
 from .services import save_item_with_pickup
 from .tests import generate_test_image
 
@@ -27,7 +28,7 @@ class ItemPickupTests(TestCase):
         self.user = get_user_model().objects.create_user(username='item-pickup-owner')
         self.other = get_user_model().objects.create_user(username='other-item-owner')
         self.client.force_login(self.user)
-        self.category = Kategori.objects.create(nama='Pakaian', slug='pakaian')
+        self.category = Category.objects.create(name='Pakaian')
         self.location = PickupLocation.objects.create(owner=self.user, label='Kos Kukusan',
             address='Jl. K.H.M. Usman No. 21, Beji, Depok', latitude='-6.362100', longitude='106.827900')
         self.data = {'nama_barang': 'Jas sidang hitam', 'deskripsi': 'Jas ukuran L, bersih dan lengkap.',

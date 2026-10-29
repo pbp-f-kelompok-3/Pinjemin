@@ -5,21 +5,6 @@
       <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin" class="brand-logo" width="108" height="36">
     </a>
 
-    <nav aria-label="Navigasi utama">
-      <form class="search-form" method="GET" action="{% url 'home' %}"> 
-        <input type="search" placeholder="Cari di Pinjemin..."> 
-        <button type="submit">Cari</button> 
-      </form>
-
-      <a href="{% url 'home' %}">Beranda</a>
-
-      <a href="#">
-        Cari Barang
-      </a>
-
-      <a href="{% url 'categories:show_categories'%}">
-        Kategori
-      </a>
     <div class="nav-location" data-location-widget data-endpoint="{% url 'locations:current' %}">
       <button class="nav-location__toggle" type="button" data-location-toggle aria-expanded="false" aria-controls="location-panel" aria-haspopup="dialog">
         <svg class="nav-location__pin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -75,7 +60,7 @@
 
   <nav class="site-subnav" aria-label="Navigasi utama">
     <div class="header-container subnav-inner">
-      <a class="subnav-categories" href="{% url 'home' %}#kategori">
+      <a class="subnav-categories" href="{% url 'categories:show_categories' %}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Semua kategori
       </a>

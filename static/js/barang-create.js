@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   'use strict';
   const form = document.querySelector('[data-item-create]');
   if (!form) return;
@@ -61,6 +61,43 @@
   const offer = find('#id_jenis_penawaran');
   const price = find('#id_tarif_per_hari');
   let rentalPrice = price.value;
+
+  let priceError = find('[data-price-error]');
+  if (!priceError) {
+    priceError = document.createElement('p');
+    priceError.className = 'pickup-error';
+    priceError.setAttribute('data-price-error', '');
+    priceError.style.color = '#DC2626';
+    priceError.style.fontSize = '12.5px';
+    priceError.style.fontWeight = '600';
+    priceError.style.marginTop = '6px';
+    const priceGroup = find('[data-price-group]');
+    if (priceGroup) priceGroup.appendChild(priceError);
+  }
+
+  const checkPriceValidity = () => {
+    if (offer.value === 'sewa') {
+      const val = Number(price.value);
+      if (price.value === '' || isNaN(val)) {
+        priceError.textContent = '⚠️ Tarif sewa harian wajib diisi untuk barang sewa.';
+        priceError.hidden = false;
+        return false;
+      } else if (val <= 0) {
+        priceError.textContent = '⚠️ Tarif sewa harian tidak boleh Rp 0 atau bernilai minus. Harap masukkan nominal minimal Rp 1.';
+        priceError.hidden = false;
+        return false;
+      } else {
+        priceError.textContent = '';
+        priceError.hidden = true;
+        return true;
+      }
+    } else {
+      priceError.textContent = '';
+      priceError.hidden = true;
+      return true;
+    }
+  };
+
   const updatePrice = () => {
     const free = offer.value === 'gratis';
     find('[data-price-group]').hidden = free;
@@ -68,9 +105,22 @@
     price.required = !free;
     price.min = free ? '0' : '1';
     price.step = '1';
-    price.value = free ? '0' : rentalPrice;
+    price.value = free ? '0' : (rentalPrice && Number(rentalPrice) > 0 ? rentalPrice : '');
+    checkPriceValidity();
   };
-  price.addEventListener('input', () => { rentalPrice = price.value; });
+
+  price.addEventListener('input', () => {
+    rentalPrice = price.value;
+    checkPriceValidity();
+  });
   offer.addEventListener('change', updatePrice);
   updatePrice();
+
+  form.addEventListener('submit', event => {
+    if (!checkPriceValidity()) {
+      event.preventDefault();
+      price.focus();
+      price.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  });
 })();

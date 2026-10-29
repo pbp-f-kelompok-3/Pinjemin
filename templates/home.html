@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Beranda - Pinjemin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/barang.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="home-page">
@@ -8,11 +13,6 @@
     <h1>Mau pinjam apa hari ini?</h1>
     <p>Temukan barang untuk kuliah, acara kampus, dan keseharianmu.</p>
 </div>
-<section class="featured-section" id="barang">
-    <div class="featured-box"> 
-        <h2>Featured Products</h2>
-    </div>
-</section>
 
 <section class="category-section" id="kategori">
     <h2>Shop by Category</h2>
@@ -20,26 +20,22 @@
         <div class="categories">
             {% if categories|length > 5 %}
                 {% for category in categories|slice:":4" %}
-                    <div class="category">
-                        <div class="category-icon">
+                    <a href="?kategori={{ category.pk }}#barang" class="category" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon" style="{% if current_kategori == category.pk|stringformat:'s' %}background: var(--yellow, #FEE75C); border: 2px solid var(--black);{% endif %}">
                             {% if category.icon_url %}
-                                <img src="{{ category.icon_url }}"
-                                     alt="{{ category.name }}">
+                                <img src="{{ category.icon_url }}" alt="{{ category.name }}">
                             {% else %}
-                                <span class="category-fallback">
-                                    {{ category.name|first }}
-                                </span>
+                                <span class="category-fallback">{{ category.name|first }}</span>
                             {% endif %}
                         </div>
 
-                        <span class="category-name">
+                        <span class="category-name" style="{% if current_kategori == category.pk|stringformat:'s' %}font-weight: 700;{% endif %}">
                             {{ category.name }}
                         </span>
-                    </div>
+                    </a>
                 {% endfor %}
 
-                <a href="{% url 'categories:show_categories' %}"
-                   class="category more-category">
+                <a href="{% url 'categories:show_categories' %}" class="category more-category">
                     <div class="category-icon more-icon">
                         <span>•••</span>
                     </div>
@@ -48,30 +44,124 @@
 
             {% else %}
                 {% for category in categories %}
-                    <div class="category">
-                        <div class="category-icon">
+                    <a href="?kategori={{ category.pk }}#barang" class="category" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon" style="{% if current_kategori == category.pk|stringformat:'s' %}background: var(--yellow, #FEE75C); border: 2px solid var(--black);{% endif %}">
                             {% if category.icon_url %}
-                                <img src="{{ category.icon_url }}"
-                                     alt="{{ category.name }}">
+                                <img src="{{ category.icon_url }}" alt="{{ category.name }}">
                             {% else %}
-                                <span class="category-fallback">
-                                    {{ category.name|first }}
-                                </span>
+                                <span class="category-fallback">{{ category.name|first }}</span>
                             {% endif %}
                         </div>
 
-                        <span class="category-name">
+                        <span class="category-name" style="{% if current_kategori == category.pk|stringformat:'s' %}font-weight: 700;{% endif %}">
                             {{ category.name }}
                         </span>
-                    </div>
+                    </a>
                 {% endfor %}
             {% endif %}
         </div>
     {% else %}
-        <p class="no-categories">
-            Belum ada kategori yang ditambahkan.
-        </p>
+        <p class="no-categories">Belum ada kategori yang ditambahkan.</p>
     {% endif %}
+</section>
+
+<section class="featured-section" id="barang">
+    <div class="featured-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--black);">
+                    {% if selected_category %}
+                        Katalog {{ selected_category.name }}
+                    {% elif current_q %}
+                        Hasil Pencarian "{{ current_q }}"
+                    {% else %}
+                        Barang Tersedia untuk Dipinjam
+                    {% endif %}
+                </h2>
+                <p style="margin: 4px 0 0; font-size: 13px; color: var(--gray-dark);">
+                    Daftar barang inventaris mahasiswa UI yang siap dipinjam atau disewa
+                </p>
+            </div>
+
+            {% if current_q or current_kategori %}
+                <a href="{% url 'home' %}#barang" class="br-btn-secondary" style="font-size: 12px; padding: 6px 14px;">
+                    ✕ Reset Filter
+                </a>
+            {% endif %}
+        </div>
+
+        {% if barang_list %}
+            <div class="br-grid" style="margin-bottom: 0;">
+                {% for item in barang_list %}
+                    <a href="{% url 'barang:detail' item.pk %}" class="br-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column;">
+                        <!-- Thumbnail Gambar & Badges -->
+                        <div class="br-card-img-wrap">
+                            {% if item.foto_utama %}
+                                <img src="{{ item.foto_utama.url }}" alt="{{ item.nama_barang }}" class="br-card-img">
+                            {% else %}
+                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                                </div>
+                            {% endif %}
+
+                            <div class="br-card-tags">
+                                <span class="br-badge br-badge-category">{{ item.kategori.nama }}</span>
+                                {% if item.jenis_penawaran == 'sewa' %}
+                                    <span class="br-badge br-badge-sewa">Sewa</span>
+                                {% else %}
+                                    <span class="br-badge br-badge-gratis">Gratis</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Informasi Barang -->
+                        <div class="br-card-body">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                {% if item.is_sedang_dipinjam %}
+                                    <span class="br-badge br-badge-status-dipinjam">Sedang Dipinjam</span>
+                                {% else %}
+                                    <span class="br-badge br-badge-status-aktif">Tersedia</span>
+                                {% endif %}
+
+                                <span style="font-size: 11px; color: var(--br-text-muted);">
+                                    Pemilik: <strong>{{ item.nama_pemilik_display }}</strong>
+                                </span>
+                            </div>
+
+                            <h3 class="br-card-title">{{ item.nama_barang }}</h3>
+                            <p class="br-card-desc">{{ item.deskripsi }}</p>
+
+                            <div class="br-card-meta">
+                                <div>
+                                    {% if item.jenis_penawaran == 'sewa' %}
+                                        <div class="br-card-price">Rp {{ item.tarif_formatted }} <span class="br-card-price-unit">/ hari</span></div>
+                                    {% else %}
+                                        <div class="br-card-price" style="color: var(--br-green);">Pinjam Gratis</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="br-card-location">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 3px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{{ item.lokasi.short_label|default:item.lokasi.nama_area }}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="br-empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--br-black); margin-bottom: 6px;">Belum Ada Barang yang Tersedia</h3>
+                <p style="font-size: 13px; color: var(--br-text-muted); margin: 0;">
+                    {% if current_q or current_kategori %}
+                        Tidak ada barang yang cocok dengan filter yang dipilih. <a href="{% url 'home' %}#barang">Lihat semua barang</a>
+                    {% else %}
+                        Saat ini belum ada barang yang didaftarkan untuk dipinjamkan.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
 </section>
 
 </div>

@@ -1,4 +1,4 @@
-"""
+﻿"""
 @module: pinjemin.barang.forms
 @author: Fauzan Taqiy Santosa (NPM: 2506607272)
 @feature: Formulir Tambah & Edit Barang
@@ -72,7 +72,7 @@ class BarangForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': '25000',
                 'min': '0',
-                'step': '1000',
+                'step': '1',
                 'id': 'id_tarif_per_hari',
             }),
             'lokasi': forms.Select(attrs={
@@ -139,6 +139,14 @@ class BarangForm(forms.ModelForm):
                 cleaned_data['pickup_longitude'] = self.current_pickup.longitude
             elif latitude is None or longitude is None:
                 self.add_error('pickup_location', 'Isi kedua koordinat atau pilih titik pada peta.')
+        elif self.current_pickup is not None:
+            # Fallback aman saat edit: pertahankan lokasi saat ini jika user tidak mengubah lokasi
+            cleaned_data['lokasi'] = self.current_pickup
+            cleaned_data['pickup_mode'] = 'current'
+            if not cleaned_data.get('pickup_latitude'):
+                cleaned_data['pickup_latitude'] = self.current_pickup.latitude
+            if not cleaned_data.get('pickup_longitude'):
+                cleaned_data['pickup_longitude'] = self.current_pickup.longitude
         elif cleaned_data.get('pickup_mode') or not cleaned_data.get('lokasi'):
             self.add_error('pickup_location', 'Pilih lokasi dari riwayat atau simpan lokasi baru terlebih dahulu.')
         jenis = cleaned_data.get('jenis_penawaran')
@@ -149,8 +157,10 @@ class BarangForm(forms.ModelForm):
             if hasattr(self, 'instance') and self.instance:
                 self.instance.tarif_per_hari = 0
         elif jenis == 'sewa':
-            if tarif is None or tarif <= 0:
-                self.add_error('tarif_per_hari', 'Tarif sewa harian harus lebih besar dari Rp 0 untuk barang sewa.')
+            if tarif is None:
+                self.add_error('tarif_per_hari', 'Tarif sewa harian wajib diisi untuk barang sewa (tidak boleh kosong).')
+            elif tarif <= 0:
+                self.add_error('tarif_per_hari', 'Tarif sewa harian tidak boleh Rp 0 atau bernilai minus. Tentukan tarif minimal Rp 1.')
 
         return cleaned_data
 
@@ -179,7 +189,7 @@ class BarangEditForm(BarangForm):
                 'pickup_latitude': self.current_pickup.latitude,
                 'pickup_longitude': self.current_pickup.longitude,
             })
-        # Foto utama tidak wajib diisi ulang jika sudah ada
-        if self.instance and self.instance.pk and self.instance.foto_utama:
-            self.fields['foto_utama'].required = False
-            self.fields['foto_utama'].widget.attrs.pop('required', None)
+        # Foto utama tidak pernah wajib diisi ulang saat edit barang
+        self.fields['foto_utama'].required = False
+        self.fields['foto_utama'].widget.attrs.pop('required', None)
+        self.fields['tarif_per_hari'].widget.attrs['step'] = '1'

@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ barang.nama_barang }} - Detail Barang - Pinjemin{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/barang.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+
+<style>
+  .br-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-top: 16px;
+  }
+
+  @media (min-width: 900px) {
+    .br-detail-layout {
+      grid-template-columns: 1.15fr 1fr;
+      gap: 36px;
+    }
+  }
+
+  .br-detail-gallery {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    background: #F3F4F6;
+    border-radius: var(--br-radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--br-border);
+    box-shadow: var(--br-shadow);
+  }
+
+  .br-detail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .br-detail-card {
+    background: var(--br-card-bg);
+    border: 1px solid var(--br-border);
+    border-radius: var(--br-radius-lg);
+    padding: 24px;
+    box-shadow: var(--br-shadow);
+    margin-bottom: 24px;
+  }
+
+  .br-owner-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--br-bg-muted);
+    border: 1px solid var(--br-border);
+    border-radius: var(--br-radius);
+    padding: 16px;
+    margin-top: 18px;
+  }
+
+  .br-owner-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--br-yellow);
+    color: var(--br-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .br-price-box {
+    background: var(--br-bg-muted);
+    border: 1.5px solid var(--br-border);
+    border-radius: var(--br-radius);
+    padding: 18px 20px;
+    margin: 20px 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="br-page">
+
+  <!-- Header & Breadcrumbs -->
+  <div class="br-header">
+    <nav class="br-breadcrumbs" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}">Beranda</a>
+      <span>/</span>
+      <a href="{% url 'home' %}?kategori={{ barang.kategori.pk }}#barang">{{ barang.kategori.nama }}</a>
+      <span>/</span>
+      <span aria-current="page">{{ barang.nama_barang|truncatechars:35 }}</span>
+    </nav>
+    <a href="{% url 'home' %}#barang" class="br-btn-secondary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Kembali ke Beranda
+    </a>
+  </div>
+
+  <div class="br-detail-layout">
+
+    <!-- Kolom Kiri: Foto Utama & Peta Lokasi Penjemputan -->
+    <div>
+      <!-- Foto Produk Utama -->
+      <div class="br-detail-gallery">
+        {% if barang.foto_utama %}
+          <img src="{{ barang.foto_utama.url }}" alt="{{ barang.nama_barang }}" class="br-detail-img">
+        {% else %}
+          <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9CA3AF;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            <span style="font-size: 14px;">Tidak ada foto produk</span>
+          </div>
+        {% endif %}
+
+        <div class="br-card-tags">
+          <span class="br-badge br-badge-category">{{ barang.kategori.nama }}</span>
+          {% if barang.jenis_penawaran == 'sewa' %}
+            <span class="br-badge br-badge-sewa">Sewa Harian</span>
+          {% else %}
+            <span class="br-badge br-badge-gratis">Pinjam Gratis</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Peta Lokasi Penjemputan -->
+      <div class="br-detail-card" style="margin-top: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            Titik Lokasi Penjemputan
+          </h3>
+          <span style="font-size: 12px; font-weight: 600; color: var(--br-text-muted);">
+            {{ barang.lokasi.short_label|default:"Kampus UI" }}
+          </span>
+        </div>
+
+        <p style="margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--br-black);">
+          {{ barang.lokasi.nama_area }}
+        </p>
+
+        {% if barang.lokasi.patokan or barang.lokasi.full_address %}
+          <p style="margin: 0 0 6px; font-size: 13px; color: var(--br-text-muted);">
+            <strong>Patokan / Alamat:</strong> {{ barang.lokasi.patokan|default:barang.lokasi.full_address }}
+          </p>
+        {% endif %}
+
+        {% if barang.lokasi.kecamatan_kota %}
+          <p style="margin: 0 0 12px; font-size: 12.5px; color: var(--br-text-muted);">
+            {{ barang.lokasi.kecamatan_kota }}
+          </p>
+        {% endif %}
+
+        {% if barang.lokasi.latitude and barang.lokasi.longitude %}
+          <div id="detail-map" style="height: 250px; border-radius: var(--br-radius); border: 1px solid var(--br-border); z-index: 1;"></div>
+          <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+            <a href="https://www.google.com/maps?q={{ barang.lokasi.latitude }},{{ barang.lokasi.longitude }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; color: var(--br-blue); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+              Buka di Google Maps ↗
+            </a>
+          </div>
+        {% else %}
+          <div style="padding: 16px; background: var(--br-bg-muted); border-radius: var(--br-radius); font-size: 13px; color: var(--br-text-muted); text-align: center;">
+            📍 Titik penjemputan berada di sekitar area <strong>{{ barang.lokasi.nama_area }}</strong>. Hubungi pemilik untuk konfirmasi titik temu spesifik.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Kolom Kanan: Rincian Produk, Tarif, Pemilik Asli, & Tombol Pinjam -->
+    <div>
+      <div class="br-detail-card">
+        
+        <!-- Status & Dilihat -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          {% if barang.is_sedang_dipinjam %}
+            <span class="br-badge br-badge-status-dipinjam">Sedang Dipinjam</span>
+          {% else %}
+            <span class="br-badge br-badge-status-aktif">Tersedia untuk Dipinjam</span>
+          {% endif %}
+
+          <span style="font-size: 12px; color: var(--br-text-muted); display: flex; align-items: center; gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            {{ barang.dilihat_count }} kali dilihat
+          </span>
+        </div>
+
+        <!-- Nama Barang -->
+        <h1 style="margin: 0 0 10px; font-size: 26px; font-weight: 800; color: var(--br-black); line-height: 1.3;">
+          {{ barang.nama_barang }}
+        </h1>
+
+        <!-- Box Tarif -->
+        {% if barang.jenis_penawaran == 'sewa' %}
+          <div class="br-price-box">
+            <span style="font-size: 13px; font-weight: 600; color: var(--br-text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+              Tarif Sewa Harian
+            </span>
+            <div style="font-size: 32px; font-weight: 800; color: var(--br-black); margin-top: 4px; display: flex; align-items: baseline; gap: 6px;">
+              Rp {{ barang.tarif_formatted }}
+              <span style="font-size: 14px; font-weight: 500; color: var(--br-text-muted);">/ 24 jam</span>
+            </div>
+            <p style="margin: 6px 0 0; font-size: 12.5px; color: var(--br-text-muted);">
+              Tarif bersahabat untuk sesama mahasiswa Universitas Indonesia.
+            </p>
+          </div>
+        {% else %}
+          <div class="br-price-box" style="background: var(--br-green-bg); border-color: #A7F3D0;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--br-green); text-transform: uppercase; letter-spacing: 0.04em;">
+              Pinjam Tanpa Biaya
+            </span>
+            <div style="font-size: 28px; font-weight: 800; color: var(--br-green); margin-top: 4px;">
+              Rp 0 (Gratis)
+            </div>
+            <p style="margin: 6px 0 0; font-size: 12.5px; color: #065F46;">
+              Barang ini dipinjamkan sukarela tanpa tarif sewa.
+            </p>
+          </div>
+        {% endif %}
+
+        <!-- Deskripsi Lengkap -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: var(--br-black); margin-bottom: 8px;">
+            Deskripsi & Kondisi Barang
+          </h3>
+          <div style="font-size: 14px; line-height: 1.7; color: var(--br-text);">
+            {{ barang.deskripsi|linebreaks }}
+          </div>
+        </div>
+
+        <!-- Kartu Pemilik Barang (Nama Asli Lengkap & Privasi Kontak) -->
+        <div class="br-owner-card">
+          <div class="br-owner-avatar">
+            {{ barang.nama_pemilik_lengkap|first|upper }}
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--br-text-muted); letter-spacing: 0.04em;">
+              Pemilik Barang
+            </div>
+            <!-- Nama Asli Lengkap Pemilik (bukan username SSO) -->
+            <div style="font-size: 15px; font-weight: 800; color: var(--br-black); margin-top: 2px;">
+              {{ barang.nama_pemilik_lengkap }}
+            </div>
+            <div style="font-size: 12px; color: var(--br-text-muted); margin-top: 1px;">
+              Mahasiswa Universitas Indonesia
+            </div>
+          </div>
+        </div>
+
+        <!-- Aturan Privasi Nomor WhatsApp: Baru terlihat setelah membayar -->
+        {% if has_paid and phone %}
+          <div style="margin-top: 14px; padding: 14px; background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: var(--br-radius); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 700; color: #065F46; text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; gap: 5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Pembayaran Terkonfirmasi
+              </span>
+              <span style="font-size: 15px; font-weight: 800; color: #047857; margin-top: 2px; display: block;">+{{ phone }}</span>
+              <span style="font-size: 12px; color: #065F46;">Hubungi pemilik untuk konfirmasi titik temu penyerahan.</span>
+            </div>
+            {% if wa_link %}
+              <a href="{{ wa_link }}" target="_blank" rel="noopener noreferrer" class="br-btn-primary" style="font-size: 13px; padding: 8px 16px; background: #25D366; color: #FFFFFF; border: none;">
+                Chat WhatsApp ↗
+              </a>
+            {% endif %}
+          </div>
+        {% elif is_owner %}
+          <div style="margin-top: 12px; font-size: 12.5px; color: var(--br-text-muted); display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; background: var(--br-bg-muted); border-radius: var(--br-radius);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div>Nomor WhatsApp kamu terlindungi secara aman dan hanya akan otomatis dibagikan kepada mahasiswa yang peminjamannya telah dibayar & terkonfirmasi.</div>
+          </div>
+        {% else %}
+          <!-- Kotak Informasi Privasi Kontak untuk Calon Peminjam (Belum Bayar) -->
+          <div style="margin-top: 14px; padding: 12px 14px; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: var(--br-radius); display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; color: var(--br-text-muted);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div>
+              <strong style="color: var(--br-black); display: block; margin-bottom: 2px;">Kontak WhatsApp Terlindungi</strong>
+              Nomor WhatsApp pemilik akan otomatis diberikan setelah kamu mengajukan peminjaman dan menyelesaikan pembayaran.
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Tombol Aksi / Call to Action (CTA) -->
+        <div style="margin-top: 24px;">
+          {% if is_owner %}
+            <div style="padding: 14px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--br-radius); color: #1E40AF; font-size: 13.5px; margin-bottom: 12px; text-align: center;">
+              ℹ️ Ini adalah barang inventaris milikmu sendiri.
+            </div>
+            <a href="{% url 'barang:edit' barang.pk %}" class="br-btn-primary" style="width: 100%; justify-content: center; font-size: 15px; padding: 13px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              Edit Informasi Barang
+            </a>
+          {% elif barang.is_sedang_dipinjam %}
+            <button class="br-btn-secondary" style="width: 100%; justify-content: center; font-size: 15px; padding: 13px; opacity: 0.65; cursor: not-allowed;" disabled>
+              Barang Sedang Dipinjam
+            </button>
+            <p style="margin: 8px 0 0; font-size: 12px; color: var(--br-text-muted); text-align: center;">
+              Barang ini sedang aktif dipinjam mahasiswa lain. Silakan periksa kembali nanti.
+            </p>
+          {% else %}
+            <!-- Tombol Pinjam Barang -->
+            {% if not user.is_authenticated %}
+              <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="br-btn-primary" style="width: 100%; justify-content: center; font-size: 16px; padding: 14px 20px;">
+                Masuk dengan SSO UI untuk Pinjam
+              </a>
+              <p style="margin: 8px 0 0; font-size: 12px; color: var(--br-text-muted); text-align: center;">
+                Masuk dengan akun Universitas Indonesia untuk mengajukan peminjaman.
+              </p>
+            {% else %}
+              <button type="button" class="br-btn-primary" onclick="openBorrowModal()" style="width: 100%; justify-content: center; font-size: 16px; padding: 14px 20px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                Pinjam Barang Sekarang
+              </button>
+            {% endif %}
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Informasi Pengajuan Peminjaman -->
+<div id="borrow-modal" class="br-modal-overlay">
+  <div class="br-modal-card">
+    <button type="button" class="br-modal-close" onclick="closeBorrowModal()">&times;</button>
+    <div class="br-modal-badge" style="background: var(--br-yellow); color: var(--br-black);">
+      ⚡
+    </div>
+    <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 800;">Ajukan Peminjaman Barang</h3>
+    <p style="font-size: 13.5px; color: var(--br-text-muted); line-height: 1.6; margin-bottom: 16px;">
+      Kamu akan mengajukan peminjaman untuk <strong>{{ barang.nama_barang }}</strong> kepada <strong>{{ barang.nama_pemilik_lengkap }}</strong>.
+    </p>
+
+    <div style="background: var(--br-bg-muted); border: 1px solid var(--br-border); border-radius: var(--br-radius); padding: 14px; font-size: 13px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+        <span style="color: var(--br-text-muted);">Jenis Peminjaman:</span>
+        <strong>{% if barang.jenis_penawaran == 'sewa' %}Sewa Berbayar{% else %}Gratis{% endif %}</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+        <span style="color: var(--br-text-muted);">Tarif:</span>
+        <strong>{% if barang.jenis_penawaran == 'sewa' %}Rp {{ barang.tarif_formatted }} / hari{% else %}Rp 0{% endif %}</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--br-text-muted);">Titik Temu:</span>
+        <strong>{{ barang.lokasi.short_label|default:barang.lokasi.nama_area }}</strong>
+      </div>
+    </div>
+
+    <div style="padding: 12px 14px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: var(--br-radius); font-size: 12.5px; color: #92400E; margin-bottom: 18px; line-height: 1.5;">
+      <strong>🔒 Aturan Kontak & Pembayaran:</strong><br>
+      Nomor WhatsApp pemilik akan otomatis diberikan langsung setelah pembayaran terkonfirmasi untuk koordinasi penyerahan barang di titik temu.
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <button type="button" class="br-btn-primary" onclick="closeBorrowModal()" style="width: 100%; justify-content: center; font-size: 14px; padding: 12px;">
+        Saya Mengerti & Lanjutkan
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openBorrowModal() {
+    var modal = document.getElementById('borrow-modal');
+    if (modal) modal.classList.add('is-open');
+  }
+
+  function closeBorrowModal() {
+    var modal = document.getElementById('borrow-modal');
+    if (modal) modal.classList.remove('is-open');
+  }
+
+  window.addEventListener('click', function(event) {
+    var modal = document.getElementById('borrow-modal');
+    if (event.target === modal) {
+      closeBorrowModal();
+    }
+  });
+</script>
+
+{% if barang.lokasi.latitude and barang.lokasi.longitude %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var lat = {{ barang.lokasi.latitude }};
+    var lng = {{ barang.lokasi.longitude }};
+    var mapContainer = document.getElementById('detail-map');
+    if (mapContainer && window.L) {
+      var map = L.map('detail-map', {
+        scrollWheelZoom: false,
+        zoomControl: true
+      }).setView([lat, lng], 16);
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+
+      var marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup("<strong>Titik Penjemputan:</strong><br>{{ barang.lokasi.nama_area|escapejs }}").openPopup();
+    }
+  });
+</script>
+{% endif %}
+
+{% endblock %}
