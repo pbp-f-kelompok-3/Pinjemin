@@ -301,7 +301,9 @@
 
 .br-search-input {
   width: 100%;
-  padding: 10px 14px 10px 38px;
+  height: 42px;
+  box-sizing: border-box;
+  padding: 0 14px 0 38px;
   border: 1px solid var(--br-border);
   border-radius: var(--br-radius);
   font-size: 14px;
@@ -324,7 +326,9 @@
 }
 
 .br-filter-select {
-  padding: 10px 14px;
+  height: 42px;
+  box-sizing: border-box;
+  padding: 0 14px;
   border: 1px solid var(--br-border);
   border-radius: var(--br-radius);
   font-size: 14px;
@@ -333,6 +337,16 @@
   color: var(--br-text);
   cursor: pointer;
   transition: border-color 0.2s;
+}
+
+.br-search-row button.br-btn-primary,
+.br-search-row a.br-btn-secondary {
+  height: 42px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
 }
 
 .br-filter-select:focus {
@@ -452,17 +466,23 @@
   color: var(--br-black);
   margin: 0 0 6px;
   line-height: 1.35;
+  min-height: 44px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .br-card-desc {
   font-size: 13px;
   color: var(--br-text-muted);
   margin: 0 0 12px;
+  line-height: 1.5;
+  min-height: 39px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.5;
 }
 
 .br-card-meta {
