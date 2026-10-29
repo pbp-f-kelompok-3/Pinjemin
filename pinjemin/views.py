@@ -15,7 +15,7 @@ def home(request):
     max_price = request.GET.get("max_price", "").strip()
     sort = request.GET.get("sort", "terbaru").strip()
 
-    items = Barang.objects.filter(status_penawaran='aktif').select_related(
+    items = Barang.objects.filter(status_penawaran='aktif', pemilik__is_active=True).select_related(
         'kategori', 'lokasi', 'pemilik', 'pemilik__profile'
     )
     if q:

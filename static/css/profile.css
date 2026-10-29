@@ -597,3 +597,38 @@ body:has(.pf-page) { overflow-x: clip; }
   font-size: 0.74rem;
   color: #9CA3AF;
 }
+
+/* ---------- Nonaktifkan akun ---------- */
+.pf-btn--danger { background: var(--pf-red); color: #fff; }
+.pf-btn--danger:hover:not(:disabled) { filter: brightness(0.92); }
+.pf-btn--danger:disabled { background: #e8e6e7; color: #9a9a9a; cursor: not-allowed; }
+.pf-btn--danger-outline { border-color: var(--pf-red); background: #fff; color: var(--pf-red); }
+.pf-btn--danger-outline:hover { background: #fdf1f1; }
+
+.pf-danger-card {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.pf-danger-card .pf-card__title { margin-bottom: 6px; }
+.pf-danger-card__text { margin: 0; max-width: 640px; font-size: 0.86rem; line-height: 1.6; color: var(--pf-muted); }
+
+.pf-bullets { margin: 0 0 20px; padding-left: 20px; font-size: 0.9rem; line-height: 1.7; color: var(--pf-olive); }
+.pf-bullets li { margin-bottom: 4px; }
+
+.pf-alert { border: 2px solid var(--pf-red); background: #fff7f7; }
+.pf-alert .pf-card__title { color: var(--pf-red); }
+.pf-alert__text { margin: 0 0 10px; font-size: 0.9rem; }
+.pf-alert .pf-bullets { margin-bottom: 0; color: var(--pf-ink); font-weight: 600; }
+
+.pf-confirm { display: flex; align-items: center; gap: 10px; margin: 8px 0 22px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.pf-confirm input { width: 18px; height: 18px; accent-color: var(--pf-red); }
+
+.pf-unavailable { max-width: 560px; margin: 0 auto; padding: 72px 24px 96px; }
+.pf-unavailable .pf-card { display: grid; justify-items: center; gap: 10px; padding: 40px 32px; text-align: center; }
+.pf-unavailable__title { margin: 8px 0 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
+.pf-unavailable__text { margin: 0 0 14px; max-width: 420px; font-size: 0.92rem; line-height: 1.7; color: var(--pf-muted); }
+.pf-page .pf-empty__icon { margin-bottom: 0; }

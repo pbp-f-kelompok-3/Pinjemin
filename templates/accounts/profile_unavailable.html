@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profil tidak tersedia{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<div class="pf-page">
+  <div class="pf-unavailable">
+    <section class="pf-card">
+      <span class="pf-empty__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="m3 3 18 18"/></svg>
+      </span>
+      <h1 class="pf-unavailable__title">Profil tidak tersedia</h1>
+      <p class="pf-unavailable__text">Pengguna ini sudah menonaktifkan akunnya, jadi profilnya tidak bisa dilihat lagi. Riwayat transaksimu dengannya tetap tersimpan.</p>
+      <a class="pf-btn pf-btn--yellow" href="{% url 'home' %}" onclick="if (history.length > 1) { history.back(); return false; }">Kembali</a>
+    </section>
+  </div>
+</div>
+{% endblock %}

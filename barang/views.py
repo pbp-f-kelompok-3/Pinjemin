@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core import serializers
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.conf import settings
 from django.db.models import Q, F
 from django.db import transaction
@@ -285,13 +285,13 @@ def hapus_barang_ajax(request, pk):
 
 def show_json(request):
     """Mengembalikan seluruh barang aktif dalam format JSON untuk integrasi API / Flutter."""
-    data = Barang.objects.filter(status_penawaran='aktif').select_related('kategori', 'lokasi', 'pemilik')
+    data = Barang.objects.filter(status_penawaran='aktif', pemilik__is_active=True).select_related('kategori', 'lokasi', 'pemilik')
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
 
 def show_json_by_id(request, pk):
     """Mengembalikan data 1 barang spesifik berdasarkan ID dalam format JSON."""
-    data = Barang.objects.filter(pk=pk)
+    data = Barang.objects.filter(pk=pk, pemilik__is_active=True)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
 
@@ -304,13 +304,13 @@ def show_json_barang_saya(request):
 
 def show_xml(request):
     """Mengembalikan seluruh barang aktif dalam format XML (Standar PBP Fasilkom UI)."""
-    data = Barang.objects.filter(status_penawaran='aktif')
+    data = Barang.objects.filter(status_penawaran='aktif', pemilik__is_active=True)
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
 
 def show_xml_by_id(request, pk):
     """Mengembalikan data 1 barang spesifik berdasarkan ID dalam format XML."""
-    data = Barang.objects.filter(pk=pk)
+    data = Barang.objects.filter(pk=pk, pemilik__is_active=True)
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
 
@@ -357,6 +357,10 @@ def detail_barang(request, pk):
         pk=pk
     )
 
+    # Barang milik akun yang sudah dinonaktifkan tidak boleh dilihat siapa pun
+    if not barang.pemilik.is_active:
+        raise Http404("Barang tidak tersedia.")
+    
     # Tambah counter dilihat jika bukan pemilik sendiri yang membuka halaman
     if not request.user.is_authenticated or request.user != barang.pemilik:
         Barang.objects.filter(pk=pk).update(dilihat_count=F('dilihat_count') + 1)

@@ -27,10 +27,6 @@
 
     <div class="pf-main">
 
-      {% for message in messages %}
-        <div class="pf-toast pf-toast--{{ message.tags }}" role="status">{{ message }}</div>
-      {% endfor %}
-
       <!-- ===== Kartu identitas ===== -->
       <section class="pf-card pf-identity" aria-labelledby="pf-name">
         <div class="pf-identity__photo">
@@ -180,6 +176,15 @@
           </div>
         </section>
       </div>
+
+      <!-- ===== Nonaktifkan akun ===== -->
+      <section class="pf-card pf-danger-card" aria-labelledby="pf-danger-title">
+        <div>
+          <h3 class="pf-card__title" id="pf-danger-title">Nonaktifkan Akun</h3>
+          <p class="pf-danger-card__text">Profilmu akan disembunyikan dari pengguna lain. Riwayat transaksi tetap tersimpan, dan kamu bisa mengaktifkannya lagi kapan saja lewat login SSO UI.</p>
+        </div>
+        <a class="pf-btn pf-btn--danger-outline" href="{% url 'accounts:deactivate' %}">Nonaktifkan Akun</a>
+      </section>
 
     </div>
   </div>
