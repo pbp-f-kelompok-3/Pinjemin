@@ -162,26 +162,23 @@ class Barang(models.Model):
 
     @property
     def is_sedang_dipinjam(self):
-        """
-        CATATAN INTEGRASI (Modul Manajemen Transaksi - Alphard Qodaruddin):
-        Mengecek apakah barang sedang dalam masa peminjaman aktif melalui
-        relasi pesanan / transaksi dari modul Alphard.
-        """
-        for rel_name in ['daftar_pesanan', 'pesanan_set', 'transaksi_set', 'transaksi']:
-            manager = getattr(self, rel_name, None)
-            if manager is not None and hasattr(manager, 'filter'):
-                active_statuses = ['aktif', 'dikonfirmasi', 'dipinjam', 'menunggu_pengembalian', 'menunggu pembayaran']
-                for st in active_statuses:
-                    if manager.filter(models.Q(status__iexact=st) | models.Q(status_transaksi__iexact=st)).exists():
-                        return True
-        return False
+        from django.utils import timezone
+        now = timezone.now()
+        return self.daftar_pesanan.filter(
+            status='dikonfirmasi', mulai__lte=now, selesai__gt=now
+        ).exists()
+
+    @property
+    def transaksi_terkunci(self):
+        from django.utils import timezone
+        return self.daftar_pesanan.filter(status='dikonfirmasi', selesai__gt=timezone.now()).exists()
 
     def can_be_deleted(self):
         """
         Aturan Bisnis #6:
         Barang yang sedang dipinjam TIDAK BOLEH dihapus oleh pemilik.
         """
-        return not self.is_sedang_dipinjam
+        return not self.daftar_pesanan.exists()
 
     @property
     def nama_pemilik_lengkap(self):

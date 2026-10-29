@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'categories',
     'locations',
     'barang',
+    'transaksi',
 ]
 
 MIDDLEWARE = [
@@ -164,6 +165,15 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 CSRF_TRUSTED_ORIGINS = ["https://roisul-umam-pinjemin.pws.cs.ui.ac.id"]
+
+# Integrasi tugas menggunakan Sandbox saja, tanpa pembayaran uang sungguhan.
+MIDTRANS_SERVER_KEY = os.getenv("MIDTRANS_SERVER_KEY", "")
+MIDTRANS_AUTO_REFUND = os.getenv("MIDTRANS_AUTO_REFUND", "True").lower() == "true"
+# Mode demo: refund dicatat secara lokal, terpisah dari status Midtrans.
+# Pilih "midtrans" hanya untuk menguji Refund API penyedia.
+REFUND_MODE = os.getenv("REFUND_MODE", "mock").lower()
+if REFUND_MODE not in {"mock", "midtrans"}:
+    raise RuntimeError("REFUND_MODE harus mock atau midtrans.")
 
 # Nominatim can be changed without updating application code.
 NOMINATIM_REVERSE_URL = os.getenv(

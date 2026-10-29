@@ -1,6 +1,8 @@
 # Environments & Credentials
 env/
 venv/
+.venv/
+.test-tmp/
 .env*
 
 media/

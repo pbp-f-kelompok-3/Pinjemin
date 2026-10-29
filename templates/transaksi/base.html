@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Pesanan - Pinjemin{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/transaksi.css' %}">{% endblock %}
+{% block content %}
+<section class="tr-page">
+  <nav class="tr-nav" aria-label="Transaksi">
+    <a href="{% url 'transaksi:daftar' %}">Pesanan Saya</a>
+    <a href="{% url 'transaksi:katalog' %}">Buat Pesanan</a>
+    <a href="{% url 'transaksi:masuk' %}">Pesanan Masuk</a>
+  </nav>
+  {% block transaksi_content %}{% endblock %}
+</section>
+{% endblock %}
