@@ -7,7 +7,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from barang.models import Barang, Kategori, Lokasi
+from barang.models import Barang, Lokasi
+from categories.models import Category
 from . import gateway, services
 from .models import Pesanan, Pembayaran
 
@@ -19,7 +20,7 @@ class TransaksiTests(TestCase):
         self.owner = User.objects.create_user(username="owner", password="test-password")
         self.user = User.objects.create_user(username="borrower", password="test-password")
         self.other = User.objects.create_user(username="stranger", password="test-password")
-        self.category = Kategori.objects.create(nama="Elektronik", slug="elektronik")
+        self.category, _ = Category.objects.get_or_create(name="Elektronik")
         self.location = Lokasi.objects.create(nama_area="Kampus UI", patokan="Gerbang", short_label="UI")
         self.item = Barang.objects.create(pemilik=self.owner, nama_barang="Proyektor", foto_utama="test.jpg",
                                          deskripsi="Tes", kategori=self.category, lokasi=self.location,
