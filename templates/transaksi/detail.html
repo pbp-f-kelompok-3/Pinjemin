@@ -55,34 +55,40 @@
     {% endif %}
     {% if order.bisa_dibatalkan %}<a class="tr-button tr-danger" href="{% url 'transaksi:batalkan' order.pk %}">Batalkan pesanan</a>{% endif %}
     {% if order.status == 'selesai' and not order.ulasan %}
-      <a class="tr-button" href="{% url 'transaksi:beri_ulasan' order.pk %}" style="background: var(--yellow, #FCD34D); color: var(--black, #111827); font-weight: 700;">
-        ⭐ Beri Rating & Ulasan Pemilik
+      <a class="tr-button tr-btn-review" href="{% url 'transaksi:beri_ulasan' order.pk %}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#000000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+        Beri Rating & Ulasan Pemilik
       </a>
     {% endif %}
   {% else %}
     {% if order.status == 'dikonfirmasi' %}
       <form method="post" action="{% url 'transaksi:selesaikan' order.pk %}" style="display: inline;">
         {% csrf_token %}
-        <button class="tr-button" style="background: #10B981; color: white;" type="submit" onclick="return confirm('Apakah barang telah benar-benar dikembalikan oleh peminjam dalam kondisi baik?')">
-          ✓ Konfirmasi Barang Diterima (Selesai)
+        <button class="tr-button tr-btn-success" type="submit" onclick="return confirm('Apakah barang telah benar-benar dikembalikan oleh peminjam dalam kondisi baik?')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          Konfirmasi Barang Diterima (Selesai)
         </button>
       </form>
     {% endif %}
   {% endif %}
   </div>
   {% if order.ulasan %}
-    <div style="margin-top: 18px; padding: 14px 16px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 10px;">
-      <strong style="color: #92400E; display: block; margin-bottom: 4px;">
-        {% if borrower %}Ulasan yang Kamu Berikan:{% else %}Ulasan dari Peminjam ({{ order.peminjam.get_full_name|default:order.peminjam.username }}):{% endif %}
-      </strong>
-      <div style="font-size: 15px; margin-bottom: 6px;">
-        {% for _ in "12345" %}
-          {% if forloop.counter <= order.ulasan.rating %}⭐{% endif %}
-        {% endfor %}
-        <span style="font-size: 13px; font-weight: 700; color: #78350F; margin-left: 4px;">({{ order.ulasan.rating }}/5)</span>
+    <div class="tr-review-box">
+      <div class="tr-review-header">
+        {% if borrower %}Ulasan yang Kamu Berikan{% else %}Ulasan dari Peminjam ({{ order.peminjam.get_full_name|default:order.peminjam.username }}){% endif %}
       </div>
-      <p style="margin: 0; font-size: 13.5px; color: #78350F; font-style: italic;">"{{ order.ulasan.komentar }}"</p>
-      <span style="display: block; margin-top: 6px; font-size: 11px; color: #B45309;">Ditulis pada {{ order.ulasan.created_at|date:"d M Y H:i" }} WIB</span>
+      <div class="tr-review-rating-row">
+        {% for _ in "12345" %}
+          {% if forloop.counter <= order.ulasan.rating %}
+            <svg viewBox="0 0 24 24" fill="#ffc400" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="#D1D5DB" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+          {% endif %}
+        {% endfor %}
+        <span class="tr-review-score">({{ order.ulasan.rating }}/5)</span>
+      </div>
+      <p class="tr-review-text">"{{ order.ulasan.komentar }}"</p>
+      <span class="tr-review-date">Ditulis pada {{ order.ulasan.created_at|date:"d M Y H:i" }} WIB</span>
     </div>
   {% endif %}
 </div>

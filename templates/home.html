@@ -62,8 +62,9 @@
             </div>
 
             {% if current_q or current_kategori or current_price_type or current_min_price or current_max_price or current_sort and current_sort != 'terbaru' %}
-                <a href="{% url 'home' %}#barang" class="br-btn-secondary" style="font-size: 12px; padding: 6px 14px;">
-                    ✕ Reset Filter
+                <a href="{% url 'home' %}#barang" class="br-btn-secondary" style="font-size: 12px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 5px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    Reset Filter
                 </a>
             {% endif %}
         </div>

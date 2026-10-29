@@ -1,20 +1,48 @@
 {% extends "transaksi/base.html" %}
+
 {% block transaksi_content %}
 <div class="tr-card tr-narrow">
-  <h1>Beri Rating & Ulasan</h1>
-  <h2>{{ order.nama_barang }}</h2>
-  <p style="color: var(--br-text-muted, #6B7280); font-size: 14px;">
-    Pemilik barang: <strong>{{ order.pemilik.get_full_name|default:order.pemilik.username }}</strong>
-  </p>
-  <p style="font-size: 13.5px; line-height: 1.6; margin: 12px 0 20px;">
-    Bagikan pengalamanmu meminjam barang ini untuk membantu mahasiswa UI lainnya mengetahui keandalan barang dan reputasi pemilik.
-  </p>
+  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+    <div style="width: 44px; height: 44px; border-radius: 50%; background: #FFFBEB; border: 1.5px solid #FDE68A; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffc400" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+    </div>
+    <div>
+      <h1 style="margin: 0; font-size: 22px; font-weight: 800; line-height: 1.2;">Beri Rating & Ulasan</h1>
+      <span style="font-size: 13px; color: var(--gray-dark);">Peminjaman Selesai</span>
+    </div>
+  </div>
+
+  <div style="background: #FAFAFA; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin: 16px 0 20px;">
+    <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--gray-dark); letter-spacing: 0.04em;">Barang yang Dipinjam</div>
+    <div style="font-size: 16px; font-weight: 800; color: var(--black); margin-top: 2px;">{{ order.nama_barang }}</div>
+    <div style="font-size: 13px; color: var(--gray-dark); margin-top: 4px;">
+      Pemilik: <strong>{{ order.pemilik.get_full_name|default:order.pemilik.username }}</strong>
+    </div>
+  </div>
 
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <div class="tr-form-group">
+      <label class="tr-form-label" for="{{ form.rating.id_for_label }}">{{ form.rating.label }}</label>
+      {{ form.rating }}
+      {% if form.rating.errors %}
+        <div class="errorlist">{{ form.rating.errors }}</div>
+      {% endif %}
+      <div class="tr-form-help">Pilih nilai bintang yang mencerminkan kepuasan peminjaman barang ini.</div>
+    </div>
+
+    <div class="tr-form-group">
+      <label class="tr-form-label" for="{{ form.komentar.id_for_label }}">{{ form.komentar.label }}</label>
+      {{ form.komentar }}
+      {% if form.komentar.errors %}
+        <div class="errorlist">{{ form.komentar.errors }}</div>
+      {% endif %}
+      <div class="tr-form-help">Ceritakan kondisi fisik barang, ketepatan waktu serah terima di titik temu UI, serta keramahan pemilik.</div>
+    </div>
+
     <div class="tr-actions" style="margin-top: 24px;">
-      <button class="tr-button" type="submit" style="background: var(--yellow, #FCD34D); font-weight: 700;">
+      <button class="tr-button tr-btn-review" type="submit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#000000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
         Kirim Ulasan Bintang
       </button>
       <a class="tr-button tr-secondary" href="{% url 'transaksi:detail' order.pk %}">Batal</a>

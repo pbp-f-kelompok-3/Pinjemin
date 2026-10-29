@@ -25,19 +25,22 @@ class JadwalForm(forms.ModelForm):
 
 class UlasanForm(forms.ModelForm):
     RATING_CHOICES = [
-        (5, '⭐⭐⭐⭐⭐ (5 - Sangat Memuaskan)'),
-        (4, '⭐⭐⭐⭐ (4 - Memuaskan)'),
-        (3, '⭐⭐⭐ (3 - Cukup Baik)'),
-        (2, '⭐⭐ (2 - Kurang Memuaskan)'),
-        (1, '⭐ (1 - Tidak Memuaskan)'),
+        (5, '5 Bintang - Sangat Memuaskan'),
+        (4, '4 Bintang - Memuaskan & Terawat'),
+        (3, '3 Bintang - Cukup Baik'),
+        (2, '2 Bintang - Kurang Memuaskan'),
+        (1, '1 Bintang - Tidak Memuaskan'),
     ]
     rating = forms.ChoiceField(
         choices=RATING_CHOICES,
-        widget=forms.Select(),
+        widget=forms.Select(attrs={
+            'class': 'tr-input'
+        }),
         label="Beri Nilai Bintang"
     )
     komentar = forms.CharField(
         widget=forms.Textarea(attrs={
+            'class': 'tr-input tr-textarea',
             'rows': 4,
             'placeholder': 'Ceritakan pengalamanmu meminjam barang ini: kondisi barang, ketepatan waktu serah terima di titik temu kampus, keramahan pemilik...'
         }),
