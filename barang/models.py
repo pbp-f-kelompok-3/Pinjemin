@@ -11,6 +11,8 @@ from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from categories.models import Category
+
 
 class Kategori(models.Model):
     """
@@ -103,7 +105,7 @@ class Barang(models.Model):
         help_text=_("Jelaskan kondisi fisik, kelengkapan, cara pemakaian, dan aturan bagi peminjam.")
     )
     kategori = models.ForeignKey(
-        Kategori,
+        Category,
         on_delete=models.PROTECT,
         related_name='daftar_barang',
         verbose_name=_("Kategori Barang")
