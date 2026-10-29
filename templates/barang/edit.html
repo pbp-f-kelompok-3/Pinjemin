@@ -223,11 +223,11 @@
     if (jenisSelect.value === 'sewa') {
       var val = Number(tarifInput.value);
       if (tarifInput.value === '' || isNaN(val)) {
-        tarifError.textContent = '⚠️ Tarif sewa harian wajib diisi untuk barang sewa.';
+        tarifError.textContent = 'Tarif sewa harian wajib diisi untuk barang sewa.';
         tarifError.style.display = 'block';
         return false;
       } else if (val <= 0) {
-        tarifError.textContent = '⚠️ Tarif sewa harian tidak boleh Rp 0 atau bernilai minus. Harap masukkan nominal minimal Rp 1.';
+        tarifError.textContent = 'Tarif sewa harian tidak boleh Rp 0 atau bernilai minus. Harap masukkan nominal minimal Rp 1.';
         tarifError.style.display = 'block';
         return false;
       } else {
@@ -280,7 +280,7 @@
       var namaInput = document.getElementById('id_nama_barang');
       if (namaInput && !namaInput.value.trim()) {
         e.preventDefault();
-        alert('⚠️ Nama barang wajib diisi dan tidak boleh kosong.');
+        alert('Nama barang wajib diisi dan tidak boleh kosong.');
         namaInput.focus();
         namaInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
@@ -290,7 +290,7 @@
       var katSelect = document.getElementById('id_kategori');
       if (katSelect && !katSelect.value) {
         e.preventDefault();
-        alert('⚠️ Kategori barang wajib dipilih.');
+        alert('Kategori barang wajib dipilih.');
         katSelect.focus();
         katSelect.scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
@@ -299,7 +299,7 @@
       // 3. Cek validitas tarif jika sewa
       if (!checkEditTarifValidity()) {
         e.preventDefault();
-        alert(tarifError ? tarifError.textContent : '⚠️ Tarif sewa harian tidak boleh Rp 0 atau bernilai minus.');
+        alert(tarifError ? tarifError.textContent : 'Tarif sewa harian tidak boleh Rp 0 atau bernilai minus.');
         tarifInput.focus();
         tarifInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
@@ -309,7 +309,7 @@
       var descInput = document.getElementById('id_deskripsi');
       if (descInput && !descInput.value.trim()) {
         e.preventDefault();
-        alert('⚠️ Deskripsi lengkap barang wajib diisi.');
+        alert('Deskripsi lengkap barang wajib diisi.');
         descInput.focus();
         descInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;

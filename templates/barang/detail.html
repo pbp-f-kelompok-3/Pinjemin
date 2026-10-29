@@ -11,80 +11,6 @@
 <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
 <link rel="stylesheet" href="{% static 'css/pickup-location.css' %}?v=20261029-4">
 
-<style>
-  .br-detail-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 28px;
-    margin-top: 16px;
-  }
-
-  @media (min-width: 900px) {
-    .br-detail-layout {
-      grid-template-columns: 1.15fr 1fr;
-      gap: 36px;
-    }
-  }
-
-  .br-detail-gallery {
-    position: relative;
-    width: 100%;
-    height: 380px;
-    background: #F3F4F6;
-    border-radius: var(--br-radius-lg);
-    overflow: hidden;
-    border: 1px solid var(--br-border);
-    box-shadow: var(--br-shadow);
-  }
-
-  .br-detail-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .br-detail-card {
-    background: var(--br-card-bg);
-    border: 1px solid var(--br-border);
-    border-radius: var(--br-radius-lg);
-    padding: 24px;
-    box-shadow: var(--br-shadow);
-    margin-bottom: 24px;
-  }
-
-  .br-owner-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--br-bg-muted);
-    border: 1px solid var(--br-border);
-    border-radius: var(--br-radius);
-    padding: 16px;
-    margin-top: 18px;
-  }
-
-  .br-owner-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--br-yellow);
-    color: var(--br-black);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  .br-price-box {
-    background: var(--br-bg-muted);
-    border: 1.5px solid var(--br-border);
-    border-radius: var(--br-radius);
-    padding: 18px 20px;
-    margin: 20px 0;
-  }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -170,7 +96,7 @@
           </div>
         {% else %}
           <div style="padding: 16px; background: var(--br-bg-muted); border-radius: var(--br-radius); font-size: 13px; color: var(--br-text-muted); text-align: center;">
-            📍 Titik penjemputan berada di sekitar area <strong>{{ barang.lokasi.nama_area }}</strong>. Hubungi pemilik untuk konfirmasi titik temu spesifik.
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline-block; vertical-align: -2px; margin-right: 4px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Titik penjemputan berada di sekitar area <strong>{{ barang.lokasi.nama_area }}</strong>. Hubungi pemilik untuk konfirmasi titik temu spesifik.
           </div>
         {% endif %}
         {% else %}
@@ -302,7 +228,7 @@
         <div style="margin-top: 24px;">
           {% if is_owner %}
             <div style="padding: 14px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--br-radius); color: #1E40AF; font-size: 13.5px; margin-bottom: 12px; text-align: center;">
-              ℹ️ Ini adalah barang inventaris milikmu sendiri.
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline-block; vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> Ini adalah barang inventaris milikmu sendiri.
             </div>
             <a href="{% url 'barang:edit' barang.pk %}" class="br-btn-primary" style="width: 100%; justify-content: center; font-size: 15px; padding: 13px;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
@@ -343,9 +269,7 @@
 <div id="borrow-modal" class="br-modal-overlay">
   <div class="br-modal-card">
     <button type="button" class="br-modal-close" onclick="closeBorrowModal()">&times;</button>
-    <div class="br-modal-badge" style="background: var(--br-yellow); color: var(--br-black);">
-      ⚡
-    </div>
+    <div class="br-modal-badge" style="background: var(--br-yellow); color: var(--br-black);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
     <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 800;">Ajukan Peminjaman Barang</h3>
     <p style="font-size: 13.5px; color: var(--br-text-muted); line-height: 1.6; margin-bottom: 16px;">
       Kamu akan mengajukan peminjaman untuk <strong>{{ barang.nama_barang }}</strong> kepada <strong>{{ barang.nama_pemilik_lengkap }}</strong>.
@@ -367,7 +291,7 @@
     </div>
 
     <div style="padding: 12px 14px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: var(--br-radius); font-size: 12.5px; color: #92400E; margin-bottom: 18px; line-height: 1.5;">
-      <strong>🔒 Aturan Kontak & Pembayaran:</strong><br>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline-block; vertical-align: -2px; margin-right: 4px;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><strong>Aturan Kontak & Pembayaran:</strong><br>
       Nomor WhatsApp pemilik akan otomatis diberikan langsung setelah pembayaran terkonfirmasi untuk koordinasi penyerahan barang di titik temu.
     </div>
 

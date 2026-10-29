@@ -30,3 +30,124 @@
 .tr-payment { border-top: 1px solid var(--border); padding: 12px 0; }
 .errorlist { color: #a12820; padding-left: 20px; }
 @media(max-width: 480px) { .tr-card { padding: 18px; } .tr-facts { grid-template-columns: 100px 1fr; } }
+
+/* Review Box on Transaksi Detail */
+.tr-review-box {
+  margin-top: 22px;
+  padding: 18px 20px;
+  background: #FFFDF0;
+  border: 1.5px solid #FDE68A;
+  border-radius: 14px;
+}
+
+.tr-review-header {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #92400E;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.tr-review-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.tr-review-rating-row svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tr-review-score {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #78350F;
+  margin-left: 6px;
+}
+
+.tr-review-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #451A03;
+  font-style: italic;
+}
+
+.tr-review-date {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #B45309;
+}
+
+/* Beri Ulasan Form Styles */
+.tr-form-group {
+  margin-bottom: 18px;
+}
+
+.tr-form-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+
+.tr-form-help {
+  font-size: 0.78rem;
+  color: var(--gray-dark);
+  margin-top: 4px;
+}
+
+.tr-input {
+  display: block;
+  width: 100%;
+  border: 1.5px solid var(--border);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.92rem;
+  background: #FAFAFA;
+  color: var(--black);
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.tr-input:focus {
+  outline: none;
+  border-color: #EAB308;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(254, 240, 138, 0.4);
+}
+
+.tr-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Button Variants */
+.tr-btn-success {
+  background: #10B981 !important;
+  color: #FFFFFF !important;
+  border-color: #059669 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tr-btn-success:hover {
+  background: #059669 !important;
+  filter: none !important;
+}
+
+.tr-btn-review {
+  background: var(--yellow) !important;
+  color: var(--black) !important;
+  font-weight: 800 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
