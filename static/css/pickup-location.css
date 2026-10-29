@@ -41,6 +41,8 @@
 .pickup-save { width: 100%; margin-top: 4px; }
 .pickup-map { position: relative; z-index: 0; width: 100%; height: 280px; border: 1px solid var(--pickup-border); border-radius: 10px; background: #EDF0E5; overflow: hidden; }
 .pickup-current { margin-top: 12px; width: min(100%, 220px); }
+.pickup-map-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.pickup-map-actions .pickup-current { width: auto; margin-top: 0; }
 .pickup-map .leaflet-control-attribution { font-size: 10px; background: rgba(255,255,255,.85); }
 .pickup-map .leaflet-control-zoom { border: 1px solid #E4E4DE; box-shadow: none; }
 .pickup-map .leaflet-control-zoom a { color: #25251F; font-weight: 500; }

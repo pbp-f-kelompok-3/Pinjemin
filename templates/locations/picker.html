@@ -48,7 +48,10 @@
     <div class="pickup-map-column">
       <h3 class="pickup-label">Peta titik penjemputan</h3>
       <div class="pickup-map" data-pickup-map role="region" aria-label="Peta OpenStreetMap untuk memilih titik penjemputan"></div>
-      <button class="pickup-current" type="button" data-current-position>Gunakan lokasi saya</button>
+      <div class="pickup-map-actions">
+        <button class="pickup-current" type="button" data-current-position>Gunakan lokasi saya</button>
+        <a class="pickup-current" data-google-maps-link target="_blank" rel="noopener noreferrer" hidden>Buka di Google Maps ↗</a>
+      </div>
       <p class="pickup-help">Klik peta atau geser pin untuk menyesuaikan titik temu.</p>
       <details class="pickup-manual">
         <summary>Atur koordinat secara manual</summary>

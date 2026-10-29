@@ -64,6 +64,14 @@ class PickupLocationTests(TestCase):
         self.assertEqual(self.client.get(self.url).json()['locations'], [])
         self.assertEqual(self.write('patch', url, self.data).status_code, 404)
 
+    def test_missing_or_removed_locations_return_json_error(self):
+        self.location.is_active = False
+        self.location.save()
+        for pk in (self.location.pk, self.location.pk + 1000):
+            response = self.write('patch', reverse('locations:pickup_detail', args=[pk]), self.data)
+            self.assertEqual(response.status_code, 404)
+            self.assertIn('error', response.json())
+
     def test_rejects_invalid_coordinates_and_incomplete_addresses(self):
         for fields in ({'latitude': 91}, {'longitude': -181}, {'latitude': 'NaN'},
                        {'latitude': True}, {'address': ''}, {'label': '<br>'}):

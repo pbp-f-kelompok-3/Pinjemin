@@ -5,6 +5,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import translation
 
 from locations.models import PickupLocation
 from .forms import BarangForm
@@ -255,3 +256,77 @@ class ItemPickupTests(TestCase):
         response = self.post_item(pickup_mode='current', pickup_location='')
         self.assertIn('pickup_location', response.context['form'].errors)
         self.assertFalse(Barang.objects.exists())
+
+    def test_edit_rejects_unsaved_new_location_instead_of_silently_using_old_point(self):
+        item, data = self.edit_fixture()
+        response = self.client.post(reverse('barang:edit', args=[item.pk]), {
+            **data, 'pickup_mode': 'new', 'pickup_location': '',
+            'pickup_latitude': '', 'pickup_longitude': ''})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pickup_location', response.context['form'].errors)
+        item.refresh_from_db()
+        self.assertEqual(item.deskripsi, 'Jas ukuran L, bersih dan lengkap.')
+
+    def test_edit_requires_a_selection_when_history_mode_is_submitted(self):
+        item, data = self.edit_fixture()
+        response = self.client.post(reverse('barang:edit', args=[item.pk]), {
+            **data, 'pickup_mode': 'saved', 'pickup_location': ''})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pickup_location', response.context['form'].errors)
+
+    def test_legacy_edit_accepts_zero_coordinates_without_replacing_them(self):
+        item, data = self.edit_fixture()
+        response = self.client.post(reverse('barang:edit', args=[item.pk]), {
+            **data, 'pickup_mode': '', 'pickup_latitude': '0', 'pickup_longitude': '0'})
+        self.assertEqual(response.status_code, 302)
+        item.refresh_from_db()
+        self.assertEqual(item.lokasi.latitude, Decimal('0'))
+        self.assertEqual(item.lokasi.longitude, Decimal('0'))
+
+    def test_legacy_edit_rejects_incomplete_coordinates(self):
+        item, data = self.edit_fixture()
+        response = self.client.post(reverse('barang:edit', args=[item.pk]), {
+            **data, 'pickup_mode': '', 'pickup_latitude': '', 'pickup_longitude': '106.830000'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('pickup_location', response.context['form'].errors)
+
+    def test_detail_shows_map_with_json_coordinates_even_at_zero_for_owner(self):
+        self.post_item(pickup_latitude='0', pickup_longitude='0')
+        item = Barang.objects.get()
+        with override_settings(OSM_TILE_URL='https://example.test/{z}/{x}/{y}.png'):
+            response = self.client.get(reverse('barang:detail', args=[item.pk]))
+        self.assertContains(response, 'data-pickup-detail-map')
+        self.assertContains(response, 'https://www.google.com/maps/search/?api=1&amp;query=0.000000,0.000000')
+        self.assertEqual(response.context['pickup_detail_data']['latitude'], 0)
+        self.assertEqual(response.context['pickup_detail_data']['tileUrl'],
+                         'https://example.test/{z}/{x}/{y}.png')
+
+    def test_detail_does_not_disclose_exact_address_or_coordinates_to_visitors(self):
+        self.post_item()
+        item = Barang.objects.get()
+        for user in (None, self.other):
+            if user is None:
+                self.client.logout()
+            else:
+                self.client.force_login(user)
+            response = self.client.get(reverse('barang:detail', args=[item.pk]))
+            self.assertEqual(response.status_code, 200)
+            self.assertNotContains(response, item.lokasi.full_address)
+            self.assertNotContains(response, 'pickup-detail-data')
+            self.assertNotContains(response, str(item.lokasi.latitude))
+            self.assertNotContains(response, 'maps?q=')
+            self.assertNotContains(response, 'www.google.com/maps/search/')
+
+    def test_google_maps_link_uses_coordinates_with_decimal_points_in_indonesian_locale(self):
+        self.post_item()
+        item = Barang.objects.get()
+        with translation.override('id'):
+            response = self.client.get(reverse('barang:detail', args=[item.pk]))
+        self.assertContains(response, 'query=-6.361500,106.828600')
+
+    def test_owner_can_view_exact_pickup_address(self):
+        self.post_item()
+        item = Barang.objects.get()
+        response = self.client.get(reverse('barang:detail', args=[item.pk]))
+        self.assertContains(response, item.lokasi.full_address)
+        self.assertEqual(response.context['pickup_detail_data']['latitude'], -6.3615)

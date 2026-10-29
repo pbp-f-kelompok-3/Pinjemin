@@ -129,9 +129,10 @@ class BarangForm(forms.ModelForm):
                 cleaned_data['pickup_longitude'] = location.longitude
             elif latitude is None or longitude is None:
                 self.add_error('pickup_location', 'Pilih titik penjemputan yang valid pada peta.')
-        elif cleaned_data.get('pickup_mode') == 'current' and self.current_pickup is not None:
+        elif cleaned_data.get('pickup_mode') in ('', None, 'current') and self.current_pickup is not None:
             # Use the item's original location, never a different ID supplied by the browser.
             cleaned_data['lokasi'] = self.current_pickup
+            cleaned_data['pickup_mode'] = 'current'
             latitude = cleaned_data.get('pickup_latitude')
             longitude = cleaned_data.get('pickup_longitude')
             if latitude is None and longitude is None:
@@ -139,14 +140,6 @@ class BarangForm(forms.ModelForm):
                 cleaned_data['pickup_longitude'] = self.current_pickup.longitude
             elif latitude is None or longitude is None:
                 self.add_error('pickup_location', 'Isi kedua koordinat atau pilih titik pada peta.')
-        elif self.current_pickup is not None:
-            # Fallback aman saat edit: pertahankan lokasi saat ini jika user tidak mengubah lokasi
-            cleaned_data['lokasi'] = self.current_pickup
-            cleaned_data['pickup_mode'] = 'current'
-            if not cleaned_data.get('pickup_latitude'):
-                cleaned_data['pickup_latitude'] = self.current_pickup.latitude
-            if not cleaned_data.get('pickup_longitude'):
-                cleaned_data['pickup_longitude'] = self.current_pickup.longitude
         elif cleaned_data.get('pickup_mode') or not cleaned_data.get('lokasi'):
             self.add_error('pickup_location', 'Pilih lokasi dari riwayat atau simpan lokasi baru terlebih dahulu.')
         jenis = cleaned_data.get('jenis_penawaran')
