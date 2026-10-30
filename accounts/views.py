@@ -1,4 +1,7 @@
+import logging
+from django.core.paginator import Paginator
 from django.db.models import Avg
+from django.http import HttpResponse, JsonResponse
 from transaksi.models import Ulasan, Pesanan
 from barang.models import Barang
 import xml.etree.ElementTree as ET
@@ -11,6 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from .forms import OnboardingForm, ProfileForm
@@ -18,6 +22,7 @@ from .models import Profile
 from .services import get_blocking_transactions
 from .sso import get_login_url, validate_ticket
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -51,14 +56,14 @@ def sso_callback(request):
     except requests.HTTPError as exc:
         resp = exc.response
         status = resp.status_code if resp is not None else None
-        print("SSO HTTP ERROR:", status, (resp.text[:300] if resp is not None else ""))
+        logger.warning("SSO HTTP error: status=%s", status)
         if status == 400:
             messages.error(request, "SSO UI menolak permintaan login. Silakan coba lagi.")
         else:
             messages.error(request, "SSO UI sedang bermasalah. Coba lagi beberapa saat.")
         return redirect("accounts:login")
     except (requests.RequestException, ET.ParseError) as exc:
-        print("SSO ERROR:", repr(exc))
+        logger.warning("SSO error: %r", exc)
         messages.error(request, "SSO UI sedang bermasalah. Coba lagi beberapa saat.")
         return redirect("accounts:login")
 
@@ -191,6 +196,7 @@ def profile_public(request, pk):
     })
 
 
+# AJAX (fetch)
 @login_required
 @require_POST
 def toggle_mode(request):
@@ -203,6 +209,13 @@ def toggle_mode(request):
             Profile.Mode.SELLER if profile.mode == Profile.Mode.RENTER else Profile.Mode.RENTER
         )
     profile.save(update_fields=["mode"])
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({
+            "mode": profile.mode,
+            "label": profile.get_mode_display(),
+            "is_seller": profile.is_seller_mode,
+        })
 
     next_url = request.POST.get("next", "")
     if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
@@ -238,4 +251,48 @@ def deactivate_account(request):
     return render(request, "accounts/account_deactivate.html", {
         "profile": profile,
         "blocking": blocking,
+    })
+
+
+ACTIVITY_PAGE_SIZE = 6
+
+# HTMX
+@never_cache
+def profile_activity(request):
+    
+    if not request.user.is_authenticated:
+        # Jangan biarkan halaman login tertukar masuk ke dalam kartu
+        resp = HttpResponse(status=401)
+        resp["HX-Redirect"] = f"{reverse('accounts:login')}?next={reverse('accounts:profile')}"
+        return resp
+
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    tab = request.GET.get("tab", "main")
+    if tab not in ("main", "reviews"):
+        tab = "main"
+
+    if tab == "reviews":
+        kind = "ulasan"
+        qs = (Ulasan.objects.filter(pemilik=request.user)
+              .select_related("peminjam", "peminjam__profile", "barang")
+              .order_by("-created_at"))
+    elif profile.is_seller_mode:
+        kind = "barang"
+        qs = (Barang.objects.filter(pemilik=request.user)
+              .select_related("kategori", "lokasi")
+              .order_by("-pk"))
+    else:
+        kind = "pesanan"
+        qs = (Pesanan.objects.filter(peminjam=request.user)
+              .exclude(status=Pesanan.Status.DRAFT)
+              .select_related("barang", "pemilik", "pemilik__profile")
+              .order_by("-pk"))
+
+    page_obj = Paginator(qs, ACTIVITY_PAGE_SIZE).get_page(request.GET.get("page"))
+    template = "accounts/_activity.html" if page_obj.number == 1 else "accounts/_activity_rows.html"
+    return render(request, template, {
+        "tab": tab,
+        "kind": kind,
+        "page_obj": page_obj,
+        "is_seller_mode": profile.is_seller_mode,
     })

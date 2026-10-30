@@ -1,0 +1,83 @@
+{# Baris-baris aktivitas. Halaman 2 dst. hanya mengirim file ini; tombol di bawah menggantikan dirinya sendiri. #}
+{% for obj in page_obj %}
+  {% if kind == "barang" %}
+    <a href="{% url 'barang:detail' obj.pk %}" class="pf-item-card">
+      <div class="pf-item-main">
+        <div class="pf-item-thumb">
+          {% if obj.foto_utama %}
+            <img src="{{ obj.foto_utama.url }}" alt="{{ obj.nama_barang }}">
+          {% else %}
+            <div class="pf-item-thumb-fallback"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg></div>
+          {% endif %}
+        </div>
+        <div class="pf-item-info">
+          <div class="pf-item-name">{{ obj.nama_barang }}</div>
+          <div class="pf-item-sub">{{ obj.kategori.nama }} &middot; {{ obj.lokasi.short_label|default:obj.lokasi.nama_area }}</div>
+        </div>
+      </div>
+      <div class="pf-item-side">
+        <span class="pf-item-rate{% if obj.jenis_penawaran != 'sewa' %} pf-item-rate--gratis{% endif %}">
+          {% if obj.jenis_penawaran == 'sewa' %}Rp {{ obj.tarif_formatted }} / hr{% else %}Gratis{% endif %}
+        </span>
+        <span class="pf-item-state pf-item-state--{{ obj.status_penawaran }}">{{ obj.status_penawaran|capfirst }}</span>
+      </div>
+    </a>
+
+  {% elif kind == "pesanan" %}
+    <a href="{% url 'transaksi:detail' obj.pk %}" class="pf-item-card">
+      <div class="pf-item-main">
+        <div class="pf-item-thumb">
+          {% if obj.barang.foto_utama %}
+            <img src="{{ obj.barang.foto_utama.url }}" alt="{{ obj.nama_barang }}">
+          {% else %}
+            <div class="pf-item-thumb-fallback"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg></div>
+          {% endif %}
+        </div>
+        <div class="pf-item-info">
+          <div class="pf-item-name">{{ obj.nama_barang|default:obj.barang.nama_barang }}</div>
+          <div class="pf-item-sub">
+            dari {{ obj.pemilik.profile.full_name|default:obj.pemilik.username }}
+            {% if not obj.pemilik.is_active %}<span class="pf-item-state pf-item-state--off">Akun nonaktif</span>{% endif %}
+            &middot; {{ obj.mulai|date:"j M Y" }} &ndash; {{ obj.selesai|date:"j M Y" }}
+          </div>
+        </div>
+      </div>
+      <div class="pf-item-side">
+        <span class="pf-item-rate{% if not obj.total %} pf-item-rate--gratis{% endif %}">
+          {% if obj.total %}Rp {{ obj.total|floatformat:"0g" }}{% else %}Gratis{% endif %}
+        </span>
+        <span class="pf-item-state pf-item-state--{{ obj.status }}">{{ obj.get_status_display }}</span>
+      </div>
+    </a>
+
+  {% else %}
+    <article class="pf-review-card">
+      <div class="pf-review-top">
+        <div>
+          <div class="pf-reviewer-name">{{ obj.peminjam.profile.full_name|default:obj.peminjam.username }}</div>
+          <div class="pf-review-item-tag">Meminjam: <strong>{{ obj.barang.nama_barang }}</strong></div>
+        </div>
+        <div class="pf-rating-pill">
+          {% for _ in "12345" %}
+            {% if forloop.counter <= obj.rating %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="#ffc400" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+            {% else %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="#E5E7EB" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l6.9-1z"/></svg>
+            {% endif %}
+          {% endfor %}
+          <span class="pf-rating-pill__num">{{ obj.rating }}.0</span>
+        </div>
+      </div>
+      <p class="pf-review-comment">"{{ obj.komentar }}"</p>
+      <div class="pf-review-time">{{ obj.created_at|date:"j F Y H:i" }} WIB</div>
+    </article>
+  {% endif %}
+{% endfor %}
+
+{% if page_obj.has_next %}
+  <button type="button" class="pf-btn pf-btn--outline pf-btn--sm pf-more"
+          hx-get="{% url 'accounts:profile_activity' %}?tab={{ tab }}&page={{ page_obj.next_page_number }}"
+          hx-target="this" hx-swap="outerHTML" hx-indicator="this">
+    Muat lebih banyak
+  </button>
+{% endif %}
