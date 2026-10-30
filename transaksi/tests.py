@@ -273,7 +273,8 @@ class TransaksiTests(TestCase):
         import tempfile
         from django.core.management import call_command
         output = io.StringIO()
-        with tempfile.TemporaryDirectory(dir=".test-tmp") as media:
+        # Use the platform temp directory: CI checkouts do not contain .test-tmp.
+        with tempfile.TemporaryDirectory(prefix="pinjemin-test-media-") as media:
             with override_settings(MEDIA_ROOT=media, PRODUCTION=False):
                 call_command("seed_demo_transaksi", password="demo-test-password", stdout=output)
                 call_command("seed_demo_transaksi", password="do-not-reset-password", stdout=output)
