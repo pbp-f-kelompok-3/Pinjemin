@@ -1,4 +1,25 @@
-(Send di wa untuk instalasi fullnya)
+# Pinjemin
+
+Pinjemin adalah aplikasi berbagi, meminjam, dan menyewakan barang untuk warga kampus. Proyek ini dibuat sebagai penerapan pengembangan web Django dalam tema *Sustainable Living*.
+
+## Menjalankan aplikasi secara lokal (Penting Aseli)
+
+Pastikan Python dan `pip` tersedia. Jalankan perintah berikut dari folder proyek yang berisi `manage.py`.
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+Di Linux atau macOS, perintah aktivasi virtual environment adalah `source .venv/bin/activate`. Konfigurasi pengembangan menggunakan SQLite secara default; `PRODUCTION` tidak perlu diaktifkan untuk menjalankan aplikasi lokal. Buka `http://127.0.0.1:8000/` setelah server berjalan. Geolocation browser membutuhkan izin lokasi dan konteks aman seperti `localhost` atau HTTPS.
+
+Untuk menjalankan pengujian, gunakan `python manage.py test`. Beberapa pengujian modul lokasi dapat dijalankan dengan `python manage.py test locations barang.test_pickup transaksi.tests`. Jangan memasukkan secret produksi, kredensial database, atau API key ke README maupun Git.
+
+Dalam pengerjaan ingat selalu pull origin main untuk memastikan gaada file yang conflict
+
 ## Tema Proyek
 
 * **Tema Utama:** Sustainable Living
@@ -117,10 +138,11 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 
 ## Integrasi API
 
-1. **OpenStreetMap API:** Public API yang digunakan untuk membaca titik koordinat lokasi, mencari barang dalam jarak terdekat, dan menampilkan lokasi penjemputan.
-2. **OSRM Route API:** Layanan routing berbasis jaringan jalan OpenStreetMap untuk menampilkan rekomendasi rute kendaraan di detail pesanan. Aplikasi menampilkan jarak, perkiraan waktu, dan langkah perjalanan; Google Maps tersedia sebagai alternatif.
-3. **SSO UI Service:** Mock API yang digunakan untuk simulasi sistem login mahasiswa Universitas Indonesia agar identitas pengguna terverifikasi.
-4. **Payment Gateway:** Mock API yang digunakan untuk simulasi sistem pembayaran transaksi sewa secara langsung.
+1. **OpenStreetMap tiles:** Menampilkan latar peta dan atribusi. Koordinat perangkat diperoleh dari Browser Geolocation API, bukan dari tile OpenStreetMap.
+2. **Nominatim Reverse API:** Mengubah koordinat perangkat yang dibulatkan menjadi nama wilayah untuk navbar; hasil label area di-cache dan permintaan ke layanan dibatasi.
+3. **Nearby Items API:** Endpoint aplikasi `/barang/api/terdekat/` menerima koordinat dan radius, menyaring barang aktif, lalu mengurutkan kandidat berdasarkan jarak Haversine. Pin publik memakai koordinat perkiraan.
+4. **OSRM Route API:** Layanan routing berbasis jaringan jalan OpenStreetMap untuk rute kendaraan pada detail pesanan. Aplikasi menampilkan geometri, jarak, estimasi waktu, dan langkah perjalanan; Google Maps tersedia sebagai alternatif.
+5. **SSO UI Service dan Payment Gateway:** Mock/sandbox untuk simulasi autentikasi mahasiswa UI dan alur pembayaran. Jangan gunakan konfigurasi development untuk transaksi nyata.
 
 ### Implementasi lokasi penjemputan
 
@@ -149,3 +171,37 @@ https://www.figma.com/design/cIcomyuXpNiIPvk3Wa4gwo/Design-System?node-id=0-1&p=
 
 ## LINK PWS 
 https://roisul-umam-pinjemin.pws.cs.ui.ac.id/
+
+---
+
+## AI Disclosure & Documentation
+
+**I Nyoman Yadnya Suta Karmana / 2506615993**
+
+**Alat:** ChatGPT/Codex, sebagai asisten AI untuk pengembangan.
+
+AI digunakan untuk meninjau kebutuhan modul, mencari kemungkinan celah pada alur lokasi, menyusun usulan perubahan, membantu membuat pengujian, dan merapikan dokumentasi. Saran AI tidak langsung dianggap benar atau diterapkan tanpa pemeriksaan; perubahan dibandingkan dengan kode, kebutuhan tugas, dan hasil pengujian.
+
+### Contoh prompt
+
+Berikut beberapa contoh permintaan bantuan yang saya berikan selama mengerjakan modul. Saya tetap meninjau saran dan perubahan terhadap kode proyek sebelum menggunakannya:
+
+1. “Aku sudah mengerjakan peta barang terdekat di beranda. Bantu cek bagian lokasi perangkat dan pilihan radius pencariannya, lalu beri tahu kalau ada yang perlu diperbaiki.”
+2. “Di detail pesanan, bagian lokasi penjemputan masih berupa teks. Bantu tambahkan tampilan peta, saran rute, dan tautan ke Google Maps sesuai struktur proyekku.”
+3. “Aku sudah punya fitur Manajemen Lokasi. Bantu tinjau CRUD, snapshot lokasi barang dan pesanan, serta pembatasan aksesnya terhadap jobdesk; jelaskan atau perbaiki bagian yang masih kurang.”
+4. “Bantu dokumentasikan kontribusiku di modul Manajemen Lokasi, termasuk alur dan API yang benar-benar dipakai. Aku akan mencocokkan dokumentasinya dengan implementasi.”
+5. “Bantu rapikan tampilan fitur lokasi dan sesuaikan agar tetap nyaman digunakan di berbagai ukuran layar.”
+
+### Strategi dan validasi
+
+Pengerjaan dilakukan bertahap: memberi konteks struktur proyek dan jobdesk, meminta audit atau perubahan yang spesifik, lalu memeriksa hasil terhadap implementasi aktual dan menguji alur penting. Prompt meminta solusi mengikuti API yang disetujui proyek, menjaga data lokasi milik setiap akun, dan tidak mengubah snapshot lama ketika riwayat diedit atau dihapus.
+
+AI dapat salah membaca arsitektur, menyarankan algoritma yang tidak digunakan, atau melewatkan batas privasi dan kondisi tepi. AI juga tidak dapat membuktikan bahwa konfigurasi deployment atau layanan eksternal selalu tersedia hanya dari kode lokal.
+
+Contoh pemeriksaan dan koreksi setelah meninjau source:
+
+- Permintaan awal menyebut Dijkstra untuk rute. Kode aktual menghitung jarak dekat dengan Haversine dan meminta rute jalan melalui OSRM, jadi dokumentasi diperbaiki agar tidak mengklaim Dijkstra sebagai kode yang ditulis sendiri.
+- Audit menemukan halaman barang dan API barang terdekat perlu membatasi ketelitian koordinat untuk pengunjung. Respons publik kini memakai area perkiraan, sedangkan titik persis dibatasi kepada pemilik dan peminjam pada pesanan terkait. Pengujian memeriksa bahwa koordinat presisi tidak bocor ke respons publik.
+- Saran AI dan implementasi diperiksa terhadap validasi pemilik di server, CSRF, penyimpanan soft-delete, dan snapshot mandiri agar riwayat yang diedit/dihapus tidak mengubah data barang atau pesanan.
+
+Validasi kode mencakup pengujian Django pada aplikasi `locations`, `barang`, dan `transaksi`, serta `python manage.py check`. Catatan: akses ke layanan eksternal dan keberhasilan deployment tetap perlu diverifikasi pada lingkungan yang menjalankannya.
