@@ -314,9 +314,36 @@ class ItemPickupTests(TestCase):
             self.assertNotContains(response, item.lokasi.full_address)
             self.assertContains(response, 'pickup-detail-data')
             self.assertContains(response, 'data-pickup-detail-map')
-            self.assertEqual(response.context['pickup_detail_data']['latitude'], -6.3615)
-            self.assertEqual(response.context['pickup_detail_data']['longitude'], 106.8286)
+            # Guests may compare the pickup area, but not infer a precise
+            # house/room-level meeting point before a related order exists.
+            self.assertEqual(response.context['pickup_detail_data']['latitude'], -6.362)
+            self.assertEqual(response.context['pickup_detail_data']['longitude'], 106.829)
+            self.assertTrue(response.context['pickup_detail_data']['isApproximate'])
             self.assertNotContains(response, 'www.google.com/maps/search/')
+
+    def test_nearby_endpoint_is_public_sorted_and_only_returns_area_precision(self):
+        self.post_item()
+        self.client.logout()
+        response = self.client.get(reverse('barang:nearby'), {
+            'latitude': '-6.361000', 'longitude': '106.829000', 'radius': '1',
+        })
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload['radius_km'], 1)
+        self.assertEqual(len(payload['items']), 1)
+        item = payload['items'][0]
+        self.assertEqual(item['name'], 'Jas sidang hitam')
+        self.assertEqual(item['latitude'], -6.362)
+        self.assertEqual(item['longitude'], 106.829)
+        self.assertTrue(item['is_approximate'])
+        self.assertNotIn('-6.361500', response.content.decode())
+
+    def test_nearby_endpoint_rejects_invalid_device_coordinates(self):
+        response = self.client.get(reverse('barang:nearby'), {
+            'latitude': '91', 'longitude': '106.8', 'radius': '1',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('tidak valid', response.json()['error'])
 
     def test_google_maps_link_uses_coordinates_with_decimal_points_in_indonesian_locale(self):
         self.post_item()
@@ -331,3 +358,4 @@ class ItemPickupTests(TestCase):
         response = self.client.get(reverse('barang:detail', args=[item.pk]))
         self.assertContains(response, item.lokasi.full_address)
         self.assertEqual(response.context['pickup_detail_data']['latitude'], -6.3615)
+        self.assertFalse(response.context['pickup_detail_data']['isApproximate'])

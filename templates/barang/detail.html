@@ -88,7 +88,7 @@
 
         {% if pickup_detail_data %}
           {{ pickup_detail_data|json_script:"pickup-detail-data" }}
-          <div id="detail-map" class="pickup-map" data-pickup-detail-map role="region" aria-label="Peta titik penjemputan barang" style="height: 250px;"></div>
+          <div id="detail-map" class="pickup-map" data-pickup-detail-map role="region" aria-label="Peta lokasi penjemputan barang" style="height: 250px;"></div>
           <p data-pickup-detail-status role="status" aria-live="polite" class="pickup-help"></p>
           {% if can_view_pickup %}
           <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
@@ -103,7 +103,7 @@
           </div>
         {% endif %}
         {% if not can_view_pickup %}
-          <p class="br-helper">Peta menampilkan titik penjemputan barang. Alamat lengkap tersedia untuk pemilik dan peminjam dengan pesanan terkonfirmasi.</p>
+          <p class="br-helper">Peta menampilkan area perkiraan barang. Titik dan alamat lengkap tersedia setelah pesanan dikonfirmasi, hanya untuk pemilik dan peminjam terkait.</p>
         {% endif %}
       </div>
     </div>
@@ -333,6 +333,6 @@
 {% block extra_js %}
 {% if pickup_detail_data %}
 <script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
-<script src="{% static 'js/pickup-detail.js' %}?v=20261029-3" defer></script>
+<script src="{% static 'js/pickup-detail.js' %}?v=20261030-4" defer></script>
 {% endif %}
 {% endblock %}

@@ -48,6 +48,24 @@ class TransaksiTests(TestCase):
         self.assertEqual(response.context["pickup_route_data"]["latitude"], -6.3621)
         self.assertEqual(response.context["pickup_route_data"]["longitude"], 106.8279)
 
+    def test_pickup_snapshot_is_immutable_and_route_is_limited_to_order_parties(self):
+        order = self.order()
+        original_snapshot = order.lokasi_snapshot.copy()
+        self.location.latitude = "-6.300000"
+        self.location.longitude = "106.900000"
+        self.location.save()
+        order.refresh_from_db()
+        self.assertEqual(order.lokasi_snapshot, original_snapshot)
+
+        self.client.force_login(self.owner)
+        owner_response = self.client.get(reverse("transaksi:detail", args=[order.pk]))
+        self.assertEqual(owner_response.status_code, 200)
+        self.assertContains(owner_response, "data-order-map")
+
+        self.client.force_login(self.other)
+        stranger_response = self.client.get(reverse("transaksi:detail", args=[order.pk]))
+        self.assertEqual(stranger_response.status_code, 404)
+
     def status_data(self, payment, status="settlement", **kwargs):
         return {"order_id": payment.gateway_order_id, "gross_amount": str(payment.jumlah),
                 "transaction_status": status, "transaction_id": "sandbox-transaction", "payment_type": "gopay",
