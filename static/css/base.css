@@ -556,8 +556,17 @@ footer {
   background: var(--gray);
 }
 
+.home-page .category-icon--selected {
+  background: var(--yellow, #FEE75C);
+  border: 2px solid var(--black);
+}
+
 .home-page .category-name {
   font-size: 12px;
+}
+
+.home-page .category-name--selected {
+  font-weight: 700;
 }
 
 @media (max-width: 650px) {
