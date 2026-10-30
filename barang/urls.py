@@ -11,6 +11,7 @@ from . import views
 app_name = 'barang'
 
 urlpatterns = [
+    path('api/terdekat/', views.barang_terdekat, name='nearby'),
     # Dashboard Inventaris Barang Saya (Fauzan Taqiy Santosa)
     path('saya/', views.dashboard_barang_saya, name='dashboard'),
 

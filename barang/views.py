@@ -13,16 +13,69 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse, Http404
+from django.urls import reverse
+from django.views.decorators.http import require_GET
+from django.views.decorators.cache import never_cache
 from django.conf import settings
 from django.db.models import Q, F
 from django.db import transaction
 import urllib.parse
+import math
 from .models import Barang, Kategori, Lokasi
 from categories.models import Category
 from transaksi.models import Pesanan
 from .forms import BarangForm, BarangEditForm
 from .services import save_item_with_pickup, visible_item_locations
 from locations.services import pickup_context
+
+
+@never_cache
+@require_GET
+def barang_terdekat(request):
+    """Return public item pins ordered by distance from the visitor's device."""
+    try:
+        latitude = float(request.GET.get('latitude', ''))
+        longitude = float(request.GET.get('longitude', ''))
+        radius_km = float(request.GET.get('radius', '1'))
+        if not (math.isfinite(latitude) and math.isfinite(longitude)
+                and -90 <= latitude <= 90 and -180 <= longitude <= 180
+                and radius_km in (1, 2)):
+            raise ValueError
+    except (TypeError, ValueError, OverflowError):
+        return JsonResponse({'error': 'Lokasi atau radius pencarian tidak valid.'}, status=400)
+
+    candidates = Barang.objects.filter(
+        status_penawaran='aktif', pemilik__is_active=True,
+        lokasi__latitude__isnull=False, lokasi__longitude__isnull=False,
+    ).select_related('lokasi')
+
+    nearby = []
+    for item in candidates:
+        item_lat = float(item.lokasi.latitude)
+        item_lon = float(item.lokasi.longitude)
+        lat_delta = math.radians(item_lat - latitude)
+        lon_delta = math.radians(item_lon - longitude)
+        haversine = (math.sin(lat_delta / 2) ** 2
+                     + math.cos(math.radians(latitude)) * math.cos(math.radians(item_lat))
+                     * math.sin(lon_delta / 2) ** 2)
+        distance_km = 6371 * 2 * math.asin(math.sqrt(min(1, haversine)))
+        if distance_km > radius_km:
+            continue
+        nearby.append({
+            'id': item.pk,
+            'name': item.nama_barang,
+            'price': item.tarif_formatted,
+            'offer': 'Sewa' if item.jenis_penawaran == 'sewa' else 'Gratis',
+            'area': item.lokasi.short_label or item.lokasi.nama_area,
+            'distance_km': round(distance_km, 2),
+            'latitude': round(item_lat, 4),
+            'longitude': round(item_lon, 4),
+            'image': item.foto_utama.url if item.foto_utama else '',
+            'url': reverse('barang:detail', args=[item.pk]),
+        })
+
+    nearby.sort(key=lambda item: (item['distance_km'], item['name'].casefold()))
+    return JsonResponse({'items': nearby[:50], 'radius_km': int(radius_km)})
 
 
 @login_required

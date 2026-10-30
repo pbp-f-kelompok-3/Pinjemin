@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.conf import settings
 from django.shortcuts import render
 
 from barang.models import Barang
@@ -84,6 +85,7 @@ def home(request):
         "max_price": max_price_value,
         "current_sort": sort,
         "total_barang": items.count(),
+        "nearby_tile_url": settings.OSM_TILE_URL,
     }
 
     return render(request, "home.html", context)
