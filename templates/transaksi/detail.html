@@ -1,5 +1,10 @@
 {% extends "transaksi/base.html" %}
 {% load static %}
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+  <link rel="stylesheet" href="{% static 'css/transaksi-map.css' %}?v=20261030-1">
+{% endblock %}
 {% block transaksi_content %}
 <div class="tr-card tr-narrow">
   <span class="tr-status">{{ order.get_status_display }}</span>
@@ -25,6 +30,33 @@
   {% if order.status != 'draft' %}
   <h2>Lokasi penjemputan</h2>
   <p>{{ order.lokasi_snapshot.label }} · {{ order.lokasi_snapshot.alamat }}<br>{{ order.lokasi_snapshot.patokan }}<br>{{ order.lokasi_snapshot.kota }}</p>
+  {% if pickup_route_data %}
+    {{ pickup_route_data|json_script:"order-pickup-data" }}
+    <div class="tr-route-card">
+      <div class="tr-route-heading">
+        <div>
+          <h3>Peta dan rekomendasi rute</h3>
+          <p>Rute jalan dihitung dari lokasimu ke titik penjemputan pesanan ini.</p>
+        </div>
+        <span class="tr-route-destination">{{ pickup_route_data.label }}</span>
+      </div>
+      <div class="tr-order-map" data-order-map role="region" aria-label="Peta lokasi penjemputan dan rute"></div>
+      <div class="tr-route-controls">
+        <button type="button" class="tr-button" data-order-route>Rute dari lokasiku</button>
+        {% if google_maps_url %}<a class="tr-button tr-secondary" href="{{ google_maps_url }}" target="_blank" rel="noopener noreferrer">Buka rute di Google Maps ↗</a>{% endif %}
+      </div>
+      <p class="tr-route-status" data-order-route-status role="status" aria-live="polite">Peta menandai titik penjemputan. Aktifkan lokasi untuk menghitung rute.</p>
+      <div class="tr-route-summary" data-order-route-summary hidden></div>
+      <ol class="tr-route-steps" data-order-route-steps hidden></ol>
+      {% if pickup_route_data.usesCurrentItemPoint %}<p class="tr-route-attribution">Koordinat belum tersimpan pada pesanan lama, jadi peta memakai titik barang saat ini.</p>{% endif %}
+      <p class="tr-route-attribution">Rute kendaraan menggunakan data jalan OpenStreetMap melalui OSRM. Jika kamu meminta rute, posisi perangkat dikirim ke layanan rute untuk menghitung jalur.</p>
+    </div>
+  {% elif google_maps_url %}
+    <div class="tr-route-fallback">
+      Koordinat peta tidak tersedia untuk pesanan ini.
+      <a href="{{ google_maps_url }}" target="_blank" rel="noopener noreferrer">Cari lokasi di Google Maps ↗</a>
+    </div>
+  {% endif %}
   {% if wa_link %}
     <p style="margin-top: 10px;">
       <a href="{{ wa_link }}" target="_blank" rel="noopener noreferrer" class="tr-button" style="background: #25D366; color: white; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 14px;">
@@ -107,4 +139,10 @@
 </section>
 {% endif %}
 {% endblock %}
-{% block extra_js %}<script src="{% static 'js/transaksi.js' %}" defer></script>{% endblock %}
+{% block extra_js %}
+  {% if pickup_route_data %}
+    <script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
+    <script src="{% static 'js/transaksi-route.js' %}?v=20261030-1" defer></script>
+  {% endif %}
+  <script src="{% static 'js/transaksi.js' %}" defer></script>
+{% endblock %}

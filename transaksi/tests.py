@@ -21,7 +21,8 @@ class TransaksiTests(TestCase):
         self.user = User.objects.create_user(username="borrower", password="test-password")
         self.other = User.objects.create_user(username="stranger", password="test-password")
         self.category, _ = Category.objects.get_or_create(name="Elektronik")
-        self.location = Lokasi.objects.create(nama_area="Kampus UI", patokan="Gerbang", short_label="UI")
+        self.location = Lokasi.objects.create(nama_area="Kampus UI", patokan="Gerbang", short_label="UI",
+                                             latitude="-6.362100", longitude="106.827900")
         self.item = Barang.objects.create(pemilik=self.owner, nama_barang="Proyektor", foto_utama="test.jpg",
                                          deskripsi="Tes", kategori=self.category, lokasi=self.location,
                                          jenis_penawaran="sewa", tarif_per_hari=25000)
@@ -32,6 +33,20 @@ class TransaksiTests(TestCase):
 
     def order(self):
         return services.submit_order(self.draft().pk, self.user)
+
+    def test_order_snapshots_pickup_coordinates_and_shows_route_map(self):
+        order = self.order()
+        self.assertEqual(order.lokasi_snapshot["latitude"], -6.3621)
+        self.assertEqual(order.lokasi_snapshot["longitude"], 106.8279)
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("transaksi:detail", args=[order.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data-order-map")
+        self.assertContains(response, "Rute dari lokasiku")
+        self.assertContains(response, "Buka rute di Google Maps")
+        self.assertEqual(response.context["pickup_route_data"]["latitude"], -6.3621)
+        self.assertEqual(response.context["pickup_route_data"]["longitude"], 106.8279)
 
     def status_data(self, payment, status="settlement", **kwargs):
         return {"order_id": payment.gateway_order_id, "gross_amount": str(payment.jumlah),

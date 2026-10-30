@@ -118,8 +118,9 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 ## Integrasi API
 
 1. **OpenStreetMap API:** Public API yang digunakan untuk membaca titik koordinat lokasi, mencari barang dalam jarak terdekat, dan menampilkan lokasi penjemputan.
-2. **SSO UI Service:** Mock API yang digunakan untuk simulasi sistem login mahasiswa Universitas Indonesia agar identitas pengguna terverifikasi.
-3. **Payment Gateway:** Mock API yang digunakan untuk simulasi sistem pembayaran transaksi sewa secara langsung.
+2. **OSRM Route API:** Layanan routing berbasis jaringan jalan OpenStreetMap untuk menampilkan rekomendasi rute kendaraan di detail pesanan. Aplikasi menampilkan jarak, perkiraan waktu, dan langkah perjalanan; Google Maps tersedia sebagai alternatif.
+3. **SSO UI Service:** Mock API yang digunakan untuk simulasi sistem login mahasiswa Universitas Indonesia agar identitas pengguna terverifikasi.
+4. **Payment Gateway:** Mock API yang digunakan untuk simulasi sistem pembayaran transaksi sewa secara langsung.
 
 ### Implementasi lokasi penjemputan
 
@@ -129,7 +130,8 @@ Pada **Barang saya → Tambah Barang** dan **Edit Barang**, pengguna dapat memil
 - Tampilan pemilih: `templates/locations/picker.html`, `static/js/pickup-location.js`, dan `static/css/pickup-location.css`.
 - Riwayat milik akun: `locations/models.py`, `locations/forms.py`, dan `locations/views.py`. Endpoint `/lokasi/api/penjemputan/` mendukung GET/POST; `/lokasi/api/penjemputan/<id>/` mendukung PATCH/DELETE dan memerlukan login serta CSRF untuk perubahan data.
 - `barang/services.py` menyimpan salinan lokasi pada barang. Mengubah atau menghapus riwayat tidak mengubah salinan tersebut. Data lokasi barang lama tetap didukung.
-- `OSM_TILE_URL` opsional untuk penyedia tile yang kompatibel; default menggunakan tile OpenStreetMap dengan atribusi. Tombol lokasi perangkat membutuhkan izin browser dan HTTPS atau localhost. Nominatim yang sudah ada tetap digunakan untuk nama wilayah di navbar; memilih/menyeret pin tidak memanggil Nominatim.
+- Saat pesanan diajukan, koordinat titik penjemputan ikut disimpan pada snapshot pesanan. Detail pesanan menampilkan pin dan dapat meminta rute dari posisi perangkat melalui OSRM. Rute membutuhkan izin lokasi dan koneksi internet; tautan Google Maps menjadi alternatif. Pesanan lama tanpa koordinat snapshot menggunakan titik barang saat ini jika masih tersedia.
+- `OSM_TILE_URL` opsional untuk penyedia tile yang kompatibel; default menggunakan tile OpenStreetMap dengan atribusi. `OSRM_ROUTE_URL` dapat diubah untuk memakai server OSRM lain; default menggunakan layanan publik OSRM. Tombol lokasi perangkat membutuhkan izin browser dan HTTPS atau localhost. Nominatim yang sudah ada tetap digunakan untuk nama wilayah di navbar; memilih/menyeret pin tidak memanggil Nominatim.
 
 ---
 

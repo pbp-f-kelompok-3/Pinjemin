@@ -7,7 +7,7 @@
   --navbar-focus: #7A6727;
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 1100;
   flex-shrink: 0;
   padding: 0;
   background: var(--navbar-bg);
