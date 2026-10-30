@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
 from pinjemin import views
@@ -31,4 +30,7 @@ urlpatterns = [
     path('bantuan/', include('help_center.urls')),
     path('barang/', include('barang.urls')),
     path('transaksi/', include('transaksi.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # PWS/Gunicorn does not serve MEDIA_ROOT automatically; unlike static assets,
+    # uploaded product/profile photos are not part of WhiteNoise's collectstatic.
+    path(f"{settings.MEDIA_URL.lstrip('/')}<path:path>", views.uploaded_media, name='uploaded_media'),
+]
