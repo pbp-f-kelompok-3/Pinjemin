@@ -1,9 +1,15 @@
 from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import render
+from django.views.static import serve as serve_media_file
 
 from barang.models import Barang
 from categories.models import Category
+
+
+def uploaded_media(request, path):
+    """Serve public uploads (barang/profile photos) from MEDIA_ROOT on PWS."""
+    return serve_media_file(request, path, document_root=settings.MEDIA_ROOT)
 
 
 def home(request):
