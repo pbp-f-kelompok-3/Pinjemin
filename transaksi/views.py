@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -42,7 +42,39 @@ def daftar(request):
 def masuk(request):
     services.maintain_orders()
     orders = Pesanan.objects.filter(pemilik=request.user).exclude(status=Pesanan.Status.DRAFT).select_related("peminjam")
-    return render(request, "transaksi/daftar.html", {"orders": orders, "incoming": True})
+    selected_status = request.GET.get("status", "")
+    summary = {"waiting": orders.filter(status=Pesanan.Status.WAITING).count(),
+               "ready": orders.filter(status=Pesanan.Status.CONFIRMED, diterima_at__isnull=True).count(),
+               "borrowed": orders.filter(status=Pesanan.Status.CONFIRMED, diterima_at__isnull=False).count()}
+    if selected_status in Pesanan.Status.values:
+        orders = orders.filter(status=selected_status)
+    return render(request, "transaksi/daftar.html", {"orders": orders, "incoming": True,
+                  "statuses": [(value, label) for value, label in Pesanan.Status.choices if value != Pesanan.Status.DRAFT],
+                  "selected_status": selected_status, "summary": summary})
+
+
+@login_required
+def pendapatan(request):
+    orders = services.earned_orders(request.user).select_related("peminjam")
+    total = orders.aggregate(total=Sum("total"))["total"] or 0
+    held = Pesanan.objects.filter(
+        pemilik=request.user, status=Pesanan.Status.CONFIRMED, diterima_at__isnull=True,
+        pembayaran__aktif=True, pembayaran__dibayar_at__isnull=False,
+        pembayaran__status__in=["capture", "settlement"], pembayaran__refund_status=Pembayaran.Refund.NONE,
+    ).aggregate(total=Sum("total"))["total"] or 0
+    return render(request, "transaksi/pendapatan.html", {"orders": orders, "total_income": total, "held_income": held})
+
+
+@login_required
+@require_POST
+def terima(request, pk):
+    _borrower_order(request.user, pk)
+    try:
+        services.receive_order(pk, request.user)
+        messages.success(request, "Penerimaan barang dikonfirmasi. Biaya sewa tercatat sebagai pendapatan simulasi pemilik.")
+    except ValidationError as exc:
+        _error(request, exc)
+    return redirect("transaksi:detail", pk=pk)
 
 
 @login_required
@@ -230,7 +262,10 @@ def bayar(request, pk):
 @login_required
 @require_POST
 def periksa(request, pk):
-    order = _borrower_order(request.user, pk)
+    order = get_object_or_404(Pesanan.objects.filter(
+        Q(peminjam=request.user) | Q(pemilik=request.user)), pk=pk)
+    if order.status == Pesanan.Status.DRAFT and order.peminjam_id != request.user.pk:
+        return HttpResponse(status=404)
     try:
         for payment in order.pembayaran.all():
             services.reconcile(payment.pk)

@@ -151,3 +151,6 @@
   align-items: center;
   gap: 8px;
 }
+
+.tr-metrics { margin-bottom: 24px; }
+.tr-metrics strong { font-size: clamp(24px, 4vw, 32px); overflow-wrap: anywhere; }

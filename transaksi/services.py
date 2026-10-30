@@ -126,7 +126,7 @@ def edit_schedule(pk, user, mulai, durasi):
 def cancel_order(pk, user):
     order = _lock_order(pk)
     if order.peminjam_id != user.pk or not order.bisa_dibatalkan:
-        raise ValidationError("Pesanan hanya dapat dibatalkan sebelum peminjaman dimulai.")
+        raise ValidationError("Pesanan hanya dapat dibatalkan sebelum peminjaman dimulai dan sebelum barang diterima.")
     order.status = Pesanan.Status.CANCELLED
     order.alasan_pembatalan = "Dibatalkan peminjam"
     order.save()
@@ -289,6 +289,35 @@ def settings_auto_refund():
     return settings.MIDTRANS_AUTO_REFUND
 
 
+@transaction.atomic
+def receive_order(pk, user):
+    order = _lock_order(pk)
+    if order.peminjam_id != user.pk:
+        raise ValidationError("Hanya peminjam terkait yang dapat mengonfirmasi penerimaan barang.")
+    if order.status != Pesanan.Status.CONFIRMED:
+        raise ValidationError("Penerimaan hanya dapat dikonfirmasi setelah pesanan dikonfirmasi.")
+    if order.total and not order.pembayaran.filter(
+        aktif=True, jumlah=order.total, dibayar_at__isnull=False,
+        status__in=["capture", "settlement"], refund_status=Pembayaran.Refund.NONE,
+    ).exists():
+        raise ValidationError("Pembayaran pesanan harus berhasil diverifikasi sebelum barang diterima.")
+    if order.diterima_at is None:
+        order.diterima_at = timezone.now()
+        order.save(update_fields=["diterima_at", "updated_at"])
+    return order
+
+
+def earned_orders(user):
+    """Satu baris per pesanan: konfirmasi ulang tidak menggandakan pendapatan."""
+    return Pesanan.objects.filter(
+        pemilik=user, diterima_at__isnull=False, total__gt=0,
+        status__in=[Pesanan.Status.CONFIRMED, Pesanan.Status.COMPLETED],
+        pembayaran__aktif=True, pembayaran__dibayar_at__isnull=False,
+        pembayaran__status__in=["capture", "settlement"],
+        pembayaran__refund_status=Pembayaran.Refund.NONE,
+    )
+
+
 def maintain_orders():
     """Jalankan setiap menit lewat scheduler; halaman terkait juga menjalankannya."""
     now = timezone.now()
@@ -300,7 +329,8 @@ def maintain_orders():
                 order.status = Pesanan.Status.CANCELLED
                 order.alasan_pembatalan = "Batas pembayaran 30 menit berakhir"
                 order.save()
-    Pesanan.objects.filter(status=Pesanan.Status.CONFIRMED, selesai__lte=now).update(status=Pesanan.Status.COMPLETED)
+    # Berakhirnya jadwal tidak membuktikan barang sudah dikembalikan.
+    # Pemilik mengonfirmasi pengembalian melalui complete_order.
 
 @transaction.atomic
 def complete_order(pk, user):
@@ -309,6 +339,8 @@ def complete_order(pk, user):
         raise ValidationError("Hanya pemilik barang yang dapat mengonfirmasi pengembalian barang.")
     if order.status != Pesanan.Status.CONFIRMED:
         raise ValidationError("Hanya pesanan yang telah dikonfirmasi yang dapat diselesaikan.")
+    if order.diterima_at is None:
+        raise ValidationError("Peminjam harus mengonfirmasi penerimaan barang terlebih dahulu.")
     order.status = Pesanan.Status.COMPLETED
     order.save()
     return order

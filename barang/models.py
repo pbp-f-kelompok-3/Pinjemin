@@ -162,16 +162,13 @@ class Barang(models.Model):
 
     @property
     def is_sedang_dipinjam(self):
-        from django.utils import timezone
-        now = timezone.now()
         return self.daftar_pesanan.filter(
-            status='dikonfirmasi', mulai__lte=now, selesai__gt=now
+            status='dikonfirmasi', diterima_at__isnull=False
         ).exists()
 
     @property
     def transaksi_terkunci(self):
-        from django.utils import timezone
-        return self.daftar_pesanan.filter(status='dikonfirmasi', selesai__gt=timezone.now()).exists()
+        return self.daftar_pesanan.filter(status='dikonfirmasi').exists()
 
     def can_be_deleted(self):
         """

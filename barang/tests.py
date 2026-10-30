@@ -637,7 +637,8 @@ class Phase56ReturnAndReviewTest(TestCase):
             total=30000,
             nama_barang=self.barang.nama_barang,
             lokasi_snapshot={"label": "Kutek", "alamat": "Kutek Dekat Indomaret"},
-            status=Pesanan.Status.CONFIRMED
+            status=Pesanan.Status.CONFIRMED,
+            diterima_at=now - timedelta(days=1),
         )
 
     def test_owner_can_complete_confirmed_order(self):

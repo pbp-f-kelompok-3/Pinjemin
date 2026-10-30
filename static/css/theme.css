@@ -112,7 +112,7 @@ html[data-theme="dark"] :is(.button-primary, .header-lend, .nav-location__detect
   .step.is-active .step__dot, .step.is-done .step__dot, .tutorial-content,
   .lock-tag, .hc-pill, .hc-tag__num, .hc-login-btn, .pickup-tab.is-active,
   .pickup-save, .pf-verified-dot, .nearby-item-marker, .tr-destination-marker) { color: #171717; }
-html[data-theme="dark"] .tr-secondary { color: var(--theme-text); }
+html[data-theme="dark"] .tr-button.tr-secondary { color: var(--theme-text) !important; }
 html[data-theme="dark"] .tr-danger { color: #a12820; }
 html[data-theme="dark"] :is(.br-badge-category, .br-badge-sewa) {
   background: var(--theme-raised);

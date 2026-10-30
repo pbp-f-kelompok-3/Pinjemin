@@ -7,7 +7,7 @@
 {% endblock %}
 {% block transaksi_content %}
 <div class="tr-card tr-narrow">
-  <span class="tr-status">{{ order.get_status_display }}</span>
+  <span class="tr-status">{{ order.tahap_pesanan }}</span>
   <h1>{{ order.nama_barang }}</h1>
   <p class="tr-reference">Nomor pesanan: {{ order.pk }}</p>
   <dl class="tr-facts">
@@ -26,6 +26,11 @@
   </div>
   {% endif %}
   {% if order.alasan_pembatalan %}<p>{{ order.alasan_pembatalan }}</p>{% endif %}
+  {% if order.diterima_at %}
+    <p class="tr-notice">Peminjam mengonfirmasi penerimaan pada {{ order.diterima_at|date:"d M Y H:i" }} WIB.{% if order.total %} Biaya sewa dicatat sebagai pendapatan simulasi pemilik, tanpa transfer dana.{% endif %}</p>
+  {% elif order.status == 'dikonfirmasi' %}
+    <p class="tr-notice">{% if borrower %}Koordinasikan pengambilan barang. Tekan “Barang sudah diterima” hanya setelah kamu benar-benar menerima barang.{% else %}Pesanan siap diserahkan. Minta peminjam mengonfirmasi penerimaan di akunnya setelah barang diserahkan.{% endif %}</p>
+  {% endif %}
   {% if mock_refund and order.total %}<p class="tr-notice">Mode demo: pembayaran memakai Midtrans Sandbox. Pengembalian dana disimulasikan di aplikasi.</p>{% endif %}
   {% if order.status != 'draft' %}
   <h2>Lokasi penjemputan</h2>
@@ -74,6 +79,9 @@
   {% endif %}
   <div class="tr-actions">
   {% if borrower %}
+    {% if order.status == 'dikonfirmasi' and not order.diterima_at %}
+      <form method="post" action="{% url 'transaksi:terima' order.pk %}">{% csrf_token %}<button class="tr-button" type="submit" onclick="return confirm('Pastikan barang sudah benar-benar kamu terima. Konfirmasi ini mencatat pendapatan simulasi pemilik dan menghentikan pembatalan pesanan.')">Barang sudah diterima</button></form>
+    {% endif %}
     {% if order.bisa_diubah %}<a class="tr-button tr-secondary" href="{% url 'transaksi:edit' order.pk %}">Ubah jadwal</a>{% endif %}
     {% if order.status == 'draft' %}
       <form method="post" action="{% url 'transaksi:ajukan' order.pk %}">{% csrf_token %}<button class="tr-button" type="submit">Ajukan pesanan</button></form>
@@ -93,12 +101,16 @@
       </a>
     {% endif %}
   {% else %}
-    {% if order.status == 'dikonfirmasi' %}
+    {% if order.status != 'draft' and order.total %}
+      <form method="post" action="{% url 'transaksi:periksa' order.pk %}">{% csrf_token %}<button class="tr-button tr-secondary" type="submit">Periksa status pembayaran</button></form>
+      <a class="tr-button tr-secondary" href="{% url 'transaksi:pendapatan' %}">Pendapatan Saya</a>
+    {% endif %}
+    {% if order.status == 'dikonfirmasi' and order.diterima_at %}
       <form method="post" action="{% url 'transaksi:selesaikan' order.pk %}" style="display: inline;">
         {% csrf_token %}
         <button class="tr-button tr-btn-success" type="submit" onclick="return confirm('Apakah barang telah benar-benar dikembalikan oleh peminjam dalam kondisi baik?')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-          Konfirmasi Barang Diterima (Selesai)
+          Konfirmasi Barang Dikembalikan
         </button>
       </form>
     {% endif %}

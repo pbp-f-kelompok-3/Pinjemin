@@ -31,6 +31,7 @@ class Pesanan(models.Model):
     status = models.CharField(max_length=24, choices=Status.choices, default=Status.DRAFT)
     diajukan_at = models.DateTimeField(null=True, blank=True)
     batas_bayar = models.DateTimeField(null=True, blank=True)
+    diterima_at = models.DateTimeField(null=True, blank=True)
     alasan_pembatalan = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -50,7 +51,16 @@ class Pesanan(models.Model):
 
     @property
     def bisa_dibatalkan(self):
-        return self.status in [self.Status.WAITING, self.Status.CONFIRMED] and self.mulai > timezone.now()
+        return (self.status in [self.Status.WAITING, self.Status.CONFIRMED]
+                and self.mulai > timezone.now() and self.diterima_at is None)
+
+    @property
+    def tahap_pesanan(self):
+        if self.status == self.Status.CONFIRMED:
+            if self.diterima_at:
+                return "Barang sedang dipinjam" if self.selesai > timezone.now() else "Menunggu pengembalian barang"
+            return "Siap diserahkan"
+        return self.get_status_display()
 
     def __str__(self):
         return f"{self.nama_barang} — {self.get_status_display()}"

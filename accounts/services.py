@@ -13,14 +13,14 @@ def get_blocking_transactions(user):
 
     Yang dianggap berjalan: pesanan berstatus WAITING (menunggu pembayaran) dan
     CONFIRMED (sudah terkonfirmasi, belum selesai), baik sebagai peminjam maupun pemilik.
-    Keduanya selesai sendiri: WAITING dibatalkan otomatis setelah 30 menit, dan
-    CONFIRMED menjadi COMPLETED saat masa pinjam berakhir (lihat maintain_orders).
+    WAITING dibatalkan otomatis setelah 30 menit. CONFIRMED menunggu konfirmasi
+    pengembalian dari pemilik, termasuk jika jadwal pinjam sudah berakhir.
     """
     # Import di dalam fungsi untuk menghindari import melingkar antar-app
     from transaksi.models import Pesanan
     from transaksi.services import maintain_orders
 
-    maintain_orders()  # rapikan dulu pesanan yang sudah kedaluwarsa / selesai
+    maintain_orders()  # rapikan dulu pesanan yang sudah kedaluwarsa
 
     orders = (
         Pesanan.objects

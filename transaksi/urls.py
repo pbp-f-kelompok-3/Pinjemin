@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.daftar, name="daftar"),
     path("barang/", views.katalog, name="katalog"),
     path("masuk/", views.masuk, name="masuk"),
+    path("pendapatan/", views.pendapatan, name="pendapatan"),
     path("checkout/<int:item_id>/", views.buat, name="buat"),
     path("midtrans/notification/", views.webhook, name="webhook"),
     path("<uuid:pk>/", views.detail, name="detail"),
@@ -15,6 +16,7 @@ urlpatterns = [
     path("<uuid:pk>/batalkan/", views.batalkan, name="batalkan"),
     path("<uuid:pk>/bayar/", views.bayar, name="bayar"),
     path("<uuid:pk>/periksa/", views.periksa, name="periksa"),
+    path("<uuid:pk>/terima/", views.terima, name="terima"),
     path("<uuid:pk>/selesaikan/", views.selesaikan, name="selesaikan"),
     path("<uuid:pk>/ulasan/", views.beri_ulasan, name="beri_ulasan"),
 ]

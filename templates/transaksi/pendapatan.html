@@ -1,0 +1,23 @@
+{% extends "transaksi/base.html" %}
+{% block title %}Pendapatan Saya - Pinjemin{% endblock %}
+{% block transaksi_content %}
+<h1>Pendapatan Saya</h1>
+<p class="tr-notice">Seluruh nominal pada halaman ini adalah simulasi. Tidak ada transfer ke rekening atau GoPay pemilik.</p>
+<div class="tr-grid tr-metrics">
+  <div class="tr-card"><p>Pendapatan simulasi</p><strong>Rp{{ total_income }}</strong><p>Dari pesanan berbayar yang barangnya sudah diterima peminjam.</p></div>
+  <div class="tr-card"><p>Menunggu penerimaan barang</p><strong>Rp{{ held_income }}</strong><p>Pembayaran sudah terverifikasi, serah terima belum dikonfirmasi peminjam.</p></div>
+</div>
+<h2>Riwayat pendapatan simulasi</h2>
+<div class="tr-grid">
+{% for order in orders %}
+  <article class="tr-card">
+    <span class="tr-status">Pendapatan simulasi tercatat</span>
+    <h3>{{ order.nama_barang }}</h3>
+    <p>Peminjam: {{ order.peminjam.get_full_name|default:order.peminjam.username }}</p>
+    <p><strong>Rp{{ order.total }}</strong></p>
+    <p>Barang diterima {{ order.diterima_at|date:"d M Y H:i" }} WIB</p>
+    <a class="tr-button tr-secondary" href="{% url 'transaksi:detail' order.pk %}">Lihat pesanan</a>
+  </article>
+{% empty %}<p>Belum ada pendapatan. Pendapatan simulasi tercatat setelah barang diterima peminjam dan pembayarannya terverifikasi.</p>{% endfor %}
+</div>
+{% endblock %}

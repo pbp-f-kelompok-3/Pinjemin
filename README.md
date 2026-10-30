@@ -20,6 +20,18 @@ Untuk menjalankan pengujian, gunakan `python manage.py test`. Beberapa pengujian
 
 Dalam pengerjaan ingat selalu pull origin main untuk memastikan gaada file yang conflict
 
+## Simulasi flow pembayaran Midtrans
+
+Payment gateway Midtrans yang digunakan di proyek ini adalah versi sandbox, jadi semua transaksi bersifat simulasi. Jangan gunakan kredensial dan uang asli untuk pengujian lokal ini.
+Cara menguji alur pembayaran:
+1. Pilih barang sewa dan lanjutkan ke checkout.
+2. Pilih metode pembayaran QRIS.
+3. Salin alamat gambar QRIS yang muncul (klik kanan gambar QRIS -> copy image address URL).
+4. Buka link berikut di browser: [Midtrans QRIS Simulator](https://simulator.sandbox.midtrans.com/v2/qris/index).
+5. Tempelkan alamat gambar QRIS yang disalin ke halaman simulator untuk menyelesaikan pembayaran. Transaksi akan dianggap berhasil secara otomatis di halaman pembayaran pinjemin (jika statusnya masih belum dibayar, klik tombol cek status pembayaran).
+
+Untuk Refund, masih berupa simulasi saja. Ketika pesanan dibatalkan maka status pembayaran akan berubah menjadi dibatalkan dan uang disimulasikan dikembalikan ke akun pembayaran. Hal ini dikarenakan Midtrans sandbox tidak benar-benar memproses pembayaran, jadi tidak ada uang sungguhan yang berpindah tangan.
+
 ## Tema Proyek
 
 * **Tema Utama:** Sustainable Living
@@ -134,6 +146,14 @@ Pengguna utama Pinjemin adalah warga kampus Universitas Indonesia:
 | **Read** | Menampilkan riwayat pesanan, rincian biaya, dan status pembayaran. Pemilik melihat pesanan masuk melalui dashboard | Peminjam dan Pemilik Barang |
 | **Update** | Mengubah tanggal atau durasi selama pesanan berstatus Menunggu Pembayaran. Status berubah mengikuti alur Menunggu Pembayaran, Dikonfirmasi setelah pembayaran berhasil, dan Selesai setelah masa peminjaman berakhir | Peminjam dan sistem |
 | **Delete** | Membatalkan pesanan sebelum masa peminjaman dimulai. Status berubah menjadi Dibatalkan dan pembayaran yang belum selesai ikut dibatalkan | Peminjam |
+
+**Penerimaan barang dan pendapatan simulasi:**
+
+- Pemilik memantau pesanan melalui `/transaksi/masuk/`, termasuk status pembayaran dan identitas peminjam terkait.
+- Setelah pembayaran terverifikasi (atau langsung untuk barang gratis), peminjam mengonfirmasi **Barang sudah diterima** setelah serah terima. Konfirmasi ini menghentikan pembatalan pesanan dan mencatat waktu penerimaan.
+- Halaman `/transaksi/pendapatan/` menampilkan biaya sewa yang masih menunggu serah terima serta pendapatan dari barang yang sudah diterima. Konfirmasi berulang tidak menggandakan nominal. Semua pendapatan adalah simulasi tanpa transfer rekening/GoPay.
+- Pesanan selesai setelah pemilik mengonfirmasi **Barang dikembalikan**. Lewatnya jadwal tidak otomatis membuktikan pengembalian barang. Barang tetap terkunci sampai pengembalian dikonfirmasi.
+- Data contoh lokal dapat dibuat dengan `python manage.py seed_demo_transaksi --owner USERNAME_PEMILIK`, memakai username pemilik yang sudah bisa login. Perintah tidak mengubah password atau hak akses akun pemilik. Akun demo tambahan adalah pengguna biasa, tanpa akses staff/admin. Lima pesanan contoh mencakup belum dibayar, sudah dibayar, diterima, dikembalikan, dan dibatalkan. Pembayaran contoh ini tidak dikirim ke Midtrans. Perintah ditolak jika `PRODUCTION=True`.
 ---
 
 ## Integrasi API

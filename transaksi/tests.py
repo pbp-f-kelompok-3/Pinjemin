@@ -173,7 +173,7 @@ class TransaksiTests(TestCase):
         order.refresh_from_db()
         self.assertEqual(order.status, Pesanan.Status.CONFIRMED)
 
-    def test_cancel_after_start_rejected_and_completion_automatic(self):
+    def test_cancel_after_start_rejected_and_completion_needs_return_confirmation(self):
         order = self.order()
         payment = order.pembayaran.get()
         services.apply_status(payment.pk, self.status_data(payment))
@@ -183,7 +183,114 @@ class TransaksiTests(TestCase):
         with patch("transaksi.services.timezone.now", return_value=order.selesai + timedelta(minutes=1)):
             services.maintain_orders()
         order.refresh_from_db()
+        self.assertEqual(order.status, Pesanan.Status.CONFIRMED)
+        services.receive_order(order.pk, self.user)
+        services.complete_order(order.pk, self.owner)
+        order.refresh_from_db()
         self.assertEqual(order.status, Pesanan.Status.COMPLETED)
+
+    def test_receipt_credits_owner_once_and_blocks_cancellation(self):
+        order = self.order()
+        payment = order.pembayaran.get()
+        services.apply_status(payment.pk, self.status_data(payment))
+        self.assertFalse(services.earned_orders(self.owner).exists())
+        services.receive_order(order.pk, self.user)
+        order.refresh_from_db()
+        received = order.diterima_at
+        services.receive_order(order.pk, self.user)
+        order.refresh_from_db()
+        self.assertEqual(order.diterima_at, received)
+        self.assertEqual(services.earned_orders(self.owner).count(), 1)
+        self.assertEqual(services.earned_orders(self.owner).get().total, 50000)
+        self.assertFalse(services.earned_orders(self.other).exists())
+        with self.assertRaises(ValidationError):
+            services.cancel_order(order.pk, self.user)
+        services.complete_order(order.pk, self.owner)
+        self.assertEqual(services.earned_orders(self.owner).count(), 1)
+
+    def test_receipt_requires_borrower_and_verified_payment(self):
+        order = self.order()
+        for user in [self.user, self.owner, self.other]:
+            with self.assertRaises(ValidationError):
+                services.receive_order(order.pk, user)
+        services.apply_status(order.pembayaran.get().pk, self.status_data(order.pembayaran.get()))
+        with self.assertRaises(ValidationError):
+            services.receive_order(order.pk, self.owner)
+        with self.assertRaises(ValidationError):
+            services.complete_order(order.pk, self.owner)
+
+    def test_owner_dashboard_payment_stages_and_income_privacy(self):
+        order = self.order()
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("transaksi:masuk"))
+        self.assertContains(response, "Menunggu peminjam membayar")
+        services.apply_status(order.pembayaran.get().pk, self.status_data(order.pembayaran.get()))
+        response = self.client.get(reverse("transaksi:masuk"))
+        self.assertContains(response, "Siap diserahkan")
+        income = self.client.get(reverse("transaksi:pendapatan"))
+        self.assertEqual(income.context["held_income"], 50000)
+        self.assertEqual(income.context["total_income"], 0)
+        self.assertEqual(self.client.post(reverse("transaksi:terima", args=[order.pk])).status_code, 404)
+        services.receive_order(order.pk, self.user)
+        income = self.client.get(reverse("transaksi:pendapatan"))
+        self.assertEqual(income.context["total_income"], 50000)
+        self.assertEqual(income.context["held_income"], 0)
+        self.assertContains(income, "Tidak ada transfer")
+        self.client.force_login(self.other)
+        income = self.client.get(reverse("transaksi:pendapatan"))
+        self.assertEqual(income.context["total_income"], 0)
+        self.assertNotContains(income, order.nama_barang)
+
+    def test_free_receipt_and_refund_do_not_create_income(self):
+        self.item.jenis_penawaran = "gratis"
+        self.item.save()
+        order = self.order()
+        services.receive_order(order.pk, self.user)
+        self.assertFalse(services.earned_orders(self.owner).exists())
+
+    def test_provider_refund_removes_income(self):
+        order = self.order()
+        payment = order.pembayaran.get()
+        services.apply_status(payment.pk, self.status_data(payment))
+        services.receive_order(order.pk, self.user)
+        self.assertTrue(services.earned_orders(self.owner).exists())
+        services.apply_status(payment.pk, self.status_data(payment, "refund", refund_amount="50000"))
+        self.assertFalse(services.earned_orders(self.owner).exists())
+
+    def test_receipt_endpoint_requires_post_and_csrf(self):
+        from django.test import Client
+        order = self.order()
+        self.client.force_login(self.user)
+        self.assertEqual(self.client.get(reverse("transaksi:terima", args=[order.pk])).status_code, 405)
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.user)
+        self.assertEqual(csrf_client.post(reverse("transaksi:terima", args=[order.pk])).status_code, 403)
+
+    @override_settings(REFUND_MODE="mock")
+    @patch("transaksi.gateway.requests.request")
+    def test_demo_fixtures_are_local_repeatable_and_cover_owner_stages(self, api):
+        import io
+        import tempfile
+        from django.core.management import call_command
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory(dir=".test-tmp") as media:
+            with override_settings(MEDIA_ROOT=media, PRODUCTION=False):
+                call_command("seed_demo_transaksi", password="demo-test-password", stdout=output)
+                call_command("seed_demo_transaksi", password="do-not-reset-password", stdout=output)
+        owner = get_user_model().objects.get(username="demo_transaksi_pemilik")
+        borrower = get_user_model().objects.get(username="demo_transaksi_peminjam")
+        self.assertTrue(owner.check_password("demo-test-password"))
+        self.assertFalse(owner.is_superuser)
+        self.assertFalse(owner.is_staff)
+        self.assertFalse(borrower.is_staff)
+        self.assertEqual(Pesanan.objects.filter(pemilik=owner).count(), 5)
+        self.assertEqual(services.earned_orders(owner).count(), 2)
+        self.assertFalse(api.called)
+        self.client.force_login(owner)
+        response = self.client.get(reverse("transaksi:masuk"))
+        self.assertContains(response, "[Demo] Proyektor", count=5)
+        self.assertEqual(response.context["summary"], {"waiting": 1, "ready": 1, "borrowed": 1})
+        self.assertEqual(self.client.get(reverse("transaksi:pendapatan")).context["total_income"], 100000)
 
     @patch("transaksi.gateway.request")
     def test_refund_uses_same_key_and_manual_fallback(self, api):
