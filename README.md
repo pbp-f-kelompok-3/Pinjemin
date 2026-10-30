@@ -284,3 +284,25 @@ Contoh pemeriksaan dan koreksi setelah meninjau source:
 
 - Permintaan awal menyarankan penyimpanan token secara lokal tanpa enkripsi. Kode aktual menerapkan penyimpanan secure session cookies berbasis server, jadi dokumentasi diperbaiki agar tidak mengklaim metode penyimpanan lokal yang kurang aman sebagai kode yang ditulis sendiri.
 - Saran AI dan implementasi diperiksa terhadap validasi token di server, perlindungan CSRF pada form login, penanganan session timeout, dan mekanisme clear session saat logout agar riwayat login lama tidak disalahgunakan.
+
+**Chelsea Stania Passikha / 2506587876**
+
+**Alat: ChatGPT**
+
+AI digunakan untuk membantu saat debugging, memberikan saran mengenai implementasi MVT pada aplikasi, membantu merancang desain, membantu membuat pengujian, dan menyesuaikan modul kategori dengan modul-modul lain. Output dari AI tidak langsung  diterapkan tanpa peninjauan dan pengujian.
+
+### Contoh prompt
+Berikut beberapa contoh permintaan bantuan yang saya berikan selama mengerjakan modul:
+
+- "Saya mendapatkan UnboundLocalError pada view saya. Apa yang dapat menyebabkan error ini?"
+- "Object pada model categories muncul di page categories tapi tidak di homepage,  apa saja yang perlu diubah?"
+- "Saya telah membuat CSS, namun tampilannya tidak sesuai dengan tampilan yang diinginkan. Bantu saya menyesuaikan CSS dengan template."
+
+### Strategi dan validasi
+Penggunaan AI melewati beberapa tahap. Saya menjelaskan masalah atau kebutuhan fitur dan meminta solusi awal, kemudian memeriksa hasilnya dan menyesuaikannya dengan kebutuhan proyek.
+
+Contoh pemeriksaan dan koreksi setelah meninjau source:
+
+- Kode CSS yang disarankan AI tidak konsisten dengan halaman lain. Misalnya, palet warna yang didapatkan berbeda dengan bagian lain.
+- AI dapat memberi saran untuk mengubah satu view secara menyeluruh, namun yang perlu diganti hanya beberapa baris saja. Hal ini perlu dibenarkan secara manual.
+- Saran AI mengenai autentikasi, serta peran dan akses pengguna diperiksa agar tidak terjadi kesalahan akses.
