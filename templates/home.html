@@ -5,6 +5,8 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/barang.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+<link rel="stylesheet" href="{% static 'css/nearby-items.css' %}?v=20261030-1">
 {% endblock %}
 
 {% block content %}
@@ -38,6 +40,61 @@
     {% else %}
         <p class="no-categories">Belum ada kategori yang ditambahkan.</p>
     {% endif %}
+</section>
+
+<section class="nearby-section" data-nearby-widget
+         data-endpoint="{% url 'barang:nearby' %}"
+         data-tile-url="{{ nearby_tile_url }}"
+         aria-labelledby="nearby-heading">
+    <div class="nearby-heading">
+        <div>
+            <h2 id="nearby-heading">Barang di dekatmu</h2>
+            <p>Temukan barang berdasarkan posisimu saat ini, lalu pilih yang paling dekat.</p>
+        </div>
+        <a class="nearby-all-link" href="#barang">Lihat semua barang <span aria-hidden="true">→</span></a>
+    </div>
+
+    <div class="nearby-toolbar">
+        <div class="nearby-location-status" data-nearby-location role="status" aria-live="polite">
+            <span class="nearby-status-pin" aria-hidden="true">⌖</span>
+            <span data-nearby-location-text>Lokasi belum aktif <small>Izinkan lokasi untuk menghitung jarak barang.</small></span>
+        </div>
+        <div class="nearby-radius" role="group" aria-label="Radius pencarian">
+            <span>Radius</span>
+            <button type="button" data-nearby-radius="1" aria-pressed="true">1 km</button>
+            <button type="button" data-nearby-radius="2" aria-pressed="false">2 km</button>
+        </div>
+        <button class="nearby-refresh" type="button" data-nearby-detect>Aktifkan lokasi saya</button>
+    </div>
+
+    <div class="nearby-content">
+        <div class="nearby-map-wrap">
+            <div class="nearby-map" data-nearby-map role="region" aria-label="Peta barang di sekitar lokasi kamu"></div>
+            <div class="nearby-map-overlay" data-nearby-overlay>
+                <div class="nearby-overlay-icon" aria-hidden="true">⌖</div>
+                <h3>Temukan yang dekat dari kamu</h3>
+                <p>Izinkan akses lokasi untuk melihat barang dalam radius 1–2 km dari posisimu.</p>
+                <button type="button" data-nearby-overlay-detect>Aktifkan lokasi saya</button>
+                <small>Lokasi dipakai untuk menghitung jarak barang.</small>
+            </div>
+        </div>
+        <div class="nearby-results" data-nearby-results aria-live="polite">
+            <div class="nearby-empty">
+                <span aria-hidden="true">♧</span>
+                <h3>Barang terdekat menunggumu</h3>
+                <p>Aktifkan lokasi untuk mendapat rekomendasi yang dekat dari posisimu.</p>
+                <a href="#barang">Jelajahi semua barang</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="nearby-legend">
+        <span><i class="nearby-legend-user"></i> Posisimu</span>
+        <span><i class="nearby-legend-item"></i> Area barang</span>
+        <span><i class="nearby-legend-lock">⌂</i> Alamat lengkap tersedia setelah membuat pesanan.</span>
+        <span class="nearby-map-credit">© OpenStreetMap contributors</span>
+    </div>
+    <p class="nearby-message" data-nearby-message role="status" aria-live="polite"></p>
 </section>
 
 <section class="featured-section" id="barang">
@@ -208,4 +265,9 @@
 </section>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
+<script src="{% static 'js/nearby-items.js' %}?v=20261030-1" defer></script>
 {% endblock %}
