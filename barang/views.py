@@ -44,10 +44,36 @@ def barang_terdekat(request):
     except (TypeError, ValueError, OverflowError):
         return JsonResponse({'error': 'Lokasi atau radius pencarian tidak valid.'}, status=400)
 
+    # Keep the precise device point transient: it is used only in this query.
+    # A bounding-box filter lets the database discard distant inventory before
+    # the exact Haversine calculation below, which matters as the catalogue
+    # grows.  The final calculation still handles the curved earth accurately.
+    latitude_delta = radius_km / 110.574
+    longitude_delta = radius_km / max(111.320 * abs(math.cos(math.radians(latitude))), 0.01)
     candidates = Barang.objects.filter(
         status_penawaran='aktif', pemilik__is_active=True,
         lokasi__latitude__isnull=False, lokasi__longitude__isnull=False,
+        lokasi__latitude__gte=latitude - latitude_delta,
+        lokasi__latitude__lte=latitude + latitude_delta,
     ).select_related('lokasi')
+    minimum_longitude = longitude - longitude_delta
+    maximum_longitude = longitude + longitude_delta
+    if longitude_delta < 180:
+        if minimum_longitude < -180:
+            candidates = candidates.filter(
+                Q(lokasi__longitude__gte=minimum_longitude + 360)
+                | Q(lokasi__longitude__lte=maximum_longitude)
+            )
+        elif maximum_longitude > 180:
+            candidates = candidates.filter(
+                Q(lokasi__longitude__gte=minimum_longitude)
+                | Q(lokasi__longitude__lte=maximum_longitude - 360)
+            )
+        else:
+            candidates = candidates.filter(
+                lokasi__longitude__gte=minimum_longitude,
+                lokasi__longitude__lte=maximum_longitude,
+            )
 
     nearby = []
     for item in candidates:
@@ -68,8 +94,12 @@ def barang_terdekat(request):
             'offer': 'Sewa' if item.jenis_penawaran == 'sewa' else 'Gratis',
             'area': item.lokasi.short_label or item.lokasi.nama_area,
             'distance_km': round(distance_km, 2),
-            'latitude': round(item_lat, 4),
-            'longitude': round(item_lon, 4),
+            # Pins shown before an order is made deliberately identify an area,
+            # not a house/room-level pickup point.  Exact coordinates are only
+            # returned to the two parties of the order in transaksi.detail.
+            'latitude': round(item_lat, 3),
+            'longitude': round(item_lon, 3),
+            'is_approximate': True,
             'image': item.foto_utama.url if item.foto_utama else '',
             'url': reverse('barang:detail', args=[item.pk]),
         })
@@ -459,13 +489,17 @@ def detail_barang(request, pk):
     can_view_pickup = is_owner or has_paid
     location = barang.lokasi
     pickup_detail_data = None
-    # Tampilkan peta titik barang di halaman publik agar pengunjung dari beranda
-    # bisa melihat area penjemputan. Alamat jalan dan tautan navigasi tetap dibatasi.
+    # A public visitor may see the pickup *area* to compare nearby items, but
+    # never the exact meeting point.  The owner and a borrower with a confirmed
+    # order receive the precise point and the navigation link below.
     if location.latitude is not None and location.longitude is not None:
+        latitude = float(location.latitude)
+        longitude = float(location.longitude)
         pickup_detail_data = {
             'label': location.short_label or location.nama_area,
-            'latitude': float(location.latitude),
-            'longitude': float(location.longitude),
+            'latitude': latitude if can_view_pickup else round(latitude, 3),
+            'longitude': longitude if can_view_pickup else round(longitude, 3),
+            'isApproximate': not can_view_pickup,
             'tileUrl': settings.OSM_TILE_URL,
         }
 

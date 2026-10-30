@@ -265,11 +265,18 @@
       remove.dataset.deleteLocation = record.id;
       remove.addEventListener('click', async () => {
         if (!window.confirm(`Hapus ${record.label} dari riwayat? Lokasi pada barang yang sudah didaftarkan tetap tersimpan.`)) return;
-        remove.disabled = true;
+        // Optimistic update: the row disappears immediately, then is restored
+        // if the server rejects the request (for example because the session
+        // has expired). This keeps the CRUD UI responsive without losing data.
+        const previousRecords = records;
+        const previousSelection = selection;
+        records = records.filter(location => location.id !== record.id);
+        if (selection?.id === record.id) selection = null;
+        renderHistory();
+        renderManagement();
+        find('[data-management-status]').textContent = 'Menghapus lokasi dari riwayat…';
         try {
           await api(`${apiUrl}${record.id}/`, 'DELETE');
-          records = records.filter(location => location.id !== record.id);
-          if (selection?.id === record.id) selection = null;
           if (editingId === record.id) {
             editingId = null;
             draft = { label: '', address: '', latitude: null, longitude: null };
@@ -279,8 +286,11 @@
           renderManagement();
           find('[data-management-status]').textContent = 'Lokasi dihapus dari riwayat. Data barang tetap tersedia.';
         } catch (error) {
+          records = previousRecords;
+          selection = previousSelection;
+          renderHistory();
+          renderManagement();
           find('[data-management-status]').textContent = error.message;
-          remove.disabled = false;
         }
       });
       actions.append(edit, remove);

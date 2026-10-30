@@ -137,6 +137,7 @@ class CategoryCreateViewTest(TestCase):
 
     def test_invalid_category_is_not_created(self):
         self.client.force_login(self.superuser)
+        initial_count = Category.objects.count()
 
         response = self.client.post(self.url, {
             "name": "",
@@ -144,7 +145,7 @@ class CategoryCreateViewTest(TestCase):
         })
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Category.objects.count(), 0)
+        self.assertEqual(Category.objects.count(), initial_count)
 
 
 class CategoryUpdateViewTest(TestCase):
