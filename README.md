@@ -205,3 +205,62 @@ Contoh pemeriksaan dan koreksi setelah meninjau source:
 - Saran AI dan implementasi diperiksa terhadap validasi pemilik di server, CSRF, penyimpanan soft-delete, dan snapshot mandiri agar riwayat yang diedit/dihapus tidak mengubah data barang atau pesanan.
 
 Validasi kode mencakup pengujian Django pada aplikasi `locations`, `barang`, dan `transaksi`, serta `python manage.py check`. Catatan: akses ke layanan eksternal dan keberhasilan deployment tetap perlu diverifikasi pada lingkungan yang menjalankannya.
+
+**Alphard Qodaruddin / 2506632910**
+
+**Alat:** ChatGPT/Codex (GPT-6.1 Sol), sebagai asisten AI untuk pengembangan.
+
+AI saya gunakan untuk membuat planning bagaimana workflow yang optimal dalam mengerjakan modul bagian saya, memahami bagaimana payment gateway Midtrans bekerja, troubleshooting error dalam flow pembayaran dan refund, dan mempercantik visual (UI). Kode dan sistem kasarnya saya lakukan sendiri setelah memahami workflow yang direkomendasikan AI, kemudian setelah fitur cukup fungsional, AI membantu untuk merapikan kodenya dan mempercantik visualnya.
+
+### Contoh prompt
+
+Berikut beberapa contoh permintaan bantuan yang saya berikan selama mengerjakan modul. Saya tetap meninjau saran dan perubahan terhadap kode proyek sebelum menggunakannya:
+
+1. "Aku harus menambahkan fitur transaksi pembayaran menggunakan suatu payment gateway untuk website ini, berikan rekomendasi pilihan payment gateway yang bisa saya gunakan dan berikan perbandingan diantaranya"
+2. "Buatkan aku planning workflow yang paling optimal untuk mengerjakan modul transaksi ini menggunakan payment gatewa Midtrans untuk mengurangi resiko error atau kerja dua kali"
+3. "Ada error berupa flow pembayaran yang terlihat looping (kembali ke awal setelah pembayaran), tolong scan project ini dan beri tahu aku masalahnya ada dimana agar bisa aku perbaiki"
+4. "Flow pembayaran dan refund saat ini sudah sepenuhnya bagus, sekarang tolong percantik UI visualnya agar lebih menarik dilihat tanpa mengubah ubah pilihan opsi tombol atau informasi didalamnya."
+
+### Strategi dan validasi
+
+Penggunaan AI dilakukan secara bertahap, dimulai dari perencanaan workflow dan pemilihan payment gateway, dilanjutkan dengan pemahaman integrasi Midtrans, implementasi fitur transaksi, troubleshooting, dan penyempurnaan UI. Saya menggunakan AI untuk membantu memahami alur kerja dan mengidentifikasi kemungkinan masalah, tetapi tetap mengerjakan implementasi dasar secara mandiri berdasarkan pemahaman terhadap solusi yang direkomendasikan.
+
+Dalam proses implementasi, AI digunakan sebagai alat bantu analisis ketika muncul masalah pada alur pembayaran, termasuk ketika proses pembayaran kembali ke halaman awal secara tidak semestinya. Saya meminta AI meninjau struktur proyek dan kode yang berkaitan untuk membantu menemukan kemungkinan penyebabnya. Hasil analisis tersebut menjadi acuan untuk pemeriksaan dan perbaikan, bukan dianggap sebagai bukti bahwa penyebab masalah telah ditemukan secara pasti.
+
+Setelah alur transaksi pembayaran dan refund berfungsi sesuai kebutuhan, penggunaan AI dialihkan untuk membantu merapikan struktur kode dan meningkatkan kualitas visual antarmuka. Perubahan UI dibatasi pada aspek presentasi, seperti tata letak dan tampilan elemen, tanpa mengubah pilihan tombol, opsi yang tersedia, atau informasi yang ditampilkan kepada pengguna. Dengan demikian, penyempurnaan visual tidak dimaksudkan untuk mengubah fungsi bisnis yang sudah berjalan.
+
+### Keterbatasan AI dan pemeriksaan hasil
+
+AI dapat memberikan rekomendasi yang kurang sesuai dengan struktur proyek, salah memahami alur transaksi, atau mengidentifikasi penyebab error yang ternyata tidak berkaitan dengan masalah sebenarnya. Karena itu, rekomendasi AI tetap perlu diperiksa terhadap implementasi aktual dan kebutuhan modul.
+
+Salah satu keterbatasan yang saya temui adalah AI tidak dapat secara langsung melakukan konfigurasi awal Midtrans melalui dashboard website Midtrans yang saya gunakan. AI dapat membantu menjelaskan tahapan setup, memberikan panduan konfigurasi, dan membantu memahami parameter yang diperlukan untuk integrasi. Namun, saya tetap harus membuka browser dan melakukan konfigurasi tersebut secara mandiri melalui website Midtrans, termasuk menyiapkan pengaturan awal yang dibutuhkan sebelum payment gateway dapat diintegrasikan dengan website proyek.
+
+Dalam integrasi payment gateway, keberhasilan implementasi tidak cukup dinilai dari tampilan halaman atau respons yang terlihat di sisi pengguna. Alur pembayaran dan refund juga perlu diperiksa agar status transaksi, perpindahan halaman, dan hasil proses tetap konsisten. Selain itu, saran AI mengenai integrasi Midtrans perlu disesuaikan dengan API dan konfigurasi yang benar-benar digunakan dalam proyek.
+
+Pada tahap penyempurnaan UI, hasil perubahan perlu diperiksa kembali untuk memastikan bahwa perbaikan tampilan tidak menghilangkan informasi, mengubah fungsi tombol, atau merusak alur transaksi yang sebelumnya sudah berjalan.
+
+Secara keseluruhan, AI berperan sebagai asisten untuk mempercepat perencanaan, membantu memahami teknologi yang digunakan, mendukung proses troubleshooting, dan meningkatkan kualitas kode serta UI. Keputusan implementasi dan penilaian akhir terhadap kesesuaian fitur tetap dilakukan berdasarkan pemeriksaan kode dan pengujian terhadap kebutuhan modul.
+
+**Roisul Umam / 2506620210**
+
+**Alat:** Claude, sebagai asisten AI untuk pengembangan.
+
+AI digunakan untuk meninjau kebutuhan modul, mencari kemungkinan celah pada alur autentikasi dan otorisasi, menyusun usulan struktur artikel bantuan, membantu membuat pengujian (test case), dan merapikan dokumentasi. Saran AI tidak langsung dianggap benar atau diterapkan tanpa pemeriksaan; perubahan dibandingkan dengan kode, kebutuhan tugas, dan hasil pengujian.
+
+### Contoh prompt
+
+Berikut beberapa contoh permintaan bantuan yang saya berikan selama mengerjakan modul. Saya tetap meninjau saran dan perubahan terhadap kode proyek sebelum menggunakannya:
+
+1. “Aku sedang mengintegrasikan login SSO UI pada modul Accounts. Bantu cek konfigurasi middleware, penanganan token CAS/OAuth, dan alur validasi tiketnya, lalu beri tahu kalau ada yang perlu diperbaiki dari segi keamanan.”
+2. “Di bagian Help Center, aku ingin membuat daftar kategori pertanyaan umum (FAQ). Bantu susun struktur artikel panduan, navigasi pencarian, dan layout pusat bantuan agar ramah bagi pengguna baru sesuai arsitektur proyekku.”
+3. “Aku sudah punya fitur Manajemen Akun dan Pusat Bantuan punya temanku. Bantu tinjau integrasi session login, proteksi rute halaman bantuan untuk admin, serta pembatasan aksesnya terhadap jobdesk; jelaskan atau perbaiki bagian yang masih kurang.”
+4. “Bantu rapikan tampilan antarmuka (UI) halaman login SSO dan Help Center, serta sesuaikan agar tetap nyaman digunakan di berbagai ukuran layar (responsif).”
+
+### Strategi dan validasi
+
+Pengerjaan dilakukan bertahap: memberi konteks struktur proyek dan jobdesk, meminta audit atau perubahan yang spesifik, lalu memeriksa hasil terhadap implementasi aktual dan menguji alur penting. Prompt meminta solusi mengikuti API yang disetujui proyek, menjaga keamanan data kredensial milik setiap akun, dan memastikan bahwa pengguna yang belum terautentikasi tetap bisa mengakses Help Center namun dibatasi untuk fitur akun.
+
+Contoh pemeriksaan dan koreksi setelah meninjau source:
+
+- Permintaan awal menyarankan penyimpanan token secara lokal tanpa enkripsi. Kode aktual menerapkan penyimpanan secure session cookies berbasis server, jadi dokumentasi diperbaiki agar tidak mengklaim metode penyimpanan lokal yang kurang aman sebagai kode yang ditulis sendiri.
+- Saran AI dan implementasi diperiksa terhadap validasi token di server, perlindungan CSRF pada form login, penanganan session timeout, dan mekanisme clear session saat logout agar riwayat login lama tidak disalahgunakan.
