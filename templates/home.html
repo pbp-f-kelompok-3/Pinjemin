@@ -42,8 +42,10 @@
     {% endif %}
 </section>
 
+{% url 'barang:nearby' as nearby_endpoint %}
+{% if nearby_endpoint %}
 <section class="nearby-section" data-nearby-widget
-         data-endpoint="{% url 'barang:nearby' %}"
+         data-endpoint="{{ nearby_endpoint }}"
          data-tile-url="{{ nearby_tile_url }}"
          aria-labelledby="nearby-heading">
     <div class="nearby-heading">
@@ -96,6 +98,7 @@
     </div>
     <p class="nearby-message" data-nearby-message role="status" aria-live="polite"></p>
 </section>
+{% endif %}
 
 <section class="featured-section" id="barang">
     <div class="featured-box">
