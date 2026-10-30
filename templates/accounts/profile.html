@@ -92,47 +92,28 @@
           </div>
         </form>
 
-        <p class="pf-mode__desc">
-          {% if profile.is_seller_mode %}
-            Kamu sedang di mode <strong>Minjemin</strong>: pinjamkan atau sewakan barang yang jarang kamu pakai.
-          {% else %}
-            Kamu sedang di mode <strong>Minjem</strong>: cari dan pinjam barang dari sesama mahasiswa UI.
-          {% endif %}
+        <p class="pf-mode__desc" data-mode-desc="renter"{% if profile.is_seller_mode %} hidden{% endif %}>
+          Kamu sedang di mode <strong>Minjem</strong>: cari dan pinjam barang dari sesama mahasiswa UI.
         </p>
+        <p class="pf-mode__desc" data-mode-desc="seller"{% if not profile.is_seller_mode %} hidden{% endif %}>
+          Kamu sedang di mode <strong>Minjemin</strong>: pinjamkan atau sewakan barang yang jarang kamu pakai.
+        </p>
+        <p class="pf-mode__status" id="modeStatus" role="status" aria-live="polite"></p>
         <p class="pf-hint">Mode bisa diganti kapan saja dan berlaku di seluruh Pinjemin.</p>
       </section>
 
-      <!-- ===== Aktivitas ===== -->
+      <!-- ===== Aktivitas (dimuat dengan HTMX) ===== -->
       <section class="pf-card pf-activity" aria-labelledby="pf-act-title">
         <h3 class="pf-card__title" id="pf-act-title">Aktivitas</h3>
 
-        <div class="pf-tabs" role="tablist" aria-label="Aktivitas">
-          <button type="button" role="tab" id="tab-main" aria-controls="panel-main" aria-selected="true" class="is-active">
-            {% if profile.is_seller_mode %}Barang Saya{% else %}Riwayat Pinjam{% endif %}
-          </button>
-          <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false">Ulasan</button>
-        </div>
-
-        {# TODO (modul katalog/transaksi): ganti empty state di dua panel ini dengan data asli #}
-        <div class="pf-panel" role="tabpanel" id="panel-main" aria-labelledby="tab-main">
-          <div class="pf-empty">
-            <span class="pf-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg></span>
-            {% if profile.is_seller_mode %}
-              <p class="pf-empty__title">Belum ada barang</p>
-              <p class="pf-empty__text">Barang yang kamu pinjamkan atau sewakan akan tampil di sini. Yuk mulai berbagi!</p>
-            {% else %}
-              <p class="pf-empty__title">Belum ada riwayat pinjam</p>
-              <p class="pf-empty__text">Barang yang pernah kamu pinjam akan tampil di sini.</p>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="pf-panel" role="tabpanel" id="panel-reviews" aria-labelledby="tab-reviews" hidden>
-          <div class="pf-empty">
-            <span class="pf-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg></span>
-            <p class="pf-empty__title">Belum ada ulasan</p>
-            <p class="pf-empty__text">Ulasan dari pengguna lain setelah transaksi selesai akan muncul di sini.</p>
-          </div>
+        <div id="activity" class="pf-activity__body"
+             data-url="{% url 'accounts:profile_activity' %}"
+             hx-get="{% url 'accounts:profile_activity' %}?tab=main"
+             hx-trigger="load"
+             hx-swap="innerHTML"
+             hx-indicator="this">
+          <div class="pf-skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
+          <noscript><p class="pf-muted">Aktifkan JavaScript untuk melihat aktivitasmu.</p></noscript>
         </div>
       </section>
 
@@ -190,37 +171,83 @@
   </div>
 </div>
 
+{# HTMX dikunci ke versi 2.0.4. Opsional: tambahkan atribut integrity (SRI) dari situs resmi htmx.org #}
+<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
 <script>
   (function () {
-    // ---- Toggle mode: pill bergeser dulu, baru form dikirim ----
+    // ---- AJAX: ganti mode tanpa memuat ulang halaman ----
     var seg = document.getElementById("pfSeg");
     var form = document.getElementById("modeForm");
-    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var statusEl = document.getElementById("modeStatus");
+    var activity = document.getElementById("activity");
+    var csrf = form.querySelector("[name=csrfmiddlewaretoken]").value;
+    var busy = false;
+    var timer;
+
+    function setMode(mode) {
+      seg.dataset.mode = mode;   // pill bergeser lewat transisi CSS
+      seg.querySelectorAll("button").forEach(function (b) {
+        b.setAttribute("aria-pressed", b.value === mode ? "true" : "false");
+      });
+      document.querySelectorAll("[data-mode-desc]").forEach(function (p) {
+        p.hidden = p.dataset.modeDesc !== mode;
+      });
+    }
+
+    function note(msg, isError) {
+      statusEl.textContent = msg;
+      statusEl.classList.toggle("is-error", !!isError);
+      clearTimeout(timer);
+      timer = setTimeout(function () { statusEl.textContent = ""; }, 3500);
+    }
+
+    // Isi kartu Aktivitas bergantung pada mode, jadi muat ulang lewat HTMX
+    function refreshActivity() {
+      if (!window.htmx) return;
+      var active = activity.querySelector("[role=tab].is-active");
+      var tab = active ? active.dataset.tab : "main";
+      htmx.ajax("GET", activity.dataset.url + "?tab=" + tab, { target: "#activity", swap: "innerHTML" });
+    }
+
     seg.querySelectorAll("button").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
-        if (btn.value === seg.dataset.mode) return;
-        seg.dataset.mode = btn.value;
-        setTimeout(function () { form.requestSubmit(btn); }, reduce ? 0 : 380);
-      });
-    });
+        var next = btn.value;
+        var prev = seg.dataset.mode;
+        if (busy || next === prev) return;
 
-    // ---- Tab aktivitas ----
-    var tabs = document.querySelectorAll(".pf-tabs [role=tab]");
-    tabs.forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        tabs.forEach(function (t) {
-          var on = t === tab;
-          t.classList.toggle("is-active", on);
-          t.setAttribute("aria-selected", on ? "true" : "false");
-          document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
-        });
-      });
-    });
+        busy = true;
+        seg.classList.add("is-busy");
+        setMode(next);   // langsung bergeser; dikembalikan kalau gagal
 
-    // ---- Notifikasi hilang otomatis ----
-    document.querySelectorAll(".pf-toast").forEach(function (t) {
-      setTimeout(function () { t.classList.add("is-hiding"); setTimeout(function () { t.remove(); }, 400); }, 4000);
+        fetch(form.action, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "X-CSRFToken": csrf,
+            "X-Requested-With": "XMLHttpRequest",
+            "Accept": "application/json"
+          },
+          body: new URLSearchParams({ mode: next })
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          })
+          .then(function (data) {
+            setMode(data.mode);
+            note("Mode diganti ke " + data.label + ".");
+            refreshActivity();
+          })
+          .catch(function () {
+            setMode(prev);
+            note("Gagal mengganti mode. Coba lagi.", true);
+          })
+          .finally(function () {
+            busy = false;
+            seg.classList.remove("is-busy");
+          });
+      });
     });
   })();
 </script>

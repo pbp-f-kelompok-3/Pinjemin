@@ -1,0 +1,49 @@
+{# Potongan HTML kartu Aktivitas. Dirender oleh view profile_activity dan ditempel HTMX ke #activity. #}
+<div class="pf-tabs" role="tablist" aria-label="Aktivitas">
+  <button type="button" role="tab" data-tab="main"
+          class="{% if tab == 'main' %}is-active{% endif %}"
+          aria-selected="{% if tab == 'main' %}true{% else %}false{% endif %}"
+          hx-get="{% url 'accounts:profile_activity' %}?tab=main"
+          hx-target="#activity" hx-swap="innerHTML" hx-indicator="#activity">
+    {% if is_seller_mode %}Barang Saya{% else %}Riwayat Pinjam{% endif %}
+  </button>
+  <button type="button" role="tab" data-tab="reviews"
+          class="{% if tab == 'reviews' %}is-active{% endif %}"
+          aria-selected="{% if tab == 'reviews' %}true{% else %}false{% endif %}"
+          hx-get="{% url 'accounts:profile_activity' %}?tab=reviews"
+          hx-target="#activity" hx-swap="innerHTML" hx-indicator="#activity">
+    Ulasan
+  </button>
+</div>
+
+<div class="pf-panel" role="tabpanel" aria-live="polite">
+  {% if page_obj.paginator.count %}
+    <p class="pf-activity__count">
+      {{ page_obj.paginator.count }}
+      {% if kind == "barang" %}barang{% elif kind == "pesanan" %}pesanan{% else %}ulasan{% endif %}
+    </p>
+    <div class="{% if kind == 'ulasan' %}pf-review-list{% else %}pf-item-list{% endif %}">
+      {% include "accounts/_activity_rows.html" %}
+    </div>
+  {% else %}
+    <div class="pf-empty">
+      <span class="pf-empty__icon">
+        {% if kind == "ulasan" %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
+        {% else %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg>
+        {% endif %}
+      </span>
+      {% if kind == "barang" %}
+        <p class="pf-empty__title">Belum ada barang</p>
+        <p class="pf-empty__text">Barang yang kamu pinjamkan atau sewakan akan tampil di sini. Yuk mulai berbagi!</p>
+      {% elif kind == "pesanan" %}
+        <p class="pf-empty__title">Belum ada riwayat pinjam</p>
+        <p class="pf-empty__text">Barang yang pernah kamu pesan akan tampil di sini.</p>
+      {% else %}
+        <p class="pf-empty__title">Belum ada ulasan</p>
+        <p class="pf-empty__text">Ulasan dari peminjam setelah transaksi selesai akan muncul di sini.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

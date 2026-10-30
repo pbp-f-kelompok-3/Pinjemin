@@ -632,3 +632,49 @@ body:has(.pf-page) { overflow-x: clip; }
 .pf-unavailable__title { margin: 8px 0 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
 .pf-unavailable__text { margin: 0 0 14px; max-width: 420px; font-size: 0.92rem; line-height: 1.7; color: var(--pf-muted); }
 .pf-page .pf-empty__icon { margin-bottom: 0; }
+
+/* ---------- Aktivitas (HTMX) & status mode (AJAX) ---------- */
+.pf-activity__body { min-height: 160px; transition: opacity 0.2s; }
+.pf-activity__body.htmx-request { opacity: 0.55; pointer-events: none; }
+.pf-activity__count { margin: 0 0 12px; font-size: 0.8rem; font-weight: 700; color: var(--pf-muted); }
+
+.pf-skeleton { display: grid; gap: 12px; }
+.pf-skeleton i {
+  display: block;
+  height: 76px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #f1efef 25%, #e8e5e6 37%, #f1efef 63%);
+  background-size: 400% 100%;
+  animation: pf-shimmer 1.3s ease infinite;
+}
+@keyframes pf-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+.pf-more { align-self: center; margin-top: 4px; }
+.pf-more.htmx-request { opacity: 0.6; pointer-events: none; }
+
+.pf-item-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; margin-left: 12px; }
+.pf-item-side .pf-item-rate { margin-left: 0; }
+.pf-item-state {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #eeeded;
+  color: var(--pf-olive);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pf-item-state--aktif, .pf-item-state--selesai { background: var(--pf-green-bg); color: var(--pf-green); }
+.pf-item-state--menunggu_pembayaran { background: #fff3cd; color: #7a5b00; }
+.pf-item-state--dikonfirmasi { background: var(--pf-y-soft); color: var(--pf-ink); }
+.pf-item-state--dibatalkan { background: #fdecea; color: var(--pf-red); }
+.pf-item-state--off { margin-left: 4px; background: #eeeded; color: var(--pf-muted); }
+
+.pf-mode__status { min-height: 1.2em; margin: 8px 0 0; font-size: 0.78rem; font-weight: 700; color: var(--pf-green); }
+.pf-mode__status.is-error { color: var(--pf-red); }
+.pf-seg.is-busy button { pointer-events: none; }
+
+@media (max-width: 640px) {
+  .pf-item-card { flex-wrap: wrap; gap: 10px; }
+  .pf-item-side { flex-direction: row; align-items: center; margin-left: 0; }
+}

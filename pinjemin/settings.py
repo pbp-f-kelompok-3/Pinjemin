@@ -35,6 +35,8 @@ if not SECRET_KEY:
         raise RuntimeError("SECRET_KEY belum diset di environment.")
     SECRET_KEY = 'dev-only-insecure-key'
 
+DEBUG = not PRODUCTION
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -186,4 +188,7 @@ NOMINATIM_USER_AGENT = os.getenv(
 )
 
 if PRODUCTION:
+    CSRF_TRUSTED_ORIGINS = ["https://roisul-umam-pinjemin.pws.cs.ui.ac.id"]
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
