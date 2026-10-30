@@ -6,18 +6,19 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/barang.css' %}?v=20261030-2">
 <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
-<link rel="stylesheet" href="{% static 'css/nearby-items.css' %}?v=20261030-2">
+<link rel="stylesheet" href="{% static 'css/nearby-items.css' %}?v=20261030-3">
 {% endblock %}
 
 {% block content %}
 <div class="home-page">
 <div class="home-intro">
+    <span class="home-intro__eyebrow">KATALOG PINJEMIN</span>
     <h1>Mau pinjam apa hari ini?</h1>
-    <p>Temukan barang untuk kuliah, acara kampus, dan keseharianmu.</p>
+    <p>Cari barang untuk kuliah, kegiatan kampus, dan kebutuhan sehari-hari.</p>
 </div>
 
 <section class="category-section" id="kategori">
-    <h2>Shop by Category</h2>
+    <h2>Jelajahi kategori</h2>
     {% if categories %}
         <div class="categories">
             {% for category in categories %}
@@ -51,22 +52,22 @@
     <div class="nearby-heading">
         <div>
             <h2 id="nearby-heading">Barang di dekatmu</h2>
-            <p>Temukan barang berdasarkan posisimu saat ini, lalu pilih yang paling dekat.</p>
+            <p>Lihat barang yang tersedia di sekitar lokasimu.</p>
         </div>
-        <a class="nearby-all-link" href="#barang">Lihat semua barang <span aria-hidden="true">→</span></a>
+        <a class="nearby-all-link" href="#barang">Lihat katalog <span aria-hidden="true">→</span></a>
     </div>
 
     <div class="nearby-toolbar">
         <div class="nearby-location-status" data-nearby-location role="status" aria-live="polite">
             <span class="nearby-status-pin" aria-hidden="true">⌖</span>
-            <span data-nearby-location-text>Lokasi belum aktif <small>Izinkan lokasi untuk menghitung jarak barang.</small></span>
+            <span data-nearby-location-text>Lokasi belum aktif <small>Aktifkan lokasi untuk melihat jarak barang.</small></span>
         </div>
         <div class="nearby-radius" role="group" aria-label="Radius pencarian">
             <span>Radius</span>
             <button type="button" data-nearby-radius="1" aria-pressed="true">1 km</button>
             <button type="button" data-nearby-radius="2" aria-pressed="false">2 km</button>
         </div>
-        <button class="nearby-refresh" type="button" data-nearby-detect>Aktifkan lokasi saya</button>
+        <button class="nearby-refresh" type="button" data-nearby-detect>Gunakan lokasi saya</button>
     </div>
 
     <div class="nearby-content">
@@ -74,25 +75,25 @@
             <div class="nearby-map" data-nearby-map role="region" aria-label="Peta barang di sekitar lokasi kamu"></div>
             <div class="nearby-map-overlay" data-nearby-overlay>
                 <div class="nearby-overlay-icon" aria-hidden="true">⌖</div>
-                <h3>Temukan yang dekat dari kamu</h3>
-                <p>Izinkan akses lokasi untuk melihat barang dalam radius 1–2 km dari posisimu.</p>
-                <button type="button" data-nearby-overlay-detect>Aktifkan lokasi saya</button>
-                <small>Lokasi dipakai untuk menghitung jarak barang.</small>
+                <h3>Cari barang di sekitarmu</h3>
+                <p>Izinkan akses lokasi untuk melihat barang dalam radius 1–2 km.</p>
+                <button type="button" data-nearby-overlay-detect>Gunakan lokasi saya</button>
+                <small>Lokasi digunakan untuk menghitung jarak.</small>
             </div>
         </div>
         <div class="nearby-results" data-nearby-results aria-live="polite">
             <div class="nearby-empty">
                 <span aria-hidden="true">♧</span>
-                <h3>Barang terdekat menunggumu</h3>
-                <p>Aktifkan lokasi untuk mendapat rekomendasi yang dekat dari posisimu.</p>
-                <a href="#barang">Jelajahi semua barang</a>
+                <h3>Belum ada barang di sekitar</h3>
+                <p>Gunakan lokasimu untuk melihat barang terdekat.</p>
+                <a href="#barang">Lihat katalog</a>
             </div>
         </div>
     </div>
 
     <div class="nearby-legend">
         <span><i class="nearby-legend-user"></i> Posisimu</span>
-        <span><i class="nearby-legend-item"></i> Area barang</span>
+        <span><i class="nearby-legend-item"></i> Perkiraan lokasi barang</span>
         <span><i class="nearby-legend-lock">⌂</i> Alamat lengkap tersedia setelah membuat pesanan.</span>
         <span class="nearby-map-credit">© OpenStreetMap contributors</span>
     </div>
@@ -110,11 +111,11 @@
                     {% elif current_q %}
                         Hasil Pencarian "{{ current_q }}"
                     {% else %}
-                        Barang Tersedia untuk Dipinjam
+                        Barang untuk dipinjam atau disewa
                     {% endif %}
                 </h2>
                 <p style="margin: 4px 0 0; font-size: 13px; color: var(--gray-dark);">
-                    Daftar barang inventaris mahasiswa UI yang siap dipinjam atau disewa
+                    Pilih barang, lalu tentukan jadwal peminjaman.
                     {% if total_barang is not None %}
                         <span style="font-weight: 600; color: var(--br-black);">({{ total_barang }} barang)</span>
                     {% endif %}
@@ -124,7 +125,7 @@
             {% if current_q or current_kategori or current_price_type or current_min_price or current_max_price or current_sort and current_sort != 'terbaru' %}
                 <a href="{% url 'home' %}#barang" class="br-btn-secondary" style="font-size: 12px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 5px;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    Reset Filter
+                    Hapus filter
                 </a>
             {% endif %}
         </div>
@@ -189,7 +190,7 @@
             </div>
 
             <button type="submit" class="br-btn-primary">
-                Terapkan Filter
+                Terapkan filter
             </button>
         </form>
 
@@ -254,12 +255,12 @@
         {% else %}
             <div class="br-empty-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                <h3 style="font-size: 16px; font-weight: 700; color: var(--br-black); margin-bottom: 6px;">Belum Ada Barang yang Cocok</h3>
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--br-black); margin-bottom: 6px;">Barang tidak ditemukan</h3>
                 <p style="font-size: 13px; color: var(--br-text-muted); margin: 0;">
                     {% if current_q or current_kategori or current_price_type or current_min_price or current_max_price or current_sort and current_sort != 'terbaru' %}
-                        Tidak ada barang yang cocok dengan kriteria pencarian atau filter yang dipilih. <a href="{% url 'home' %}#barang" style="font-weight: 600; text-decoration: underline;">Reset semua filter</a>
+                        Coba ubah kata kunci atau filter. <a href="{% url 'home' %}#barang" style="font-weight: 600; text-decoration: underline;">Hapus semua filter</a>
                     {% else %}
-                        Saat ini belum ada barang yang didaftarkan untuk dipinjamkan.
+                        Belum ada barang yang tersedia. Coba cek kembali nanti.
                     {% endif %}
                 </p>
             </div>
@@ -272,5 +273,5 @@
 
 {% block extra_js %}
 <script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script>
-<script src="{% static 'js/nearby-items.js' %}?v=20261030-1" defer></script>
+<script src="{% static 'js/nearby-items.js' %}?v=20261030-2" defer></script>
 {% endblock %}

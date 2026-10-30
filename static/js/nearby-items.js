@@ -109,7 +109,7 @@
 
   async function loadNearby() {
     if (!userPoint) return;
-    setMessage('Menghitung jarak barang…');
+    setMessage('Memuat barang di sekitarmu…');
     const query = new URLSearchParams({
       latitude: String(userPoint.latitude),
       longitude: String(userPoint.longitude),
@@ -149,23 +149,23 @@
         const title = document.createElement('h3');
         title.textContent = `Belum ada barang dalam radius ${radiusKm} km`;
         const copy = document.createElement('p');
-        copy.textContent = 'Coba perluas radius pencarian atau lihat semua barang yang tersedia.';
+        copy.textContent = 'Perluas radius atau lihat katalog barang yang tersedia.';
         const link = document.createElement('a');
         link.href = '#barang';
-        link.textContent = 'Jelajahi semua barang';
+        link.textContent = 'Lihat katalog';
         empty.append(title, copy, link);
         resultsNode.append(empty);
-        setMessage(`Belum ada barang dengan titik lokasi dalam radius ${radiusKm} km.`);
+        setMessage(`Belum ada barang dalam radius ${radiusKm} km.`);
       } else {
         const heading = document.createElement('h3');
         heading.className = 'nearby-list-heading';
-        heading.textContent = `${items.length} barang dalam ${radiusKm} km`;
+        heading.textContent = `${items.length} barang dalam radius ${radiusKm} km`;
         resultsNode.append(heading);
         items.forEach((item, index) => {
           resultsNode.append(makeItemCard(item));
           makeMarker(item, index);
         });
-        setMessage(`${items.length} barang ditemukan di sekitarmu.`);
+        setMessage(`${items.length} barang tersedia di sekitarmu.`);
       }
 
       const bounds = L.latLngBounds([[userPoint.latitude, userPoint.longitude]]);
@@ -182,17 +182,17 @@
 
   function requestLocation() {
     if (!window.isSecureContext) {
-      setMessage('Akses lokasi memerlukan HTTPS atau alamat localhost.', true);
+      setMessage('Akses lokasi hanya tersedia melalui koneksi aman. Buka situs dengan HTTPS, lalu coba lagi.', true);
       return;
     }
     if (!navigator.geolocation) {
-      setMessage('Browser ini belum mendukung fitur lokasi perangkat.', true);
+      setMessage('Browser ini tidak mendukung akses lokasi.', true);
       return;
     }
     detectButton.disabled = true;
     overlayButton.disabled = true;
     detectButton.textContent = 'Mencari lokasi…';
-    setMessage('Menunggu izin lokasi dari browser…');
+    setMessage('Menunggu izin akses lokasi…');
     navigator.geolocation.getCurrentPosition((position) => {
       userPoint = {
         latitude: position.coords.latitude,
@@ -202,7 +202,7 @@
       locationText.replaceChildren();
       locationText.append(document.createTextNode('Lokasi aktif'));
       const note = document.createElement('small');
-      note.textContent = `Posisi perangkat digunakan untuk menghitung jarak (akurasi ±${accuracy} m).`;
+      note.textContent = `Perkiraan akurasi lokasi: ±${accuracy} m.`;
       locationText.append(note);
       overlay.hidden = true;
       detectButton.textContent = 'Perbarui lokasi';
@@ -212,12 +212,12 @@
       loadNearby();
     }, (error) => {
       const messages = {
-        1: 'Izin lokasi ditolak. Izinkan akses lokasi di browser untuk melihat barang terdekat.',
-        2: 'Posisi belum tersedia. Aktifkan layanan lokasi perangkat, lalu coba lagi.',
-        3: 'Pencarian lokasi terlalu lama. Coba lagi.',
+        1: 'Izin lokasi ditolak. Izinkan akses lokasi lewat pengaturan browser.',
+        2: 'Lokasi belum bisa ditemukan. Periksa pengaturan lokasi perangkat.',
+        3: 'Pencarian lokasi memakan waktu terlalu lama. Coba lagi.',
       };
       setMessage(messages[error.code] || 'Lokasi belum dapat dideteksi. Coba lagi.', true);
-      detectButton.textContent = userPoint ? 'Perbarui lokasi' : 'Aktifkan lokasi saya';
+      detectButton.textContent = userPoint ? 'Perbarui lokasi' : 'Gunakan lokasi saya';
       detectButton.disabled = false;
       overlayButton.disabled = false;
     }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });

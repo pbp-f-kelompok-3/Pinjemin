@@ -1,21 +1,26 @@
-<footer>
+<footer class="site-footer">
   <div class="container footer-content">
-
     <div class="footer-brand">
-      <p class="footer-logo">Pinjemin</p>
-      <p>
-        Platform pinjam dan sewa barang untuk mahasiswa Universitas Indonesia.
-      </p>
+      <a class="footer-logo" href="{% url 'home' %}" aria-label="Pinjemin, beranda">
+        {% include "partials/theme_logo.html" with logo_class="footer-logo-image" logo_width="108" logo_height="36" %}
+      </a>
+      <p>Platform pinjam dan sewa barang untuk mahasiswa Universitas Indonesia.</p>
     </div>
 
-    <div class="footer-links">
-      <a href="{% url 'help_center:help' %}">Pusat Bantuan</a>
-      <a href="{% url 'help_center:help' %}#kebijakan-privasi">Kebijakan Privasi</a>
+    <nav class="footer-links" aria-label="Tautan footer">
+      <p class="footer-heading">Bantuan & informasi</p>
+      <a href="{% url 'help_center:help' %}">Pusat bantuan <span aria-hidden="true">↗</span></a>
+      <a href="{% url 'help_center:help' %}#kebijakan-privasi">Kebijakan privasi <span aria-hidden="true">↗</span></a>
+    </nav>
+
+    <div class="footer-note">
+      <span class="footer-note__label"><span aria-hidden="true"></span> UNTUK MAHASISWA UI</span>
+      <p>Barang yang jarang dipakai bisa membantu teman yang membutuhkan.</p>
     </div>
 
-    <div class="footer-copyright">
+    <div class="footer-bottom">
       <p>&copy; {% now 'Y' %} Pinjemin</p>
+      <p>Pakai bersama, lebih bermakna.</p>
     </div>
-
   </div>
 </footer>

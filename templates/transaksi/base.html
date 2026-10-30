@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Pesanan - Pinjemin{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/transaksi.css' %}?v=20261030-3">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/transaksi.css' %}?v=20261030-6">{% endblock %}
 {% block content %}
 <section class="tr-page">
   <nav class="tr-nav" aria-label="Transaksi">
-    <a href="{% url 'transaksi:daftar' %}">Pesanan Saya</a>
-    <a href="{% url 'transaksi:katalog' %}">Buat Pesanan</a>
-    <a href="{% url 'transaksi:masuk' %}">Pesanan Masuk</a>
-    <a href="{% url 'transaksi:pendapatan' %}">Pendapatan Saya</a>
+    <a href="{% url 'transaksi:daftar' %}"{% if request.resolver_match.url_name == 'daftar' %} aria-current="page"{% endif %}>Pesanan Saya</a>
+    <a href="{% url 'transaksi:katalog' %}"{% if request.resolver_match.url_name == 'katalog' %} aria-current="page"{% endif %}>Buat Pesanan</a>
+    <a href="{% url 'transaksi:masuk' %}"{% if request.resolver_match.url_name == 'masuk' %} aria-current="page"{% endif %}>Pesanan Masuk</a>
+    <a href="{% url 'transaksi:pendapatan' %}"{% if request.resolver_match.url_name == 'pendapatan' %} aria-current="page"{% endif %}>Pendapatan Saya</a>
   </nav>
   {% block transaksi_content %}{% endblock %}
 </section>

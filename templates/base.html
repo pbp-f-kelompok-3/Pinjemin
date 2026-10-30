@@ -24,10 +24,10 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <link rel="stylesheet" href="{% static 'css/base.css' %}?v=20261030-2">
-  <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20261030-2">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}?v=20261030-7">
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20261030-4">
   {% block extra_css %}{% endblock %}
-  <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=20261030-4">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=20261030-12">
 </head>
 
 <body>
@@ -36,20 +36,11 @@
 
   <main class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
     {% if messages %}
-      <div style="margin: 16px 0 24px; display: flex; flex-direction: column; gap: 10px;">
+      <div class="app-message-list">
         {% for message in messages %}
-          <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" 
-               style="padding: 14px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; display: flex; align-items: flex-start; gap: 10px;
-               {% if 'error' in message.tags %}background: #FEF2F2; color: #991B1B; border: 1.5px solid #F87171;
-               {% elif 'success' in message.tags %}background: #ECFDF5; color: #065F46; border: 1.5px solid #6EE7B7;
-               {% elif 'warning' in message.tags %}background: #FFFBEB; color: #92400E; border: 1.5px solid #FCD34D;
-               {% else %}background: #EFF6FF; color: #1E40AF; border: 1.5px solid #93C5FD;{% endif %}">
-            {% if 'error' in message.tags %}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {% elif 'success' in message.tags %}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            {% endif %}
-            <div style="flex: 1; line-height: 1.5;">{{ message }}</div>
+          <div class="app-alert alert-{{ message.tags|default:'info' }}" role="status">
+            <span class="app-alert__icon" aria-hidden="true"></span>
+            <div class="app-alert__message">{{ message }}</div>
           </div>
         {% endfor %}
       </div>

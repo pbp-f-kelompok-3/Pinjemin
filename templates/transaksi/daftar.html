@@ -1,7 +1,10 @@
 {% extends "transaksi/base.html" %}
 {% block transaksi_content %}
-<h1>{% if incoming %}Pesanan Masuk{% else %}Pesanan Saya{% endif %}</h1>
-<p>{% if incoming %}Pantau pembayaran, serah terima, dan pengembalian barang milikmu.{% else %}Kelola draft dan pantau perjalanan peminjamanmu.{% endif %}</p>
+<header class="tr-list-heading">
+  <span class="tr-list-eyebrow">{% if incoming %}UNTUK PEMILIK BARANG{% else %}RIWAYAT TRANSAKSI{% endif %}</span>
+  <h1>{% if incoming %}Pesanan Masuk{% else %}Pesanan Saya{% endif %}</h1>
+  <p>{% if incoming %}Pantau pembayaran, serah terima, dan pengembalian barang milikmu.{% else %}Pantau status dan jadwal peminjamanmu di sini.{% endif %}</p>
+</header>
 {% if incoming %}
 <div class="tr-grid tr-metrics">
   <div class="tr-card"><p>Menunggu pembayaran</p><strong>{{ summary.waiting }}</strong></div>
@@ -10,12 +13,12 @@
 </div>
 <p><a class="tr-button tr-secondary" href="{% url 'transaksi:pendapatan' %}">Lihat pendapatan simulasi</a></p>
 {% endif %}
-<form method="get" class="tr-filter"><label for="status">Status</label>
+<form method="get" class="tr-filter tr-order-filter"><label for="status">Filter status</label>
 <select name="status" id="status"><option value="">Semua</option>{% for value,label in statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
 <button type="submit" class="tr-button tr-secondary">Tampilkan</button></form>
 <div class="tr-grid">
 {% for order in orders %}
-<article class="tr-card">
+<article class="tr-card tr-order-card">
   <span class="tr-status">{{ order.tahap_pesanan }}</span>
   <h2><a href="{% url 'transaksi:detail' order.pk %}">{{ order.nama_barang }}</a></h2>
   <p>{{ order.mulai|date:"d M Y H:i" }} WIB · {{ order.durasi }} hari</p>
@@ -25,6 +28,6 @@
   {% if incoming and order.status == 'dikonfirmasi' and not order.diterima_at %}<p>{% if order.total %}Pembayaran sudah terverifikasi. Pendapatan dicatat setelah peminjam mengonfirmasi barang diterima.{% else %}Peminjaman gratis, tidak ada pembayaran.{% endif %}</p>{% endif %}
   <a class="tr-button tr-secondary" href="{% url 'transaksi:detail' order.pk %}">Lihat rincian</a>
 </article>
-{% empty %}<p>Belum ada pesanan pada daftar ini.</p>{% endfor %}
+{% empty %}<div class="tr-order-empty"><span aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M10 13h6M10 17h6"/></svg></span><h2>Belum ada pesanan</h2><p>Pesanan dan pembaruan status akan muncul di sini.</p></div>{% endfor %}
 </div>
 {% endblock %}

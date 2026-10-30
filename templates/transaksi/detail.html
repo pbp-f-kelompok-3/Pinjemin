@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="{% static 'css/transaksi-map.css' %}?v=20261030-2">
 {% endblock %}
 {% block transaksi_content %}
-<div class="tr-card tr-narrow">
+<div class="tr-card tr-narrow tr-detail-card">
   <span class="tr-status">{{ order.tahap_pesanan }}</span>
   <h1>{{ order.nama_barang }}</h1>
   <p class="tr-reference">Nomor pesanan: {{ order.pk }}</p>
