@@ -20,6 +20,22 @@ Untuk menjalankan pengujian, gunakan `python manage.py test`. Beberapa pengujian
 
 Dalam pengerjaan ingat selalu pull origin main untuk memastikan gaada file yang conflict
 
+### Daftar Migrasi Penting
+
+Setelah melakukan pull versi terbaru, pastikan untuk selalu menjalankan `python manage.py migrate`. Berikut beberapa migrasi penting yang dibuat dan diterapkan pada proyek:
+
+1. **`barang`**:
+   - `0003_alter_barang_kategori`: Menyesuaikan relasi foreign key `kategori` pada model `Barang` agar merujuk ke model `Category` terpusat dari modul `categories`.
+2. **`transaksi`**:
+   - `0003_ulasan`: Menambahkan model dan tabel `Ulasan` (OneToOne ke `Pesanan`, ForeignKey ke `peminjam`, `pemilik`, `barang`, rating bintang 1–5, dan komentar) untuk sistem ulasan peminjaman serta reputasi pemilik.
+   - `0004_pesanan_diterima_at`: Menambahkan field timestamp pencatatan saat serah terima barang dikonfirmasi oleh peminjam.
+3. **`accounts`**:
+   - `0002_profile_deactivated_at`: Menambahkan field penanda waktu saat akun dinonaktifkan (soft-delete).
+4. **`help_center`**:
+   - `0001_initial`: Inisialisasi model dan tabel pusat bantuan (pertanyaan FAQ & tiket kendala pengguna).
+5. **`categories`**:
+   - `0003_seed_categories`: Data awal (*seeding*) kategori barang kampus.
+
 ## Simulasi flow pembayaran Midtrans
 
 Payment gateway Midtrans yang digunakan di proyek ini adalah versi sandbox, jadi semua transaksi bersifat simulasi. Jangan gunakan kredensial dan uang asli untuk pengujian lokal ini.
@@ -306,3 +322,28 @@ Contoh pemeriksaan dan koreksi setelah meninjau source:
 - Kode CSS yang disarankan AI tidak konsisten dengan halaman lain. Misalnya, palet warna yang didapatkan berbeda dengan bagian lain.
 - AI dapat memberi saran untuk mengubah satu view secara menyeluruh, namun yang perlu diganti hanya beberapa baris saja. Hal ini perlu dibenarkan secara manual.
 - Saran AI mengenai autentikasi, serta peran dan akses pengguna diperiksa agar tidak terjadi kesalahan akses.
+
+**Fauzan Taqiy Santosa / 2506607272**
+
+**Alat:** Antigravity (Google DeepMind) sebagai asisten AI untuk pengembangan modul Manajemen Barang.
+
+AI digunakan untuk merancang arsitektur integrasi antara katalog barang dengan alur peminjaman, menegakkan aturan bisnis (penguncian status, larangan edit/hapus barang yang sedang dipinjam aktif, pencegahan peminjaman barang sendiri), mengimplementasikan sistem penyelesaian pesanan dan ulasan bintang (rating 1–5), menulis pengujian unit (*test suite*) yang komprehensif, serta merapikan antarmuka dan modularitas CSS.
+
+### Contoh prompt
+
+Berikut beberapa contoh instruksi dan permintaan bantuan yang saya berikan selama pengerjaan modul:
+
+1. "Bantu rancang integrasi alur peminjaman dari halaman detail barang ke pembuatan draft transaksi, lengkap dengan validasi kepemilikan agar pemilik tidak bisa meminjam barangnya sendiri."
+2. "Terapkan aturan bisnis penguncian barang: jika barang memiliki pesanan yang berstatus dikonfirmasi/aktif dipinjam, tombol edit dan hapus harus terkunci dan backend view serta AJAX harus menolak permintaannya."
+3. "Implementasikan alur pengembalian barang oleh pemilik (konfirmasi selesai), form pemberian ulasan bintang 1–5 bagi peminjam, serta tampilkan riwayat testimoni dan skor reputasi pemilik di halaman profil publik."
+4. "Periksa seluruh file HTML dan CSS pada modul barang dan transaksi, pindahkan seluruh blok inline style ke file stylesheet terpisah, dan bersihkan semua karakter emoji menjadi ikon SVG vektor agar tampilan konsisten dan profesional."
+5. "Buatkan unit test komprehensif untuk menguji seluruh skenario peminjaman, hak akses pengembalian barang, pencegahan ulasan ganda, dan tampilan profil publik pemilik."
+
+### Strategi dan validasi
+
+Pengerjaan modul dilakukan secara bertahap dan terstruktur. Setiap usulan logika bisnis dan kode dari AI selalu ditinjau kembali kesesuaiannya dengan spesifikasi proyek PBP dan peran rekan kelompok lainnya.
+
+Beberapa contoh evaluasi, koreksi, dan pemeriksaan terhadap saran AI:
+- **Pembersihan Komponen UI:** Pada implementasi awal, AI sempat menyertakan simbol emoji (seperti ⭐, 📦, 🔒, ⚡) pada teks dan tombol. Saya mengoreksi hal tersebut dengan meminta pembersihan menyeluruh dan menggantinya dengan ikon SVG vektor terstandarisasi serta memindahkan inline styling ke file CSS modular (`barang.css`, `profile.css`, dan `transaksi.css`).
+- **Integritas Aturan Bisnis & Validasi Akses:** Memastikan logika penyelesaian transaksi hanya dapat dieksekusi oleh pemilik sah, serta form ulasan hanya terbuka untuk peminjam dari transaksi yang sudah berstatus selesai (*completed*). Dilakukan penguncian agar satu transaksi tidak dapat diulas lebih dari satu kali.
+- **Validasi Pengujian Otomatis:** Setiap tahapan kode diverifikasi langsung dengan menjalankan *automated test suite* Django (`python manage.py test barang`). Seluruh 123 skenario pengujian dipastikan lulus (*OK*) sebelum kode diintegrasikan ke cabang utama.
