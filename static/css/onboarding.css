@@ -56,7 +56,7 @@
   right: calc(var(--dot) / 2);
   top: calc(var(--dot) / 2 - 1.5px);
   height: 3px;
-  background: #e4e2e3;
+  background: var(--theme-raised, #e4e2e3);
 }
 .stepper__line i { display: block; height: 100%; width: 0; background: var(--y); transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1); }
 
@@ -69,7 +69,7 @@
   width: var(--dot);
   height: var(--dot);
   border-radius: 50%;
-  background: #fff;
+  background: var(--theme-surface, #fff);
   box-shadow: 0 3px 7px rgba(0, 0, 0, 0.22);
   font-size: 1.5rem;
   font-weight: 800;
@@ -124,7 +124,7 @@
 .ob-card {
   position: relative;
   z-index: 1;
-  background: #fff;
+  background: var(--theme-surface, #fff);
   border-radius: 40px;
   padding: 64px 56px 48px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
@@ -179,7 +179,7 @@
 .btn-yellow svg { width: 14px; height: 14px; }
 .btn-yellow:hover:not(:disabled) { filter: brightness(0.96); }
 .btn-yellow:active:not(:disabled) { transform: translateY(1px); }
-.btn-yellow:disabled { background: #e8e6e7; color: #9a9a9a; cursor: not-allowed; }
+.btn-yellow:disabled { background: var(--theme-raised, #e8e6e7); color: var(--theme-muted, #9a9a9a); cursor: not-allowed; }
 .btn-yellow:focus-visible, .btn-outline:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
 .btn-outline {
@@ -187,7 +187,7 @@
   padding: 9px 20px;
   border: 1.5px solid var(--ink);
   border-radius: 999px;
-  background: #fff;
+  background: var(--theme-surface, #fff);
   color: var(--ink);
   font: inherit;
   font-size: 0.85rem;
@@ -195,7 +195,7 @@
   text-align: center;
   cursor: pointer;
 }
-.btn-outline:hover { background: #f4f3f4; }
+.btn-outline:hover { background: var(--theme-raised, #f4f3f4); }
 .btn-back { padding: 12px 24px; font-size: 0.92rem; }
 
 /* ---------- Langkah 2 ---------- */
@@ -209,8 +209,8 @@
   margin-bottom: 12px;
   overflow: hidden;
   border-radius: 14px;
-  background: #e9e7e8;
-  color: #8a8a8a;
+  background: var(--theme-raised, #e9e7e8);
+  color: var(--theme-muted, #8a8a8a);
   font-size: 4rem;
   font-weight: 800;
 }
@@ -267,8 +267,8 @@
   transition: border-color 0.15s, background 0.15s;
 }
 .field textarea { resize: vertical; min-height: 96px; }
-.field input::placeholder, .field textarea::placeholder { color: #8e8e8e; }
-.field input:focus, .field textarea:focus { background: #fff; border-color: var(--y); }
+.field input::placeholder, .field textarea::placeholder { color: var(--theme-muted, #8e8e8e); }
+.field input:focus, .field textarea:focus { background: var(--theme-surface, #fff); border-color: var(--y); }
 
 .counter { margin-top: 4px; text-align: right; font-size: 0.72rem; color: var(--muted); }
 .field-error { margin: 6px 0 0; font-size: 0.78rem; font-weight: 600; color: var(--danger); }
@@ -283,7 +283,7 @@
   margin: 26px auto 0;
   padding: 0;
   border-radius: 999px;
-  background: #f3f3f3;
+  background: var(--theme-raised, #f3f3f3);
 }
 .seg__pill {
   position: absolute;
@@ -319,7 +319,7 @@
   gap: 8px;
   margin-top: 26px;
   font-size: 0.8rem;
-  color: #444;
+  color: var(--theme-text, #444);
   cursor: pointer;
 }
 .agree input { width: 18px; height: 18px; accent-color: #1c1c1c; cursor: pointer; }

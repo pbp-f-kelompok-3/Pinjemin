@@ -1,0 +1,163 @@
+/* Shared neutral colors. Component styles keep their original light values as fallbacks. */
+:root { color-scheme: light; }
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --theme-text: #f0f0f2;
+  --theme-muted: #b2b5bf;
+  --theme-surface: #1c1e24;
+  --theme-raised: #272a33;
+  --theme-border: #414550;
+  --black: var(--theme-text);
+  --white: var(--theme-surface);
+  --gray: var(--theme-raised);
+  --gray-dark: var(--theme-muted);
+  --border: var(--theme-border);
+  --br-black: var(--theme-text);
+  --br-card-bg: var(--theme-surface);
+  --br-bg-muted: var(--theme-raised);
+  --br-border: var(--theme-border);
+  --br-border-dark: #636978;
+  --br-text: var(--theme-text);
+  --br-text-muted: var(--theme-muted);
+  --br-green: #6ee7b7;
+  --br-green-bg: #123b30;
+  --br-blue: #93c5fd;
+  --br-blue-bg: #1d3253;
+  --br-red: #fca5a5;
+  --br-red-bg: #49262b;
+  --br-amber: #fcd34d;
+  --br-amber-bg: #413619;
+  --pf-ink: var(--theme-text);
+  --pf-olive: #c8c4b9;
+  --pf-muted: var(--theme-muted);
+  --pf-bg: #14161b;
+  --pf-gray: var(--theme-raised);
+  --pf-line: var(--theme-border);
+  --pf-green: #6ee7b7;
+  --pf-green-bg: #123b30;
+  --pf-y-soft: #413619;
+  --pf-red: #fca5a5;
+  --hc-ink: var(--theme-text);
+  --hc-olive: #c8c4b9;
+  --hc-muted: var(--theme-muted);
+  --hc-bg: #14161b;
+  --hc-card: var(--theme-surface);
+  --hc-gray: var(--theme-raised);
+  --hc-red: #fca5a5;
+  --hc-accent-soft: #413619;
+  --danger: #fca5a5;
+  --ink: var(--theme-text);
+  --ink-muted: var(--theme-muted);
+  --muted: var(--theme-muted);
+  --bg: #14161b;
+  --field: var(--theme-raised);
+  --page-bg: #14161b;
+  --panel-bg: var(--theme-raised);
+  --card-bg: var(--theme-surface);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--border, #dedee3);
+  border-radius: 8px;
+  background: var(--white, #fff);
+  color: var(--black, #171717);
+  cursor: pointer;
+}
+.theme-toggle[hidden] { display: none; }
+.theme-toggle:hover { border-color: #aa9130; }
+.theme-toggle:focus-visible { outline: 3px solid #aa9130; outline-offset: 3px; }
+.theme-toggle__sun { display: none; }
+html[data-theme="dark"] .theme-toggle__moon { display: none; }
+html[data-theme="dark"] .theme-toggle__sun { display: block; }
+.standalone-theme { display: flex; justify-content: flex-end; padding: 16px 24px 0; position: relative; z-index: 1; }
+
+html[data-theme="dark"] body { background-color: #14161b; }
+html[data-theme="dark"] .site-header {
+  --navbar-bg: #22221d;
+  --navbar-line: #414137;
+  --navbar-control-active: #c5b16b;
+  --navbar-focus: #f6d95e;
+}
+html[data-theme="dark"] .header-search button {
+  background: var(--theme-raised);
+  color: var(--theme-text);
+  border-left: 1px solid var(--theme-border);
+}
+html[data-theme="dark"] .header-search button:hover { background: #353946; }
+html[data-theme="dark"] .category-page {
+  --category-ink: var(--theme-text);
+  --category-ink-hover: #d4d7e0;
+  --category-surface: var(--theme-surface);
+  --category-focus: #93c5fd;
+}
+html[data-theme="dark"] .pickup-picker {
+  --pickup-soft: #393521;
+  --pickup-ink: var(--theme-text);
+  --pickup-muted: var(--theme-muted);
+  --pickup-border: var(--theme-border);
+}
+
+/* Yellow actions and badges need dark lettering in both themes. */
+html[data-theme="dark"] :is(.button-primary, .header-lend, .nav-location__detect,
+  .br-btn-primary, .tr-button, .pf-btn--yellow, .pf-badge--yellow,
+  .btn-yellow, .btn-login, .nearby-radius button[aria-pressed="true"],
+  .step.is-active .step__dot, .step.is-done .step__dot, .tutorial-content,
+  .lock-tag, .hc-pill, .hc-tag__num, .hc-login-btn, .pickup-tab.is-active,
+  .pickup-save, .pf-verified-dot, .nearby-item-marker, .tr-destination-marker) { color: #171717; }
+html[data-theme="dark"] .tr-secondary { color: var(--theme-text); }
+html[data-theme="dark"] .tr-danger { color: #a12820; }
+html[data-theme="dark"] :is(.br-badge-category, .br-badge-sewa) {
+  background: var(--theme-raised);
+  color: var(--theme-text);
+}
+html[data-theme="dark"] :is(.br-badge-gratis, .br-btn-danger) { color: #171717; }
+html[data-theme="dark"] :is(.category-name, .category-fallback) { color: var(--theme-text); }
+html[data-theme="dark"] .nearby-map-overlay { background: rgba(28, 30, 36, .97); }
+html[data-theme="dark"] :is(.tr-status, .tr-notice, .tr-review-box) { background: #413619; color: #fde68a; }
+html[data-theme="dark"] .tr-review-header { color: #fde68a; }
+html[data-theme="dark"] :is(.pf-avatar-fallback, .pf-photo__preview, .hc-avatar,
+  .pf-checklist li.is-done .pf-checklist__mark, .seg input:checked + span,
+  .pf-seg button[aria-pressed="true"]) { color: #171717; }
+html[data-theme="dark"] .br-price-box-desc--gratis { color: #6ee7b7; }
+html[data-theme="dark"] :is(.pf-toast--error, .pf-item-state--dibatalkan, .login-body .alert-error) { background: #49262b; }
+html[data-theme="dark"] :is(.pf-logout .pf-menu__icon, .pf-logout:hover, .pf-btn--danger-outline:hover,
+  .pickup-form-errors) { background: #49262b; }
+html[data-theme="dark"] :is(.pf-btn--danger, .hc-btn--danger) { color: #171717; }
+html[data-theme="dark"] :is(.nearby-all-link:hover, .nearby-empty a:hover, .nearby-refresh:hover) { background: #393521; }
+html[data-theme="dark"] :is(.leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-control-zoom a) {
+  background: var(--theme-surface);
+  color: var(--theme-text);
+}
+html[data-theme="dark"] :is(.nearby-popup a, .tr-route-fallback a) { color: #93c5fd; }
+html[data-theme="dark"] .br-pickup-page .br-badge-role { background: #393521; }
+html[data-theme="dark"] .pickup-item-guide { background: #393521; }
+html[data-theme="dark"] .pickup-status { color: #b9d59d; }
+html[data-theme="dark"] :is(.pickup-error, .pickup-status.is-error, .pickup-form-errors,
+  .field-error, .req, .errorlist) { color: #fca5a5; }
+/* Both assets are ready when the root theme changes, including system changes. */
+html .theme-logo.theme-logo--dark { display: none; }
+html[data-theme="dark"] .theme-logo.theme-logo--light { display: none; }
+html[data-theme="dark"] .theme-logo.theme-logo--dark { display: block; }
+
+@media (min-width: 601px) and (max-width: 1000px) {
+  .header-main { grid-template-columns: 108px minmax(100px, 1fr) auto; gap: 12px; }
+  .header-actions { gap: 12px; }
+}
+@media (max-width: 600px) {
+  .header-main { grid-template-columns: minmax(0, 1fr) auto; }
+  .site-header .brand { width: clamp(80px, 23vw, 108px); }
+  .site-header .brand-logo { width: 100%; height: auto; }
+  .header-actions { gap: 8px; }
+  .theme-toggle { width: 36px; height: 36px; flex-basis: 36px; }
+}
+@media (pointer: coarse) {
+  .theme-toggle { width: 44px; height: 44px; flex-basis: 44px; }
+}

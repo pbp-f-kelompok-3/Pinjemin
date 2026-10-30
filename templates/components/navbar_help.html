@@ -3,10 +3,11 @@
   <div class="hc-nav__inner">
 
     <a class="hc-nav__logo" href="{% url 'home' %}" aria-label="Pinjemin - Beranda">
-      <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin">
+      {% include "partials/theme_logo.html" %}
     </a>
 
     <div class="hc-nav__right">
+      {% include "partials/theme_toggle.html" %}
       {% if user.is_authenticated %}
         <button type="button" class="hc-bell" aria-label="Notifikasi">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -28,14 +28,14 @@
     margin: 0 0 8px;
     font-size: clamp(1.75rem, 4vw, 2.25rem);
     font-weight: 800;
-    color: #171717;
+    color: var(--theme-text, #171717);
     line-height: 1.15;
 }
 
 .category-page__subtitle {
     max-width: 55ch;
     margin: 0;
-    color: #6B7280;
+    color: var(--theme-muted, #6B7280);
     font-size: 1rem;
     line-height: 1.5;
 }
@@ -64,9 +64,9 @@
     flex-direction: column;
     min-width: 0;
     padding: 0;
-    border: 1.5px solid #E5E7EB;
+    border: 1.5px solid var(--theme-border, #E5E7EB);
     border-radius: 16px;
-    background: #FAFAFA;
+    background: var(--theme-surface, #FAFAFA);
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
 }
@@ -76,7 +76,7 @@
     transform: translateY(-2px);
     border-color: #FEE75C;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-    background: #FFFFFF;
+    background: var(--theme-surface, #FFFFFF);
 }
 
 .category-card__link {
@@ -103,9 +103,9 @@
     width: 84px;
     height: 84px;
     border-radius: 18px;
-    background: #FFFFFF;
+    background: var(--theme-surface, #FFFFFF);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border: 1px solid #F3F4F6;
+    border: 1px solid var(--theme-border, #F3F4F6);
 }
 
 .category-card__icon {
@@ -123,7 +123,7 @@
     justify-content: center;
     width: 52px;
     height: 52px;
-    color: #4B5563;
+    color: var(--theme-text, #4B5563);
     font-size: 26px;
     font-weight: 700;
     line-height: 1;
@@ -138,7 +138,7 @@
     margin: 0;
     font-size: 15.5px;
     font-weight: 700;
-    color: #1F2937;
+    color: var(--theme-text, #1F2937);
     line-height: 1.35;
     text-align: center;
     min-height: 42px;
@@ -183,14 +183,14 @@
 }
 
 .category-btn--secondary {
-    background: #FFFFFF;
-    border-color: #D1D5DB;
-    color: #374151;
+    background: var(--theme-surface, #FFFFFF);
+    border-color: var(--theme-border, #D1D5DB);
+    color: var(--theme-text, #374151);
 }
 
 .category-btn--secondary:hover {
-    border-color: #171717;
-    color: #171717;
+    border-color: var(--theme-text, #171717);
+    color: var(--theme-text, #171717);
 }
 
 .category-btn--danger {
@@ -207,8 +207,8 @@
     grid-column: 1 / -1;
     padding: 48px 24px;
     text-align: center;
-    color: #6B7280;
-    background: #FAFAFA;
-    border: 1px dashed #D1D5DB;
+    color: var(--theme-muted, #6B7280);
+    background: var(--theme-surface, #FAFAFA);
+    border: 1px dashed var(--theme-border, #D1D5DB);
     border-radius: 16px;
 }

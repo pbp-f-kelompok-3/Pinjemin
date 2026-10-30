@@ -1,0 +1,3 @@
+{% load static %}
+<img src="{% static 'img/logo-light.png' %}" alt="Pinjemin" class="theme-logo theme-logo--light {{ logo_class }}"{% if logo_width %} width="{{ logo_width }}"{% endif %}{% if logo_height %} height="{{ logo_height }}"{% endif %}>
+<img src="{% static 'img/logo-dark.png' %}" alt="Pinjemin" class="theme-logo theme-logo--dark {{ logo_class }}"{% if logo_width %} width="{{ logo_width }}"{% endif %}{% if logo_height %} height="{{ logo_height }}"{% endif %}>

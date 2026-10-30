@@ -2,7 +2,7 @@
 <header class="site-header">
   <div class="header-container header-main">
     <a class="brand" href="{% url 'home' %}" aria-label="Pinjemin, beranda">
-      <img src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin" class="brand-logo" width="108" height="36">
+      {% include "partials/theme_logo.html" with logo_class="brand-logo" logo_width="108" logo_height="36" %}
     </a>
 
     <div class="nav-location" data-location-widget data-endpoint="{% url 'locations:current' %}">
@@ -43,6 +43,7 @@
     </form>
 
     <div class="header-actions">
+      {% include "partials/theme_toggle.html" %}
       {% if user.is_authenticated %}
         <a class="header-account" href="{% url 'accounts:profile' %}"{% if request.resolver_match.namespace == 'accounts' %} aria-current="page"{% endif %}>Akun saya</a>
       {% else %}

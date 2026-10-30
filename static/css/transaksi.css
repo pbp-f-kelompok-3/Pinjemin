@@ -4,7 +4,7 @@
 .tr-nav a { font-weight: 700; padding: 8px 0; }
 .tr-nav a:hover { text-decoration: underline; }
 .tr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr)); gap: 20px; margin-top: 24px; }
-.tr-card { border: 1px solid var(--border); border-radius: 16px; padding: 24px; background: white; }
+.tr-card { border: 1px solid var(--border); border-radius: 16px; padding: 24px; background: var(--theme-surface, white); }
 .tr-narrow { max-width: 740px; margin: 0 auto 24px; }
 .tr-card h1 { margin-top: 12px; font-size: clamp(24px, 4vw, 32px); }
 .tr-card h2 { font-size: 20px; }
@@ -23,7 +23,7 @@
 .tr-facts { display: grid; grid-template-columns: 140px 1fr; gap: 10px; }
 .tr-facts dd { margin: 0; }
 .tr-facts dt { color: var(--gray-dark); }
-.tr-card input, .tr-card select, .tr-filter select { display: block; width: 100%; border: 1px solid #aaa; padding: 11px; border-radius: 8px; font: inherit; margin-top: 6px; }
+.tr-card input, .tr-card select, .tr-filter select { display: block; width: 100%; border: 1px solid var(--theme-border, #aaa); padding: 11px; border-radius: 8px; font: inherit; margin-top: 6px; }
 .tr-card label { font-weight: 700; }
 .tr-filter { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .tr-filter select { width: auto; margin: 0; }
@@ -110,7 +110,7 @@
   border-radius: 10px;
   font: inherit;
   font-size: 0.92rem;
-  background: #FAFAFA;
+  background: var(--theme-surface, #FAFAFA);
   color: var(--black);
   transition: all 0.15s ease;
   box-sizing: border-box;
@@ -119,7 +119,7 @@
 .tr-input:focus {
   outline: none;
   border-color: #EAB308;
-  background: #FFFFFF;
+  background: var(--theme-surface, #FFFFFF);
   box-shadow: 0 0 0 3px rgba(254, 240, 138, 0.4);
 }
 

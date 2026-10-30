@@ -4,20 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="{% static 'js/theme.js' %}?v=20261030-1"></script>
   <title>Selamat Datang | Pinjemin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/onboarding.css' %}">
+  <link rel="stylesheet" href="{% static 'css/onboarding.css' %}?v=20261030-2">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=20261030-3">
 </head>
 <body class="ob-body">
+  <div class="standalone-theme">{% include "partials/theme_toggle.html" %}</div>
 
   <div class="ob-bg" aria-hidden="true">
     <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="blob b4"></i>
   </div>
 
   <main class="ob">
-    <img class="ob-logo" src="{% static 'img/Logo_v2.png' %}" alt="Pinjemin">
+    {% include "partials/theme_logo.html" with logo_class="ob-logo" %}
 
     <!-- ===== Stepper ===== -->
     <div class="stepper-wrap">

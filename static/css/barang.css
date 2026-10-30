@@ -147,7 +147,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: #FFFFFF;
+  background: var(--theme-surface, #FFFFFF);
   color: var(--br-text);
   font-weight: 600;
   font-size: 13px;
@@ -238,7 +238,7 @@
 .br-icon-yellow { background: #FEF9C3; color: #854D0E; }
 .br-icon-green { background: #DCFCE7; color: #166534; }
 .br-icon-blue { background: #DBEAFE; color: #1E40AF; }
-.br-icon-gray { background: #F3F4F6; color: #4B5563; }
+.br-icon-gray { background: var(--theme-raised, #F3F4F6); color: var(--theme-text, #4B5563); }
 
 /* Filter & Controls Section */
 .br-controls {
@@ -332,7 +332,7 @@
   border: 1px solid var(--br-border);
   border-radius: var(--br-radius);
   font-size: 14px;
-  background: #FFFFFF;
+  background: var(--theme-surface, #FFFFFF);
   outline: none;
   color: var(--br-text);
   cursor: pointer;
@@ -381,7 +381,7 @@
   position: relative;
   width: 100%;
   height: 200px;
-  background: #E5E7EB;
+  background: var(--theme-raised, #E5E7EB);
   overflow: hidden;
 }
 
@@ -448,9 +448,9 @@
 }
 
 .br-badge-status-nonaktif {
-  background: #F3F4F6;
-  color: #6B7280;
-  border: 1px solid #E5E7EB;
+  background: var(--theme-raised, #F3F4F6);
+  color: var(--theme-muted, #6B7280);
+  border: 1px solid var(--theme-border, #E5E7EB);
 }
 
 .br-card-body {
@@ -584,7 +584,7 @@
   padding: 0 10px;
   border-radius: var(--br-radius-sm);
   border: 1px solid var(--br-border);
-  background: #FFFFFF;
+  background: var(--theme-surface, #FFFFFF);
   color: var(--br-text);
   font-size: 13px;
   font-weight: 600;
@@ -658,7 +658,7 @@
   border-radius: var(--br-radius);
   font-size: 14px;
   color: var(--br-text);
-  background: #FFFFFF;
+  background: var(--theme-surface, #FFFFFF);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
@@ -677,7 +677,7 @@
   border: 1px solid var(--br-border);
   border-radius: var(--br-radius);
   overflow: hidden;
-  background: #FFFFFF;
+  background: var(--theme-surface, #FFFFFF);
 }
 
 .br-input-price-group:focus-within {
@@ -687,7 +687,7 @@
 
 .br-price-prefix {
   padding: 10px 14px;
-  background: #F3F4F6;
+  background: var(--theme-raised, #F3F4F6);
   color: var(--br-text);
   font-weight: 700;
   font-size: 14px;
@@ -761,7 +761,7 @@
 
 .br-upload-dropzone:hover {
   border-color: var(--br-black);
-  background: #F9FAFB;
+  background: var(--theme-surface, #F9FAFB);
 }
 
 .br-preview-img-container {
@@ -829,7 +829,7 @@
 }
 
 .br-modal-card {
-  background: #FFFFFF;
+  background: var(--theme-surface, #FFFFFF);
   border-radius: var(--br-radius-lg);
   width: 100%;
   max-width: 460px;
@@ -889,7 +889,7 @@
   position: relative;
   width: 100%;
   height: 380px;
-  background: #F3F4F6;
+  background: var(--theme-raised, #F3F4F6);
   border-radius: var(--br-radius-lg);
   overflow: hidden;
   border: 1px solid var(--br-border);
@@ -909,7 +909,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #9CA3AF;
+  color: var(--theme-muted, #9CA3AF);
   gap: 8px;
   font-size: 14px;
 }

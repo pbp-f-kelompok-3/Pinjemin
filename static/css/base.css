@@ -456,8 +456,8 @@ footer {
   height: 76px;
   box-sizing: border-box;
   border-radius: 50%;
-  background-color: #F3F4F6;
-  border: 1.5px solid #E5E7EB;
+  background-color: var(--theme-raised, #F3F4F6);
+  border: 1.5px solid var(--theme-border, #E5E7EB);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -482,14 +482,14 @@ footer {
 .category-fallback {
   font-size: 26px;
   font-weight: 700;
-  color: #4B5563;
+  color: var(--theme-text, #4B5563);
   line-height: 1;
 }
 
 .category-name {
   font-size: 12.5px;
   font-weight: 600;
-  color: #1F2937;
+  color: var(--theme-text, #1F2937);
   text-align: center;
   line-height: 1.35;
   min-height: 36px;
@@ -595,8 +595,8 @@ footer {
     gap: 14px;
     margin: 20px 0 28px;
     padding: 18px 22px;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
+    background: var(--theme-surface, #FFFFFF);
+    border: 1px solid var(--theme-border, #E5E7EB);
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -611,7 +611,7 @@ footer {
     display: block;
     font-size: 11.5px;
     font-weight: 700;
-    color: #4B5563;
+    color: var(--theme-text, #4B5563);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -621,18 +621,18 @@ footer {
     box-sizing: border-box;
     min-width: 150px;
     padding: 10px 14px;
-    border: 1.5px solid #E5E7EB;
+    border: 1.5px solid var(--theme-border, #E5E7EB);
     border-radius: 10px;
-    background: #FAFAFA;
+    background: var(--theme-surface, #FAFAFA);
     font-size: 13.5px;
     font-family: inherit;
-    color: #1F2937;
+    color: var(--theme-text, #1F2937);
     transition: all 0.2s ease;
 }
 
 .price-filter select:focus,
 .price-filter input:focus {
-    background: #FFFFFF;
+    background: var(--theme-surface, #FFFFFF);
     border-color: #3B82F6;
     outline: none;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
