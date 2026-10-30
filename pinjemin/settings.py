@@ -182,6 +182,7 @@ NOMINATIM_REVERSE_URL = os.getenv(
     'NOMINATIM_REVERSE_URL', 'https://nominatim.openstreetmap.org/reverse'
 )
 OSM_TILE_URL = os.getenv('OSM_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png')
+OSRM_ROUTE_URL = os.getenv('OSRM_ROUTE_URL', 'https://router.project-osrm.org/route/v1')
 NOMINATIM_USER_AGENT = os.getenv(
     'NOMINATIM_USER_AGENT',
     'Pinjemin/1.0 (+https://roisul-umam-pinjemin.pws.cs.ui.ac.id)',

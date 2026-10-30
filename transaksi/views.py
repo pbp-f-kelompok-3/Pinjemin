@@ -71,7 +71,7 @@ def buat(request, item_id):
 @login_required
 def detail(request, pk):
     services.maintain_orders()
-    order = get_object_or_404(Pesanan.objects.select_related("barang", "pemilik", "peminjam").filter(
+    order = get_object_or_404(Pesanan.objects.select_related("barang__lokasi", "pemilik", "peminjam").filter(
         Q(peminjam=request.user) | Q(pemilik=request.user)), pk=pk)
     if order.status == Pesanan.Status.DRAFT and order.peminjam_id != request.user.pk:
         return HttpResponse(status=404)
@@ -79,7 +79,39 @@ def detail(request, pk):
     counterparty_name = ""
     counterparty_role = ""
     wa_link = ""
+    pickup_route_data = None
+    google_maps_url = ""
     if order.status != Pesanan.Status.DRAFT:
+        location_snapshot = order.lokasi_snapshot if isinstance(order.lokasi_snapshot, dict) else {}
+        latitude = location_snapshot.get("latitude")
+        longitude = location_snapshot.get("longitude")
+        uses_current_item_point = latitude is None or longitude is None
+        # Orders created before coordinates were added to their snapshot can use
+        # the item's current pickup point as a best-effort fallback.
+        if latitude is None or longitude is None:
+            latitude = order.barang.lokasi.latitude
+            longitude = order.barang.lokasi.longitude
+        if latitude is not None and longitude is not None:
+            latitude, longitude = float(latitude), float(longitude)
+            if -90 <= latitude <= 90 and -180 <= longitude <= 180:
+                pickup_route_data = {
+                    "label": location_snapshot.get("label") or order.barang.lokasi.short_label or order.barang.lokasi.nama_area,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "tileUrl": settings.OSM_TILE_URL,
+                    "routeUrl": settings.OSRM_ROUTE_URL.rstrip("/"),
+                    "usesCurrentItemPoint": uses_current_item_point,
+                }
+                destination = f"{latitude},{longitude}"
+            else:
+                destination = location_snapshot.get("alamat") or location_snapshot.get("label") or ""
+        else:
+            destination = location_snapshot.get("alamat") or location_snapshot.get("label") or ""
+        if destination:
+            google_maps_url = "https://www.google.com/maps/dir/?" + urllib.parse.urlencode({
+                "api": "1", "destination": destination, "travelmode": "driving",
+            })
+
         is_borrower = order.peminjam_id == request.user.pk
         counterparty = order.pemilik if is_borrower else order.peminjam
         counterparty_role = "pemilik" if is_borrower else "peminjam"
@@ -108,6 +140,8 @@ def detail(request, pk):
         "borrower": order.peminjam_id == request.user.pk,
         "phone": phone,
         "wa_link": wa_link,
+        "pickup_route_data": pickup_route_data,
+        "google_maps_url": google_maps_url,
         "counterparty_name": counterparty_name,
         "counterparty_role": counterparty_role,
         "mock_refund": settings.REFUND_MODE == "mock"

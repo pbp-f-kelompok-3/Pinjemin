@@ -29,7 +29,9 @@ def _snapshot(order):
     order.nama_barang = item.nama_barang
     loc = item.lokasi
     order.lokasi_snapshot = {"label": loc.short_label, "alamat": loc.nama_area,
-                             "patokan": loc.patokan, "kota": loc.kecamatan_kota}
+                             "patokan": loc.patokan, "kota": loc.kecamatan_kota,
+                             "latitude": float(loc.latitude) if loc.latitude is not None else None,
+                             "longitude": float(loc.longitude) if loc.longitude is not None else None}
 
 
 def _schedule(order, mulai, durasi, submitting=False):
