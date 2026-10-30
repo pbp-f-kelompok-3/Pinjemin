@@ -84,23 +84,26 @@
             {{ barang.lokasi.kecamatan_kota }}
           </p>
         {% endif %}
+        {% endif %}
 
         {% if pickup_detail_data %}
           {{ pickup_detail_data|json_script:"pickup-detail-data" }}
           <div id="detail-map" class="pickup-map" data-pickup-detail-map role="region" aria-label="Peta titik penjemputan barang" style="height: 250px;"></div>
           <p data-pickup-detail-status role="status" aria-live="polite" class="pickup-help"></p>
+          {% if can_view_pickup %}
           <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
             <a href="https://www.google.com/maps/search/?api=1&amp;query={{ barang.lokasi.latitude|unlocalize }},{{ barang.lokasi.longitude|unlocalize }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; color: var(--br-blue); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
               Buka di Google Maps ↗
             </a>
           </div>
+          {% endif %}
         {% else %}
           <div style="padding: 16px; background: var(--br-bg-muted); border-radius: var(--br-radius); font-size: 13px; color: var(--br-text-muted); text-align: center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: inline-block; vertical-align: -2px; margin-right: 4px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Titik penjemputan berada di sekitar area <strong>{{ barang.lokasi.nama_area }}</strong>. Hubungi pemilik untuk konfirmasi titik temu spesifik.
+            Titik peta belum tersedia. Lokasi barang berada di sekitar area <strong>{{ barang.lokasi.nama_area }}</strong>.
           </div>
         {% endif %}
-        {% else %}
-          <p class="br-helper">Alamat lengkap dan titik penjemputan tersedia untuk pemilik dan peminjam dengan pesanan terkonfirmasi.</p>
+        {% if not can_view_pickup %}
+          <p class="br-helper">Peta menampilkan titik penjemputan barang. Alamat lengkap tersedia untuk pemilik dan peminjam dengan pesanan terkonfirmasi.</p>
         {% endif %}
       </div>
     </div>

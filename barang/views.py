@@ -406,9 +406,11 @@ def detail_barang(request, pk):
     can_view_pickup = is_owner or has_paid
     location = barang.lokasi
     pickup_detail_data = None
-    if can_view_pickup and location.latitude is not None and location.longitude is not None:
+    # Tampilkan peta titik barang di halaman publik agar pengunjung dari beranda
+    # bisa melihat area penjemputan. Alamat jalan dan tautan navigasi tetap dibatasi.
+    if location.latitude is not None and location.longitude is not None:
         pickup_detail_data = {
-            'label': location.nama_area,
+            'label': location.short_label or location.nama_area,
             'latitude': float(location.latitude),
             'longitude': float(location.longitude),
             'tileUrl': settings.OSM_TILE_URL,

@@ -301,7 +301,7 @@ class ItemPickupTests(TestCase):
         self.assertEqual(response.context['pickup_detail_data']['tileUrl'],
                          'https://example.test/{z}/{x}/{y}.png')
 
-    def test_detail_does_not_disclose_exact_address_or_coordinates_to_visitors(self):
+    def test_visitors_can_see_pickup_map_without_exact_address_or_navigation_link(self):
         self.post_item()
         item = Barang.objects.get()
         for user in (None, self.other):
@@ -312,9 +312,10 @@ class ItemPickupTests(TestCase):
             response = self.client.get(reverse('barang:detail', args=[item.pk]))
             self.assertEqual(response.status_code, 200)
             self.assertNotContains(response, item.lokasi.full_address)
-            self.assertNotContains(response, 'pickup-detail-data')
-            self.assertNotContains(response, str(item.lokasi.latitude))
-            self.assertNotContains(response, 'maps?q=')
+            self.assertContains(response, 'pickup-detail-data')
+            self.assertContains(response, 'data-pickup-detail-map')
+            self.assertEqual(response.context['pickup_detail_data']['latitude'], -6.3615)
+            self.assertEqual(response.context['pickup_detail_data']['longitude'], 106.8286)
             self.assertNotContains(response, 'www.google.com/maps/search/')
 
     def test_google_maps_link_uses_coordinates_with_decimal_points_in_indonesian_locale(self):
