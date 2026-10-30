@@ -1,15 +1,24 @@
 {% extends "transaksi/base.html" %}
 {% block transaksi_content %}
-<div class="tr-card tr-narrow">
-  <h1>{% if order %}Ubah jadwal{% else %}Buat draft pesanan{% endif %}</h1>
-  <h2>{{ item.nama_barang }}</h2>
-  <p>{% if item.jenis_penawaran == 'gratis' %}Gratis{% else %}Rp{{ item.tarif_formatted }} / hari{% endif %}</p>
-  <p>Durasi 1 hari = 24 jam. Total = tarif harian × durasi.</p>
-  <p>Barang sewa: jadwal mulai minimal 24 jam 30 menit saat pengajuan. Barang gratis: minimal 24 jam.</p>
+<div class="tr-card tr-narrow tr-order-form-card">
+  <header class="tr-form-heading">
+    <p class="tr-form-eyebrow">PESAN BARANG</p>
+    <h1>{% if order %}Ubah jadwal{% else %}Buat draft pesanan{% endif %}</h1>
+    <p>Atur waktu mulai dan durasi peminjaman sebelum mengajukan pesanan.</p>
+  </header>
+  <section class="tr-item-summary" aria-label="Ringkasan barang">
+    <div><span>Barang yang dipilih</span><h2>{{ item.nama_barang }}</h2></div>
+    <strong>{% if item.jenis_penawaran == 'gratis' %}Gratis{% else %}Rp{{ item.tarif_formatted }} <small>/ hari</small>{% endif %}</strong>
+  </section>
+  <aside class="tr-form-guidance">
+    <strong>Informasi durasi dan jadwal</strong>
+    <p>Durasi 1 hari dihitung sebagai 24 jam. Total biaya dihitung dari tarif harian dikali durasi.</p>
+    <p>Untuk barang sewa, waktu mulai minimal 24 jam 30 menit dari pengajuan. Barang gratis dapat dimulai minimal 24 jam dari pengajuan.</p>
+  </aside>
   {% if order.status == 'menunggu_pembayaran' %}
   <p class="tr-notice">Batas bayar tetap {{ order.batas_bayar|date:"d M Y H:i:s" }} WIB. Pilih mulai minimal 24 jam setelah batas tersebut. Jika tagihan berubah, gunakan halaman pembayaran terbaru.</p>
   {% endif %}
-  <form method="post">
+  <form method="post" class="tr-order-form">
     {% csrf_token %}
     {{ form.as_p }}
     <div class="tr-actions"><button class="tr-button" type="submit">Simpan {% if not order %}draft{% else %}perubahan{% endif %}</button>

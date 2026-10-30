@@ -92,7 +92,7 @@ html {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -246,7 +246,7 @@ html {
   color: var(--black);
   background: transparent;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .header-search input::placeholder {
@@ -277,7 +277,7 @@ html {
 }
 
 .header-account {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -286,8 +286,7 @@ html {
   text-underline-offset: 4px;
 }
 
-.header-account[aria-current],
-.header-lend[aria-current] {
+.header-account[aria-current] {
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 6px;
@@ -308,12 +307,25 @@ html {
   border-radius: 7px;
   color: var(--black);
   background: var(--yellow);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .header-lend:hover {
   background: #f0d000;
+}
+
+.header-lend[aria-current="page"] {
+  border-color: var(--black);
+  background: #f0d000;
+  text-decoration: none;
+}
+
+.header-lend:hover,
+.header-lend:focus-visible,
+.header-lend:active {
+  text-decoration: none;
 }
 
 .header-mobile-label {
@@ -348,7 +360,7 @@ html {
   gap: 8px;
   padding: 12px 0 10px;
   border-bottom: 2px solid transparent;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -421,7 +433,7 @@ html {
 
   .header-account,
   .header-lend {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .header-lend {
@@ -449,7 +461,7 @@ html {
   }
 
   .nav-location__label {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .header-search {
