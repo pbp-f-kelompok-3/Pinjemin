@@ -29,4 +29,7 @@ urlpatterns = [
     path('json/<int:pk>/', views.show_json_by_id, name='show_json_by_id'),
     path('xml/', views.show_xml, name='show_xml'),
     path('xml/<int:pk>/', views.show_xml_by_id, name='show_xml_by_id'),
+
+    # DRF API Endpoint – Flutter/Mobile Integration (Fauzan Taqiy Santosa)
+    path('api/', views.api_daftar_barang, name='api_barang'),
 ]
