@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'locations',
     'barang',
     'transaksi',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

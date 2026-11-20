@@ -7,6 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.api_views import CSRF_FAILED_MESSAGE, SESSION_EXPIRED_MESSAGE
 from accounts.models import Profile
 
 User = get_user_model()
@@ -149,18 +150,37 @@ class SsoExchangeApiTests(TestCase):
         with mock.patch("accounts.api_views.validate_ticket", return_value=SSO_RESULT):
             no_token = client.post(self.url, {"ticket": "ST-1"})
             self.assertEqual(no_token.status_code, 403)
+            # The app gets JSON it can show, not Django's HTML CSRF page
+            self.assertEqual(no_token.json()["message"], CSRF_FAILED_MESSAGE)
+            self.assertNotIn("_auth_user_id", client.session)
 
             client.get(reverse("accounts:api_sso_start"))
             token = client.cookies["csrftoken"].value
             with_token = client.post(self.url, {"ticket": "ST-1"}, HTTP_X_CSRFTOKEN=token)
         self.assertEqual(with_token.status_code, 200)
 
+    def test_accepts_json_body(self):
+        with mock.patch("accounts.api_views.validate_ticket", return_value=SSO_RESULT):
+            resp = self.client.post(self.url, {"ticket": "ST-1"}, content_type="application/json")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_wrong_method_answers_json(self):
+        resp = self.client.get(self.url)
+        self.assertFalse(resp.json()["status"])
+        self.assertIn("GET", resp.json()["message"])
+
 
 class MeApiTests(TestCase):
     def test_anonymous_gets_401_json(self):
         resp = self.client.get(reverse("accounts:api_me"))
         self.assertEqual(resp.status_code, 401)
-        self.assertFalse(resp.json()["status"])
+        self.assertEqual(resp.json(), {"status": False, "message": SESSION_EXPIRED_MESSAGE})
+
+    def test_response_is_not_cached(self):
+        user, _ = make_user()
+        self.client.force_login(user)
+        resp = self.client.get(reverse("accounts:api_me"))
+        self.assertIn("no-cache", resp["Cache-Control"])
 
     def test_returns_profile_and_sets_csrf_cookie(self):
         user, _ = make_user(phone="08123456789", mode=Profile.Mode.SELLER)

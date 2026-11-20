@@ -16,8 +16,8 @@ urlpatterns = [
     path("profil/aktivitas/", views.profile_activity, name="profile_activity"),
     path("pengguna/<int:pk>/", views.profile_public, name="profile_public"),
     path("nonaktifkan/", views.deactivate_account, name="deactivate"),
-    path("api/sso/start/", api_views.sso_start, name="api_sso_start"),
+    path("api/sso/start/", api_views.SsoStartView.as_view(), name="api_sso_start"),
     path("api/sso/callback/", api_views.sso_callback_landing, name="api_sso_callback"),
-    path("api/sso/exchange/", api_views.sso_exchange, name="api_sso_exchange"),
-    path("api/me/", api_views.me, name="api_me"),
+    path("api/sso/exchange/", api_views.SsoExchangeView.as_view(), name="api_sso_exchange"),
+    path("api/me/", api_views.MeView.as_view(), name="api_me"),
 ]
