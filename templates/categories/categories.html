@@ -55,6 +55,8 @@
                 <h2 class="category-card__name">{{ category.name }}</h2>
             </a>
 
+            <h2>{{category.time}}</h2>
+
             {% if user.is_staff or user.is_superuser %}
                 <div class="category-card__actions">
                     <a href="{% url 'categories:update_category' category.id %}"

@@ -34,4 +34,8 @@ urlpatterns = [
     # PWS/Gunicorn does not serve MEDIA_ROOT automatically; unlike static assets,
     # uploaded product/profile photos are not part of WhiteNoise's collectstatic.
     path(f"{settings.MEDIA_URL.lstrip('/')}<path:path>", views.uploaded_media, name='uploaded_media'),
+     # API endpoint
+    path("api/v1/", include("categories.api_urls")),
+    # Django REST Framework
+    path("api-auth/", include("rest_framework.urls")),
 ]
