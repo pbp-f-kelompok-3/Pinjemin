@@ -454,3 +454,24 @@ def detail_barang(request, pk):
         'has_paid': has_paid,
     }
     return render(request, 'barang/detail.html', context)
+
+
+# ---------------------------------------------------------------------------
+# DRF API Endpoint – Flutter/Mobile Integration (Fauzan Taqiy Santosa)
+# ---------------------------------------------------------------------------
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .serializers import BarangSerializer
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_daftar_barang(request):
+    """
+    GET /barang/api/
+    Mengembalikan daftar barang milik user yang sedang login.
+    Digunakan untuk integrasi Flutter (Checkpoint 1).
+    """
+    barang = Barang.objects.filter(pemilik=request.user)
+    return Response(BarangSerializer(barang, many=True).data)
